@@ -18,7 +18,6 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f1f5f9;color:#1e293b;dis
 #sidebar .user-area{padding:12px 16px;border-top:1px solid #334155;}
 #sidebar .user-area select{width:100%;background:#334155;color:#fff;border:none;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;}
 #sidebar .user-area .user-badge{font-size:11px;color:#64748b;margin-top:4px;}
-/* SYNC STATUS */
 .sync-bar{background:#0f172a;padding:5px 16px;font-size:11px;display:flex;align-items:center;gap:6px;}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#94a3b8;flex-shrink:0;}
 .sync-dot.ok{background:#22c55e;}
@@ -36,27 +35,29 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f1f5f9;color:#1e293b;dis
 .stat-card .val{font-size:26px;font-weight:700;}
 .stat-card .lbl{font-size:11px;color:#64748b;margin-top:2px;line-height:1.3;}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
-.s-접수대기{background:#f1f5f9;color:#64748b;}
-.s-자료수집중{background:#dbeafe;color:#1d4ed8;}
+/* 1단계 검토상태 */
+.s-검토예정{background:#f1f5f9;color:#64748b;}
 .s-검토중{background:#e0e7ff;color:#4338ca;}
 .s-보완요청{background:#ffedd5;color:#c2410c;}
 .s-보완회신대기{background:#fef9c3;color:#854d0e;}
-.s-표시사항작성중{background:#f3e8ff;color:#7e22ce;}
 .s-검토완료{background:#dcfce7;color:#15803d;}
-.s-신고완료{background:#ccfbf1;color:#0f766e;}
-.pi-해당없음{background:#f1f5f9;color:#94a3b8;}
+/* 2단계 사전검사 */
 .pi-진행예정{background:#e0f2fe;color:#0369a1;}
 .pi-진행중{background:#dbeafe;color:#1d4ed8;}
-.pi-완료{background:#dcfce7;color:#15803d;}
-.pr-미반영{background:#fee2e2;color:#dc2626;}
-.pr-반영중{background:#fef9c3;color:#854d0e;}
+.pi-진행완료{background:#dcfce7;color:#15803d;}
+.pi-해당없음{background:#f1f5f9;color:#94a3b8;}
+/* 2단계 반영여부 */
+.pr-검토파일미반영{background:#fee2e2;color:#dc2626;}
 .pr-반영완료{background:#dcfce7;color:#15803d;}
-.id-신고전{background:#f1f5f9;color:#64748b;}
-.id-신고준비중{background:#e0f2fe;color:#0369a1;}
-.id-신고완료{background:#dcfce7;color:#15803d;}
-.id-보완요청{background:#ffedd5;color:#c2410c;}
-.id-보완완료{background:#ccfbf1;color:#0f766e;}
-.id-통관완료{background:#d1fae5;color:#065f46;}
+/* 3단계 라벨 */
+.lb-라벨요청{background:#e0f2fe;color:#0369a1;}
+.lb-라벨작성중{background:#f3e8ff;color:#7e22ce;}
+.lb-라벨작성완료{background:#dcfce7;color:#15803d;}
+.lb-라벨발송전{background:#fef3c7;color:#d97706;}
+.lb-라벨발송{background:#d1fae5;color:#065f46;}
+/* 4단계 수입신고 */
+.id-수입신고준비중{background:#e0f2fe;color:#0369a1;}
+.id-신고완료{background:#d1fae5;color:#065f46;}
 .ph{background:#fee2e2;color:#dc2626;}
 .pm{background:#fef9c3;color:#ca8a04;}
 .pl{background:#f0fdf4;color:#16a34a;}
@@ -107,12 +108,8 @@ tr:hover td{background:#fafafa;}
 .notif-item{display:flex;gap:12px;padding:11px;border-radius:8px;margin-bottom:6px;background:#fff;border:1px solid #e2e8f0;cursor:pointer;}
 .notif-item.unread{border-left:3px solid #3b82f6;background:#f0f7ff;}
 .notif-count{background:#ef4444;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;font-weight:700;}
-.ai-section{background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px;}
-.ai-section h4{font-size:13px;font-weight:700;margin-bottom:8px;}
-.ai-section ul{list-style:none;font-size:13px;}
-.ai-section ul li{padding:3px 0;display:flex;gap:8px;}
-.status-section{background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:14px;}
-.status-section h4{font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.status-section{background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:10px;}
+.status-section h4{font-size:11px;font-weight:700;color:#475569;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
 .status-btns{display:flex;gap:6px;flex-wrap:wrap;}
 .status-btns button{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:2px solid transparent;font-weight:500;transition:.15s;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;}
@@ -129,6 +126,7 @@ tr:hover td{background:#fafafa;}
 .alert-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d4ed8;margin-bottom:12px;}
 .alert-warn{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:12px;}
 .alert-success{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;font-size:12px;color:#15803d;margin-bottom:12px;}
+.alert-red{background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:10px;}
 .empty{text-align:center;padding:36px;color:#94a3b8;font-size:13px;}
 .flex-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;background:#e0e7ff;color:#3730a3;}
@@ -136,13 +134,32 @@ tr:hover td{background:#fafafa;}
 .lock-chip{background:#fef3c7;color:#92400e;}
 hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
 .text-sm{font-size:12px;color:#64748b;}
-/* API 설정 */
-.api-setup{background:#1e3a5f;border-radius:8px;padding:12px 16px;margin:8px 16px;font-size:12px;color:#93c5fd;}
-.api-setup a{color:#60a5fa;cursor:pointer;text-decoration:underline;}
+.stage-label{font-size:10px;font-weight:700;color:#fff;background:#475569;border-radius:4px;padding:1px 6px;margin-right:4px;}
+
+/* 인라인 상태 드롭다운 */
+.inline-select{border:none;background:transparent;font-size:11px;font-weight:600;cursor:pointer;border-radius:20px;padding:2px 6px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;padding-right:18px;}
+.inline-select:focus{outline:2px solid #3b82f6;outline-offset:1px;}
+
+/* 4단계 파이프라인 미니바 */
+.pipeline{display:flex;align-items:center;gap:2px;min-width:220px;}
+.pipe-step{flex:1;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px;cursor:default;}
+.pipe-step.done{opacity:1;}
+.pipe-step.pending{background:#f1f5f9;color:#94a3b8;}
+.pipe-arrow{color:#cbd5e1;font-size:10px;flex-shrink:0;}
+
+/* 칸반 보드 */
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
+.kanban-col{background:#f8fafc;border-radius:10px;padding:10px;}
+.kanban-col-header{font-size:11px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.kanban-card{background:#fff;border-radius:7px;padding:8px 10px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:.15s;border-left:3px solid #e2e8f0;}
+.kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px);}
+.kanban-card .kc-name{font-size:12px;font-weight:600;margin-bottom:4px;color:#1e293b;}
+.kanban-card .kc-meta{font-size:10px;color:#94a3b8;}
+.kanban-card .kc-pipe{display:flex;gap:2px;margin-top:5px;}
+.kc-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 </style>
 </head>
 <body>
-
 <div id="sidebar">
   <div class="logo">
     <h2>🍱 식품표시사항<br>검토 협업 시스템</h2>
@@ -150,7 +167,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
   </div>
   <div class="sync-bar">
     <div class="sync-dot" id="syncDot"></div>
-    <span id="syncStatus" style="color:#64748b">클라우드 미연결</span>
+    <span id="syncStatus" style="color:#64748b">연결 중...</span>
   </div>
   <nav id="nav">
     <a onclick="go('dashboard')" class="active" data-page="dashboard"><span class="icon">📊</span>대시보드</a>
@@ -159,9 +176,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <a onclick="go('search')" data-page="search"><span class="icon">🔍</span>검색</a>
     <div class="section-title">업무관리</div>
     <a onclick="go('notifications')" data-page="notifications" id="nav-notif"><span class="icon">🔔</span>알림</a>
-    <div class="section-title">데이터</div>
-    <a onclick="showImportModal()" data-page="import"><span class="icon">📥</span>구글시트 이관</a>
-    <a onclick="showApiSettings()" data-page="api"><span class="icon">☁️</span>클라우드 설정</a>
+    <a onclick="showImportModal()" data-page="import" style="display:none"><span class="icon">📥</span>구글시트 이관</a>
+    <a onclick="showApiSettings()" data-page="api" style="display:none"><span class="icon">☁️</span>클라우드 설정</a>
   </nav>
   <div class="user-area">
     <select id="userSelect" onchange="switchUser(this.value)">
@@ -186,27 +202,37 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
 
 <script>
 // ============================================================
-// CONFIG & CONSTANTS
+// CONFIG
 // ============================================================
-const STORE_KEY='frs_v3';
+const STORE_KEY='frs_v4';
 const API_KEY_STORE='frs_api_url';
-const SHEET_ID='1P-glS1ovQSioUiuccOmRrwd2VWXc90XSJmSs48SAetU';
-const SHEET_GID='30938180';
-
 const DEFAULT_API_URL='https://script.google.com/macros/s/AKfycbwqawWMW3wKAIIcNNAJhDbBnaFVOTVzJTe3A7qERr3JQwN5LR5lw_CJJ85LWge9xxqt/exec';
 let API_URL=localStorage.getItem(API_KEY_STORE)||DEFAULT_API_URL;
 
-const STATUSES=['접수대기','자료수집중','검토중','보완요청','보완회신대기','표시사항작성중','검토완료','신고완료'];
-const STATUS_COLORS={'접수대기':'#94a3b8','자료수집중':'#3b82f6','검토중':'#6366f1','보완요청':'#f97316','보완회신대기':'#eab308','표시사항작성중':'#a855f7','검토완료':'#22c55e','신고완료':'#14b8a6'};
-const PI_STATUSES=['해당없음','진행예정','진행중','완료'];
-const PR_STATUSES=['미반영','반영중','반영완료'];
-const ID_STATUSES=['-','신고전','신고준비중','신고완료','보완요청','보완완료','통관완료'];
+// ============================================================
+// CONSTANTS
+// ============================================================
+// 1단계
+const STATUSES=['검토예정','검토중','보완요청','보완회신대기','검토완료'];
+const STATUS_COLORS={'검토예정':'#94a3b8','검토중':'#6366f1','보완요청':'#f97316','보완회신대기':'#eab308','검토완료':'#22c55e'};
+// 2단계 사전검사
+const PI_STATUSES=['-','진행예정','진행중','진행완료','해당없음'];
+const PI_COLORS={'-':'#94a3b8','진행예정':'#0369a1','진행중':'#1d4ed8','진행완료':'#15803d','해당없음':'#94a3b8'};
+const PR_STATUSES=['검토파일미반영','반영완료'];
+const PR_COLORS={'검토파일미반영':'#dc2626','반영완료':'#15803d'};
+// 3단계 라벨
+const LABEL_STATUSES=['-','라벨요청','라벨작성중','라벨작성완료','라벨 발송 전','라벨 발송'];
+const LABEL_COLORS={'-':'#94a3b8','라벨요청':'#0369a1','라벨작성중':'#7c3aed','라벨작성완료':'#15803d','라벨 발송 전':'#d97706','라벨 발송':'#065f46'};
+// 3단계 라벨 검토단계 (사전검사 반영여부처럼 세부)
+const LABEL_REVIEW_STATUSES=['-','라벨검토중','라벨발송전','라벨발송'];
+const LABEL_REVIEW_COLORS={'-':'#94a3b8','라벨검토중':'#7c3aed','라벨발송전':'#d97706','라벨발송':'#065f46'};
+// 4단계 수입신고
+const ID_STATUSES=['-','수입신고준비중','신고완료'];
+const ID_COLORS={'-':'#94a3b8','수입신고준비중':'#0369a1','신고완료':'#065f46'};
+
 const FILE_CATS=['성분표','공정도','포장재질 자료','제조사 회신자료','시험성적서','표시시안','검토보고서'];
 const FOOD_TYPES=['과자류','캔디류','빵류','초콜릿류','잼류','음료류','주류','통조림류','냉동식품','육가공품','수산가공품','유가공품','건강기능식품','조미식품','기타'];
 const PRIORITIES=['높음','보통','낮음'];
-const PI_COLORS={'해당없음':'#94a3b8','진행예정':'#0369a1','진행중':'#1d4ed8','완료':'#15803d'};
-const PR_COLORS={'미반영':'#dc2626','반영중':'#854d0e','반영완료':'#15803d'};
-const ID_COLORS={'-':'#94a3b8','신고전':'#64748b','신고준비중':'#0369a1','신고완료':'#15803d','보완요청':'#c2410c','보완완료':'#0f766e','통관완료':'#065f46'};
 
 const USERS={
   u1:{id:'u1',name:'김다진',role:'admin'},
@@ -215,83 +241,50 @@ const USERS={
 
 let currentUser=USERS.u1, currentPage='dashboard', currentProductId=null, currentTab='기본정보';
 let syncInterval=null;
-let lastSyncTime=0;
 
 // ============================================================
 // DATA
 // ============================================================
 function loadData(){try{const r=localStorage.getItem(STORE_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
-function saveData(d){
-  localStorage.setItem(STORE_KEY,JSON.stringify(d));
-  cloudSave(d);
-}
+function saveData(d){localStorage.setItem(STORE_KEY,JSON.stringify(d));cloudSave(d);}
 
 let DB=loadData()||initDB();
 
 function initDB(){
   const d={products:[],history:[],chats:[],files:[],notifications:[]};
   d.products=[
-    {id:'p1',name:'ABC Beef Jerky',itemNo:'A-001',importer:'(주)한국식품',foodType:'육가공품',registeredAt:'2026-06-20',assignee:'u1',priority:'높음',status:'검토중',lockedBy:'u1',lockTime:'2026-06-25 09:30',note:'',preInspect:'완료',preInspectReflect:'미반영',importDecl:'신고준비중'},
-    {id:'p2',name:'Sweet Mango Candy',itemNo:'A-002',importer:'(주)맛있는수입',foodType:'캔디류',registeredAt:'2026-06-21',assignee:'u2',priority:'보통',status:'자료수집중',lockedBy:null,lockTime:null,note:'',preInspect:'진행중',preInspectReflect:'미반영',importDecl:'-'},
-    {id:'p3',name:'Organic Granola Bar',itemNo:'B-001',importer:'오가닉코리아',foodType:'과자류',registeredAt:'2026-06-22',assignee:'u1',priority:'낮음',status:'보완요청',lockedBy:null,lockTime:null,note:'GMO 관련 자료 추가 요청',preInspect:'완료',preInspectReflect:'반영중',importDecl:'-'},
-    {id:'p4',name:'Premium Green Tea',itemNo:'B-002',importer:'(주)그린티코리아',foodType:'음료류',registeredAt:'2026-06-23',assignee:'u2',priority:'높음',status:'표시사항작성중',lockedBy:null,lockTime:null,note:'',preInspect:'해당없음',preInspectReflect:'미반영',importDecl:'신고준비중'},
-    {id:'p5',name:'Spicy Tuna Canned',itemNo:'C-001',importer:'태평양수산',foodType:'수산가공품',registeredAt:'2026-06-24',assignee:'u1',priority:'보통',status:'검토완료',lockedBy:null,lockTime:null,note:'',preInspect:'완료',preInspectReflect:'반영완료',importDecl:'신고완료'},
-    {id:'p6',name:'Chocolate Truffle Box',itemNo:'C-002',importer:'초코수입상사',foodType:'초콜릿류',registeredAt:'2026-06-24',assignee:'u2',priority:'보통',status:'접수대기',lockedBy:null,lockTime:null,note:'',preInspect:'진행예정',preInspectReflect:'미반영',importDecl:'-'},
-    {id:'p7',name:'Frozen Pizza Margherita',itemNo:'D-001',importer:'(주)피자수입',foodType:'냉동식품',registeredAt:'2026-06-25',assignee:'u1',priority:'높음',status:'신고완료',lockedBy:null,lockTime:null,note:'',preInspect:'완료',preInspectReflect:'반영완료',importDecl:'통관완료'},
+    {id:'p1',itemNo:'C2603006',name:'Nattia 24pc',importer:'코스트코',foodType:'과자류',registeredAt:'2026-06-20',assignee:'u1',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,reviewedBy:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',labelReview:'-',importDecl:'-'},
+    {id:'p2',itemNo:'75494',name:'GRISSOL BAGUETTES SEASALT',importer:'코스트코',foodType:'빵류',registeredAt:'2026-06-21',assignee:'u2',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
+    {id:'p3',itemNo:'B-001',name:'Organic Granola Bar',importer:'코스트코',foodType:'과자류',registeredAt:'2026-06-22',assignee:'u1',priority:'낮음',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
+    {id:'p4',itemNo:'B-002',name:'Premium Green Tea',importer:'코스트코',foodType:'음료류',registeredAt:'2026-06-23',assignee:'u2',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
+    {id:'p5',itemNo:'C-001',name:'Spicy Tuna Canned',importer:'코스트코',foodType:'수산가공품',registeredAt:'2026-06-24',assignee:'u1',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
+    {id:'p6',itemNo:'C-002',name:'Chocolate Truffle Box',importer:'코스트코',foodType:'초콜릿류',registeredAt:'2026-06-24',assignee:'u2',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
+    {id:'p7',itemNo:'D-001',name:'Frozen Pizza Margherita',importer:'코스트코',foodType:'냉동식품',registeredAt:'2026-06-25',assignee:'u1',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
   ];
-  d.history=[
-    {id:'h1',productId:'p1',from:'접수대기',to:'자료수집중',by:'u1',at:'2026-06-20 14:00',note:''},
-    {id:'h2',productId:'p1',from:'자료수집중',to:'검토중',by:'u1',at:'2026-06-25 09:30',note:'검토 시작'},
-    {id:'h4',productId:'p3',from:'검토중',to:'보완요청',by:'u1',at:'2026-06-24 15:00',note:'GMO 자료 미비'},
-    {id:'h5',productId:'p5',from:'표시사항작성중',to:'검토완료',by:'u2',at:'2026-06-24 17:00',note:''},
-  ];
-  d.chats=[
-    {id:'c1',productId:'p1',userId:'u1',userName:'김다진',msg:'원재료 관련 제조사 문의 발송했습니다.',at:'2026-06-25 09:35'},
-    {id:'c2',productId:'p1',userId:'u2',userName:'남서우 부장',msg:'공정도 수신 완료했습니다.',at:'2026-06-25 10:00'},
-    {id:'c3',productId:'p1',userId:'u1',userName:'김다진',msg:'수분함량 확인 요청드립니다.',at:'2026-06-25 10:30'},
-  ];
-  d.files=[
-    {id:'f1',productId:'p1',cat:'성분표',name:'성분표_v1.pdf',version:1,by:'u1',at:'2026-06-20 14:30'},
-    {id:'f2',productId:'p1',cat:'성분표',name:'성분표_v2.pdf',version:2,by:'u2',at:'2026-06-22 09:00'},
-    {id:'f3',productId:'p1',cat:'공정도',name:'공정도.pdf',version:1,by:'u1',at:'2026-06-21 11:00'},
-  ];
-  d.notifications=[
-    {id:'n1',userId:'u1',type:'chat',msg:'남서우 부장님이 ABC Beef Jerky에 메시지를 남겼습니다.',productId:'p1',read:false,at:'2026-06-25 10:00'},
-    {id:'n2',userId:'u1',type:'status',msg:'Organic Granola Bar 상태가 보완요청으로 변경되었습니다.',productId:'p3',read:false,at:'2026-06-24 15:00'},
-  ];
-  saveData(d);
-  return d;
+  d.history=[];d.chats=[];d.files=[];d.notifications=[];
+  saveData(d);return d;
 }
 
 // ============================================================
 // CLOUD SYNC
 // ============================================================
-function setSyncStatus(status){
+function setSyncStatus(s){
   const dot=document.getElementById('syncDot');
   const txt=document.getElementById('syncStatus');
   if(!dot||!txt)return;
-  if(status==='ok'){dot.className='sync-dot ok';txt.textContent='클라우드 연결됨';txt.style.color='#4ade80';}
-  else if(status==='syncing'){dot.className='sync-dot syncing';txt.textContent='동기화 중...';txt.style.color='#fbbf24';}
-  else if(status==='err'){dot.className='sync-dot err';txt.textContent='연결 오류';txt.style.color='#f87171';}
+  if(s==='ok'){dot.className='sync-dot ok';txt.textContent='클라우드 연결됨';txt.style.color='#4ade80';}
+  else if(s==='syncing'){dot.className='sync-dot syncing';txt.textContent='동기화 중...';txt.style.color='#fbbf24';}
+  else if(s==='err'){dot.className='sync-dot err';txt.textContent='연결 오류';txt.style.color='#f87171';}
   else{dot.className='sync-dot';txt.textContent='클라우드 미연결';txt.style.color='#64748b';}
 }
-
 async function cloudSave(data){
   if(!API_URL)return;
   try{
     setSyncStatus('syncing');
-    await fetch(API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({data:data,ts:Date.now()})
-    });
+    await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({data,ts:Date.now()})});
     setSyncStatus('ok');
-    lastSyncTime=Date.now();
-  }catch(e){
-    setSyncStatus('err');
-  }
+  }catch(e){setSyncStatus('err');}
 }
-
 async function cloudLoad(silent){
   if(!API_URL)return;
   if(!silent)setSyncStatus('syncing');
@@ -299,26 +292,14 @@ async function cloudLoad(silent){
     const r=await fetch(API_URL+'?t='+Date.now());
     const json=await r.json();
     if(json.status==='ok'&&json.data){
-      const remote=json.data;
-      // Only update if remote data is different
-      if(JSON.stringify(remote)!==JSON.stringify(DB)){
-        DB=remote;
-        localStorage.setItem(STORE_KEY,JSON.stringify(DB));
-        renderPage();
+      if(JSON.stringify(json.data)!==JSON.stringify(DB)){
+        DB=json.data;localStorage.setItem(STORE_KEY,JSON.stringify(DB));renderPage();
       }
       setSyncStatus('ok');
-      lastSyncTime=Date.now();
     }
-  }catch(e){
-    setSyncStatus('err');
-  }
+  }catch(e){setSyncStatus('err');}
 }
-
-function manualSync(){
-  if(!API_URL){showApiSettings();return;}
-  cloudLoad(false);
-}
-
+function manualSync(){if(!API_URL){showApiSettings();return;}cloudLoad(false);}
 function startSyncPolling(){
   if(syncInterval)clearInterval(syncInterval);
   if(!API_URL)return;
@@ -327,88 +308,71 @@ function startSyncPolling(){
 }
 
 // ============================================================
-// API SETTINGS MODAL
+// API SETTINGS
 // ============================================================
 function showApiSettings(){
-  showModal(`
-  <h2>☁️ 클라우드 동기화 설정</h2>
+  showModal(`<h2>☁️ 클라우드 동기화 설정</h2>
   <div class="alert-info">구글 앱스 스크립트 Web App URL을 등록하면 두 분의 데이터가 실시간으로 공유됩니다.</div>
-
-  <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.8">
-    <strong>📋 설정 순서:</strong><br>
-    1. 구글 드라이브에서 새 <strong>스프레드시트</strong> 생성<br>
-    2. 상단 메뉴 → <strong>확장 프로그램 → Apps Script</strong><br>
-    3. Code.gs 파일 내용을 전체 삭제 후 제공된 코드 붙여넣기<br>
-    4. <strong>배포 → 새 배포</strong> → 유형: 웹 앱<br>
-    5. 실행 대상: <strong>나</strong> / 액세스 권한: <strong>모든 사용자</strong><br>
-    6. 배포 완료 후 <strong>웹 앱 URL</strong> 복사하여 아래에 붙여넣기
-  </div>
-
-  <div class="fg">
-    <label>앱스 스크립트 Web App URL</label>
-    <input id="apiUrlInput" value="${API_URL}" placeholder="https://script.google.com/macros/s/.../exec">
-  </div>
-
+  <div class="fg"><label>앱스 스크립트 Web App URL</label>
+  <input id="apiUrlInput" value="${API_URL}" placeholder="https://script.google.com/macros/s/.../exec"></div>
   ${API_URL?`<div class="alert-success">✅ 현재 URL이 등록되어 있습니다.</div>`:''}
-
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal()">취소</button>
     ${API_URL?`<button class="btn btn-danger btn-sm" onclick="clearApiUrl()" style="margin-right:auto">연결 해제</button>`:''}
     <button class="btn btn-success" onclick="saveApiUrl()">✅ 저장 및 연결</button>
   </div>`);
 }
-
 function saveApiUrl(){
   const url=(document.getElementById('apiUrlInput').value||'').trim();
   if(!url){alert('URL을 입력하세요.');return;}
-  API_URL=url;
-  localStorage.setItem(API_KEY_STORE,url);
-  closeModal();
-  startSyncPolling();
-  alert('✅ 연결되었습니다! 이제 두 분의 데이터가 자동으로 공유됩니다.');
+  API_URL=url;localStorage.setItem(API_KEY_STORE,url);closeModal();startSyncPolling();
+  alert('✅ 연결되었습니다!');
 }
-
 function clearApiUrl(){
-  if(!confirm('클라우드 연결을 해제하시겠습니까?'))return;
-  API_URL='';
-  localStorage.removeItem(API_KEY_STORE);
-  if(syncInterval)clearInterval(syncInterval);
-  setSyncStatus('none');
-  closeModal();
+  if(!confirm('연결을 해제하시겠습니까?'))return;
+  API_URL='';localStorage.removeItem(API_KEY_STORE);
+  if(syncInterval)clearInterval(syncInterval);setSyncStatus('none');closeModal();
 }
 
 // ============================================================
 // UTILS
 // ============================================================
 function uid(){return 'id_'+Math.random().toString(36).substr(2,9)+'_'+Date.now();}
-function nowStr(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;}
+function nowStr(){const d=new Date();return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;}
 function p2(n){return String(n).padStart(2,'0');}
 function username(id){return USERS[id]?USERS[id].name:id;}
 function getProduct(id){return DB.products.find(p=>p.id===id);}
-function canEdit(){return true;}
-function isAdmin(){return true;}
 function unreadCount(){return DB.notifications.filter(n=>n.userId===currentUser.id&&!n.read).length;}
+
 function ensureFields(p){
-  if(!p.preInspect)p.preInspect='해당없음';
-  if(!p.preInspectReflect)p.preInspectReflect='미반영';
+  if(!p.preInspect)p.preInspect='-';
+  if(!p.preInspectDate)p.preInspectDate='';
+  if(!p.preInspectReflect)p.preInspectReflect='검토파일미반영';
+  if(!p.labelStatus)p.labelStatus='-';
+  if(!p.labelReview)p.labelReview='-';
   if(!p.importDecl)p.importDecl='-';
   if(!p.itemNo)p.itemNo='';
+  if(!p.reviewedBy)p.reviewedBy=null;
+  if(!p.status||!STATUSES.includes(p.status))p.status='검토예정';
   return p;
 }
+
 function addNotif(userId,type,msg,productId){
   DB.notifications.unshift({id:uid(),userId,type,msg,productId,read:false,at:nowStr()});
   saveData(DB);updateNotifBadge();
 }
 function updateNotifBadge(){
   const cnt=unreadCount();
-  const el=document.getElementById('nav-notif');
-  if(!el)return;
+  const el=document.getElementById('nav-notif');if(!el)return;
   const ex=el.querySelector('.notif-count');if(ex)ex.remove();
   if(cnt>0){const s=document.createElement('span');s.className='notif-count';s.style.marginLeft='auto';s.textContent=cnt;el.appendChild(s);}
 }
-function piBadge(v){return `<span class="badge pi-${v}">${v}</span>`;}
-function prBadge(v){return `<span class="badge pr-${v}">${v}</span>`;}
-function idBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return `<span class="badge id-${v}">${v}</span>`;}
+
+function sBadge(v){return`<span class="badge s-${v}">${v}</span>`;}
+function piBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return`<span class="badge pi-${v}">${v}</span>`;}
+function prBadge(v){return`<span class="badge pr-${v.replace(/\s/g,'')}">${v}</span>`;}
+function labelBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return`<span class="badge lb-${v.replace(/\s/g,'')}">${v}</span>`;}
+function idBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return`<span class="badge id-${v.replace(/\s/g,'')}">${v}</span>`;}
 
 // ============================================================
 // ROUTER
@@ -417,9 +381,7 @@ function go(page,arg){
   currentPage=page;currentProductId=arg||null;
   if(page!=='product')currentTab='기본정보';
   renderPage();
-  document.querySelectorAll('#nav a[data-page]').forEach(a=>{
-    a.classList.toggle('active',a.dataset.page===page);
-  });
+  document.querySelectorAll('#nav a[data-page]').forEach(a=>a.classList.toggle('active',a.dataset.page===page));
 }
 function renderPage(){
   document.getElementById('topbarDate').textContent=nowStr();
@@ -441,32 +403,66 @@ function switchUser(id){currentUser=USERS[id];renderPage();}
 // ============================================================
 function renderDashboard(){
   const prods=DB.products.map(ensureFields);
+  const reviewing=prods.filter(p=>['검토중','보완요청','보완회신대기'].includes(p.status)).length;
+  const piInProg=prods.filter(p=>p.preInspect==='진행중').length;
+  const piNotRefl=prods.filter(p=>p.preInspect==='진행완료'&&p.preInspectReflect==='검토파일미반영').length;
+  const labelInProg=prods.filter(p=>['라벨요청','라벨작성중'].includes(p.labelStatus)).length;
+  const idInProg=prods.filter(p=>p.importDecl==='수입신고준비중').length;
+  const idDone=prods.filter(p=>p.importDecl==='신고완료').length;
   const total=prods.length;
-  const reviewing=prods.filter(p=>p.status==='검토중').length;
-  const piInProgress=prods.filter(p=>p.preInspect==='진행중').length;
-  const piDoneNotReflect=prods.filter(p=>p.preInspect==='완료'&&p.preInspectReflect==='미반영').length;
-  const idNone=prods.filter(p=>p.importDecl==='신고전').length;
-  const idInProg=prods.filter(p=>['신고준비중','보완요청'].includes(p.importDecl)).length;
-  const idDone=prods.filter(p=>['신고완료','보완완료','통관완료'].includes(p.importDecl)).length;
   const statusCounts={};STATUSES.forEach(s=>statusCounts[s]=0);
   prods.forEach(p=>statusCounts[p.status]=(statusCounts[p.status]||0)+1);
   const myProds=prods.filter(p=>p.assignee===currentUser.id);
-  const myActive=myProds.filter(p=>!['검토완료','신고완료'].includes(p.status)).length;
-  const myDone=myProds.filter(p=>['검토완료','신고완료'].includes(p.status)).length;
+  const myActive=myProds.filter(p=>p.status!=='검토완료').length;
+  const myDone=myProds.filter(p=>p.status==='검토완료').length;
   const mySupp=myProds.filter(p=>['보완요청','보완회신대기'].includes(p.status)).length;
   const assigneeRows=Object.values(USERS).map(u=>{
     const up=prods.filter(p=>p.assignee===u.id);
-    return `<tr><td><strong>${u.name}</strong></td><td style="color:#3b82f6;font-weight:600">${up.filter(p=>!['검토완료','신고완료'].includes(p.status)).length}</td><td style="color:#22c55e;font-weight:600">${up.filter(p=>['검토완료','신고완료'].includes(p.status)).length}</td><td style="color:#f97316;font-weight:600">${up.filter(p=>['보완요청','보완회신대기'].includes(p.status)).length}</td><td>${up.length}</td></tr>`;
+    return`<tr><td><strong>${u.name}</strong></td><td style="color:#3b82f6;font-weight:600">${up.filter(p=>p.status!=='검토완료').length}</td><td style="color:#22c55e;font-weight:600">${up.filter(p=>p.status==='검토완료').length}</td><td style="color:#f97316;font-weight:600">${up.filter(p=>['보완요청','보완회신대기'].includes(p.status)).length}</td><td>${up.length}</td></tr>`;
   }).join('');
   const recentH=[...DB.history].sort((a,b)=>b.at.localeCompare(a.at)).slice(0,5);
-  return `
+
+  // 칸반 보드 (상태별 카드)
+  const kanbanHTML=STATUSES.map(s=>{
+    const col=prods.filter(p=>p.status===s);
+    const bcolor=STATUS_COLORS[s]||'#94a3b8';
+    return`<div class="kanban-col">
+      <div class="kanban-col-header">
+        <span style="color:${bcolor}">${s}</span>
+        <span style="background:${bcolor}22;color:${bcolor};border-radius:10px;padding:1px 7px;font-size:11px">${col.length}</span>
+      </div>
+      ${col.length===0?`<div style="font-size:11px;color:#cbd5e1;text-align:center;padding:10px 0">없음</div>`:
+        col.map(p=>`<div class="kanban-card" onclick="go('product','${p.id}')" style="border-left-color:${bcolor}">
+          <div class="kc-name">${p.itemNo?`[${p.itemNo}] `:''}${p.name}</div>
+          <div class="kc-meta">${username(p.assignee)}</div>
+          <div class="kc-pipe">
+            ${[
+              {c:PI_COLORS[p.preInspect]||'#e2e8f0',t:`사전검사: ${p.preInspect||'-'}`},
+              {c:LABEL_COLORS[p.labelStatus]||'#e2e8f0',t:`라벨: ${p.labelStatus||'-'}`},
+              {c:ID_COLORS[p.importDecl]||'#e2e8f0',t:`수입신고: ${p.importDecl||'-'}`},
+            ].map(d=>`<div class="kc-dot" style="background:${d.c}" title="${d.t}"></div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  return`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm" id="view-stat" onclick="setDashView('stat')" style="font-weight:600">📊 현황</button>
+      <button class="btn btn-outline btn-sm" id="view-kanban" onclick="setDashView('kanban')">🗂️ 칸반</button>
+    </div>
+    <span class="text-sm">전체 ${total}건</span>
+  </div>
+
+  <div id="dash-stat">
   <div class="stat-grid">
-    <div class="stat-card" style="border-color:#6366f1" onclick="filterGo('status','검토중')"><div class="val" style="color:#4338ca">${reviewing}</div><div class="lbl">🔍 검토중 제품</div></div>
-    <div class="stat-card" style="border-color:#3b82f6" onclick="filterGo('preInspect','진행중')"><div class="val" style="color:#1d4ed8">${piInProgress}</div><div class="lbl">🧪 사전검사 진행중</div></div>
-    <div class="stat-card" style="border-color:#ef4444" onclick="filterGo('piDoneNotReflect','')"><div class="val" style="color:#dc2626">${piDoneNotReflect}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
-    <div class="stat-card" style="border-color:#94a3b8" onclick="filterGo('importDecl','신고전')"><div class="val" style="color:#475569">${idNone}</div><div class="lbl">📋 수입신고 미진행</div></div>
-    <div class="stat-card" style="border-color:#f59e0b" onclick="filterGo('importDecl','진행중')"><div class="val" style="color:#d97706">${idInProg}</div><div class="lbl">🚢 수입신고 진행중</div></div>
-    <div class="stat-card" style="border-color:#10b981" onclick="filterGo('importDecl','완료')"><div class="val" style="color:#059669">${idDone}</div><div class="lbl">✅ 수입신고 완료</div></div>
+    <div class="stat-card" style="border-color:#6366f1" onclick="go('products')"><div class="val" style="color:#4338ca">${reviewing}</div><div class="lbl">🔍 검토 진행중</div></div>
+    <div class="stat-card" style="border-color:#3b82f6"><div class="val" style="color:#1d4ed8">${piInProg}</div><div class="lbl">🧪 사전검사 진행중</div></div>
+    <div class="stat-card" style="border-color:#ef4444"><div class="val" style="color:#dc2626">${piNotRefl}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
+    <div class="stat-card" style="border-color:#7c3aed"><div class="val" style="color:#6d28d9">${labelInProg}</div><div class="lbl">🏷️ 라벨 진행중</div></div>
+    <div class="stat-card" style="border-color:#f59e0b"><div class="val" style="color:#d97706">${idInProg}</div><div class="lbl">🚢 수입신고 준비중</div></div>
+    <div class="stat-card" style="border-color:#10b981"><div class="val" style="color:#059669">${idDone}</div><div class="lbl">✅ 신고 완료</div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
     <div class="card">
@@ -474,117 +470,215 @@ function renderDashboard(){
       <div style="display:flex;gap:10px;margin-bottom:14px">
         <div style="background:#eff6ff;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#2563eb">${myActive}</div><div style="font-size:11px;color:#64748b">진행중</div></div>
         <div style="background:#f0fdf4;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#16a34a">${myDone}</div><div style="font-size:11px;color:#64748b">완료</div></div>
-        <div style="background:#fff7ed;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#ea580c">${mySupp}</div><div style="font-size:11px;color:#64748b">보완대기</div></div>
+        <div style="background:#fff7ed;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#ea580c">${mySupp}</div><div style="font-size:11px;color:#64748b">보완</div></div>
       </div>
-      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">담당자별 현황</div>
       <table><tr><th>담당자</th><th>진행중</th><th>완료</th><th>보완</th><th>전체</th></tr>${assigneeRows}</table>
     </div>
     <div class="card">
-      <h3>검토 상태별 현황</h3>
+      <h3>1단계 검토 현황</h3>
       ${STATUSES.filter(s=>statusCounts[s]>0).map(s=>`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span class="badge s-${s}" style="width:96px;text-align:center">${s}</span>
+        <span class="badge s-${s}" style="width:90px;text-align:center">${s}</span>
         <div style="flex:1;background:#f1f5f9;border-radius:4px;height:7px;overflow:hidden"><div style="width:${total?Math.round((statusCounts[s]/total)*100):0}%;background:${STATUS_COLORS[s]};height:100%;border-radius:4px"></div></div>
         <span style="font-size:12px;font-weight:600;width:18px;text-align:right">${statusCounts[s]}</span>
       </div>`).join('')}
     </div>
   </div>
-  ${piDoneNotReflect>0?`<div class="card" style="border:1px solid #fca5a5">
-    <h3 style="color:#dc2626">⚠️ 사전검사 완료 후 검토파일 미반영 (${piDoneNotReflect}건)</h3>
-    <table><tr><th>제품명</th><th>수입사</th><th>담당자</th><th>검토상태</th><th>수입신고</th><th></th></tr>
-    ${prods.filter(p=>p.preInspect==='완료'&&p.preInspectReflect==='미반영').map(p=>`
-    <tr><td><strong style="cursor:pointer;color:#dc2626" onclick="go('product','${p.id}')">${p.name}</strong></td>
-    <td>${p.importer}</td><td>${username(p.assignee)}</td>
-    <td><span class="badge s-${p.status}">${p.status}</span></td>
-    <td>${idBadge(p.importDecl)}</td>
+  ${piNotRefl>0?`<div class="card" style="border:1px solid #fca5a5">
+    <h3 style="color:#dc2626">⚠️ 사전검사 완료 후 검토파일 미반영 (${piNotRefl}건)</h3>
+    <table><tr><th>No.</th><th>제품명</th><th>수입사</th><th>검토상태</th><th>라벨</th><th>수입신고</th><th></th></tr>
+    ${prods.filter(p=>p.preInspect==='진행완료'&&p.preInspectReflect==='검토파일미반영').map(p=>`
+    <tr><td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
+    <td><strong style="cursor:pointer;color:#dc2626" onclick="go('product','${p.id}')">${p.name}</strong></td>
+    <td>${p.importer}</td><td>${sBadge(p.status)}</td>
+    <td>${labelBadge(p.labelStatus)}</td><td>${idBadge(p.importDecl)}</td>
     <td><button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td></tr>`).join('')}
     </table></div>`:''}
   <div class="card"><div class="flex-between"><h3>최근 활동</h3></div>
-    ${recentH.map(h=>{const p=getProduct(h.productId);return `<div class="history-item"><div class="dot"></div><div><div class="meta">${h.at} · ${username(h.by)}</div><div style="font-size:13px;margin-top:3px">${p?p.name:'?'} — <span class="badge s-${h.from||'접수대기'}">${h.from||'등록'}</span> → <span class="badge s-${h.to}">${h.to}</span></div></div></div>`;}).join('')}
-  </div>`;
-}
+    ${recentH.length===0?'<div class="empty">활동 내역이 없습니다.</div>':recentH.map(h=>{const p=getProduct(h.productId);return`<div class="history-item"><div class="dot"></div><div><div class="meta">${h.at} · ${username(h.by)}</div><div style="font-size:13px;margin-top:3px">${p?p.name:'?'} — ${h.from||'등록'} → <strong>${h.to}</strong></div></div></div>`;}).join('')}
+  </div>
+  </div>
 
-function filterGo(field,val){
-  go('products');
-  setTimeout(()=>{
-    if(field==='status'&&val){const el=document.getElementById('fl-status');if(el){el.value=val;filterList();}}
-    else if(field==='preInspect'&&val){const el=document.getElementById('fl-pi');if(el){el.value=val;filterList();}}
-    else if(field==='importDecl'){
-      const el=document.getElementById('fl-id');if(el){
-        if(val==='진행중')el.value='__id_progress';
-        else if(val==='완료')el.value='__id_done';
-        else el.value='신고전';
-        filterList();
-      }
-    }
-    else if(field==='piDoneNotReflect'){
-      const e1=document.getElementById('fl-pi');const e2=document.getElementById('fl-pr');
-      if(e1)e1.value='완료';if(e2)e2.value='미반영';filterList();
-    }
-  },100);
+  <div id="dash-kanban" style="display:none">
+    <div class="kanban">${kanbanHTML}</div>
+  </div>
+
+  <script>
+  (function(){
+    const stored=sessionStorage.getItem('dashView')||'stat';
+    setDashView(stored,true);
+  })();
+  function setDashView(v,silent){
+    sessionStorage.setItem('dashView',v);
+    document.getElementById('dash-stat').style.display=v==='stat'?'block':'none';
+    document.getElementById('dash-kanban').style.display=v==='kanban'?'block':'none';
+    document.getElementById('view-stat').style.fontWeight=v==='stat'?'700':'400';
+    document.getElementById('view-kanban').style.fontWeight=v==='kanban'?'700':'400';
+  }
+  <\/script>
+  `;
 }
 
 // ============================================================
 // PRODUCT LIST
 // ============================================================
 function renderProductList(){
-  return `<div class="card">
+  return`<div class="card">
     <div class="flex-between"><h3>전체 제품 (${DB.products.length}건)</h3>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary btn-sm" onclick="go('register')">➕ 제품 등록</button>
         <button class="btn btn-purple btn-sm" onclick="showImportModal()">📥 구글시트 이관</button>
+        <button class="btn btn-warning btn-sm" onclick="showBulkUpdate()">✏️ 일괄수정</button>
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <input id="fl-name" placeholder="🔍 제품명/수입사" oninput="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;min-width:160px">
-      <select id="fl-status" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 상태</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <select id="fl-assignee" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 담당자</option>${Object.values(USERS).map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select>
+      <input id="fl-name" placeholder="🔍 아이템번호/제품명/수입사" oninput="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;min-width:200px">
+      <select id="fl-status" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 검토상태</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="fl-lock" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">검토자 전체</option>${Object.values(USERS).map(u=>`<option value="${u.id}">🔒${u.name}</option>`).join('')}<option value="none">🔓 미검토</option></select>
       <select id="fl-pi" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">사전검사 전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <select id="fl-pr" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">반영여부 전체</option>${PR_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <select id="fl-id" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">수입신고 전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}<option value="__id_progress">신고 진행중</option><option value="__id_done">신고 완료</option></select>
+      <select id="fl-lb" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">라벨 전체</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="fl-id" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">수입신고 전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
     </div>
     <table>
-      <tr><th>No.</th><th>제품명</th><th>수입사</th><th>식품유형</th><th>검토상태</th><th>사전검사</th><th>반영여부</th><th>수입신고</th><th>잠금</th><th>작업</th></tr>
+      <tr><th><input type="checkbox" id="chk-all" onchange="toggleAllCheck(this.checked)" title="전체선택"></th><th>No.</th><th>제품명</th><th>1단계 검토상태</th><th>진행 파이프라인 (2~4단계)</th><th>잠금</th><th>작업</th></tr>
       <tbody id="product-tbody">${renderProductRows(DB.products.map(ensureFields))}</tbody>
     </table>
   </div>`;
 }
+function pipelineBar(p){
+  const steps=[
+    {label:'검토',val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료'},
+    {label:'사전검사',val:p.preInspect,colors:PI_COLORS,done:p.preInspect==='진행완료'||p.preInspect==='해당없음'},
+    {label:'라벨',val:p.labelStatus,colors:LABEL_COLORS,done:p.labelStatus==='라벨 발송'},
+    {label:'수입신고',val:p.importDecl,colors:ID_COLORS,done:p.importDecl==='신고완료'},
+  ];
+  return`<div class="pipeline">${steps.map((s,i)=>{
+    const color=s.colors[s.val]||'#94a3b8';
+    const bg=s.done?color:s.val&&s.val!=='-'?color+'33':'#f1f5f9';
+    const fc=s.done?'#fff':s.val&&s.val!=='-'?color:'#94a3b8';
+    return(i>0?`<span class="pipe-arrow">›</span>`:'')+
+      `<div class="pipe-step" style="background:${bg};color:${fc}" title="${s.val||'미진행'}">${s.label}</div>`;
+  }).join('')}</div>`;
+}
+
+function inlineStatusSelect(p){
+  const locked=p.lockedBy&&p.lockedBy!==currentUser.id;
+  if(locked)return sBadge(p.status);
+  const bg=STATUS_COLORS[p.status]||'#94a3b8';
+  return`<select class="inline-select" style="background:${bg}22;color:${bg};border:1px solid ${bg}66"
+    onchange="inlineChangeStatus('${p.id}',this.value)" onclick="event.stopPropagation()">
+    ${STATUSES.map(s=>`<option value="${s}" ${s===p.status?'selected':''}>${s}</option>`).join('')}
+  </select>`;
+}
+
+function inlineChangeStatus(id,s){
+  const p=getProduct(id);if(!p)return;
+  if(p.lockedBy&&p.lockedBy!==currentUser.id){alert(`${username(p.lockedBy)}님이 검토중입니다.`);return;}
+  const old=p.status;if(old===s)return;
+  p.status=s;
+  DB.history.push({id:uid(),productId:id,from:old,to:s,by:currentUser.id,at:nowStr(),note:'목록 인라인 변경'});
+  if(s==='검토완료'){p.lockedBy=null;p.lockTime=null;}
+  Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→${s}`,id);});
+  saveData(DB);filterList();
+}
+
 function renderProductRows(prods){
   if(!prods.length)return`<tr><td colspan="10" class="empty">검색 결과가 없습니다.</td></tr>`;
   return prods.map(p=>`<tr>
+    <td><input type="checkbox" class="row-chk" value="${p.id}"></td>
     <td style="font-size:11px;color:#64748b;white-space:nowrap">${p.itemNo||'—'}</td>
-    <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
-    <td style="font-size:11px">${p.importer}</td>
-    <td><span class="tag" style="font-size:10px">${p.foodType}</span></td>
-    <td><span class="badge s-${p.status}">${p.status}</span></td>
-    <td>${piBadge(p.preInspect)}</td>
-    <td>${p.preInspect==='해당없음'?'<span style="color:#94a3b8;font-size:11px">—</span>':prBadge(p.preInspectReflect)}</td>
-    <td>${idBadge(p.importDecl)}</td>
-    <td>${p.lockedBy?`<span class="chip lock-chip" style="font-size:10px">🔒${username(p.lockedBy)}</span>`:'<span class="chip" style="font-size:10px">🔓</span>'}</td>
+    <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#94a3b8">${p.importer||''}</div></td>
+    <td>${inlineStatusSelect(p)}</td>
+    <td>${pipelineBar(p)}</td>
+    <td style="white-space:nowrap">
+      ${p.lockedBy&&p.lockedBy!==currentUser.id
+        ?`<span class="chip lock-chip" style="font-size:10px">🔒 ${username(p.lockedBy)}</span>`
+        :p.lockedBy===currentUser.id
+        ?`<button class="btn btn-danger btn-sm" onclick="toggleLockFromList('${p.id}')">🔓 종료</button>`
+        :`<button class="btn btn-success btn-sm" onclick="toggleLockFromList('${p.id}')">🔒 시작</button>`}
+    </td>
     <td style="display:flex;gap:3px">
       <button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button>
       <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">삭</button>
     </td>
   </tr>`).join('');
 }
+function toggleAllCheck(checked){document.querySelectorAll('.row-chk').forEach(c=>c.checked=checked);}
+function getCheckedIds(){return [...document.querySelectorAll('.row-chk:checked')].map(c=>c.value);}
 function filterList(){
   const name=(document.getElementById('fl-name')||{}).value?.toLowerCase()||'';
   const status=(document.getElementById('fl-status')||{}).value||'';
-  const assignee=(document.getElementById('fl-assignee')||{}).value||'';
+  const lockFilter=(document.getElementById('fl-lock')||{}).value||'';
   const pi=(document.getElementById('fl-pi')||{}).value||'';
-  const pr=(document.getElementById('fl-pr')||{}).value||'';
+  const lb=(document.getElementById('fl-lb')||{}).value||'';
   const idv=(document.getElementById('fl-id')||{}).value||'';
   let prods=DB.products.map(ensureFields);
-  if(name)prods=prods.filter(p=>p.name.toLowerCase().includes(name)||p.importer.toLowerCase().includes(name));
+  if(name)prods=prods.filter(p=>(p.itemNo||'').toLowerCase().includes(name)||(p.name||'').toLowerCase().includes(name)||(p.importer||'').toLowerCase().includes(name));
   if(status)prods=prods.filter(p=>p.status===status);
-  if(assignee)prods=prods.filter(p=>p.assignee===assignee);
+  if(lockFilter==='none')prods=prods.filter(p=>!p.lockedBy);
+  else if(lockFilter)prods=prods.filter(p=>p.lockedBy===lockFilter);
   if(pi)prods=prods.filter(p=>p.preInspect===pi);
-  if(pr)prods=prods.filter(p=>p.preInspectReflect===pr);
-  if(idv==='__id_progress')prods=prods.filter(p=>['신고준비중','보완요청'].includes(p.importDecl));
-  else if(idv==='__id_done')prods=prods.filter(p=>['신고완료','보완완료','통관완료'].includes(p.importDecl));
-  else if(idv)prods=prods.filter(p=>p.importDecl===idv);
+  if(lb)prods=prods.filter(p=>p.labelStatus===lb);
+  if(idv)prods=prods.filter(p=>p.importDecl===idv);
   const tbody=document.getElementById('product-tbody');
   if(tbody)tbody.innerHTML=renderProductRows(prods);
+}
+function showBulkUpdate(){
+  const checkedIds=getCheckedIds();
+  const targetCount=checkedIds.length>0?checkedIds.length:DB.products.length;
+  const targetLabel=checkedIds.length>0?`선택된 ${targetCount}건`:`전체 ${targetCount}건`;
+  const userOpts=Object.values(USERS).map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
+  showModal(`<h2>✏️ 일괄 수정</h2>
+  <div class="${checkedIds.length>0?'alert-info':'alert-warn'}">
+    ${checkedIds.length>0?`✅ <strong>선택된 ${targetCount}건</strong>을 수정합니다.`:`체크된 제품이 없어 <strong>전체 ${targetCount}건</strong>을 수정합니다.`}
+    빈 칸으로 두면 해당 항목은 변경하지 않습니다.
+  </div>
+  <input type="hidden" id="bu-ids" value="${checkedIds.join(',')}">
+  <div class="form-row">
+    <div class="fg"><label>수입사</label><input id="bu-imp" placeholder="예: 코스트코"></div>
+    <div class="fg"><label>담당자</label><select id="bu-assignee"><option value="">변경 안 함</option>${userOpts}</select></div>
+  </div>
+  <div class="form-row">
+    <div class="fg"><label>1단계 검토상태</label><select id="bu-status"><option value="">변경 안 함</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div class="fg"><label>2단계 사전검사</label><select id="bu-pi"><option value="">변경 안 함</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+  </div>
+  <div class="form-row">
+    <div class="fg"><label>검토파일 반영여부</label><select id="bu-pr"><option value="">변경 안 함</option>${PR_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div class="fg"><label>3단계 라벨</label><select id="bu-lb"><option value="">변경 안 함</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+  </div>
+  <div class="form-row">
+    <div class="fg"><label>4단계 수입신고</label><select id="bu-id"><option value="">변경 안 함</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal()">취소</button>
+    <button class="btn btn-warning" onclick="doBulkUpdate()">${targetLabel} 수정</button>
+  </div>`);
+}
+function doBulkUpdate(){
+  const imp=(document.getElementById('bu-imp').value||'').trim();
+  const assignee=document.getElementById('bu-assignee').value;
+  const status=document.getElementById('bu-status').value;
+  const pi=document.getElementById('bu-pi').value;
+  const pr=document.getElementById('bu-pr').value;
+  const lb=document.getElementById('bu-lb').value;
+  const idv=document.getElementById('bu-id').value;
+  if(!imp&&!assignee&&!status&&!pi&&!pr&&!lb&&!idv){alert('수정할 항목을 하나 이상 선택하세요.');return;}
+  const idsStr=(document.getElementById('bu-ids').value||'').trim();
+  const targetIds=idsStr?idsStr.split(',').filter(Boolean):null;
+  const targets=targetIds?DB.products.filter(p=>targetIds.includes(p.id)):DB.products;
+  if(!confirm(`${targets.length}건을 수정하시겠습니까?`))return;
+  targets.forEach(p=>{
+    if(imp)p.importer=imp;
+    if(assignee)p.assignee=assignee;
+    if(status)p.status=status;
+    if(pi)p.preInspect=pi;
+    if(pr)p.preInspectReflect=pr;
+    if(lb)p.labelStatus=lb;
+    if(idv)p.importDecl=idv;
+  });
+  saveData(DB);closeModal();renderPage();
+  alert(`✅ ${targets.length}건 수정 완료`);
 }
 function deleteProduct(id){
   if(!confirm('삭제하시겠습니까?'))return;
@@ -600,20 +694,19 @@ function renderProductDetail(id){
   const tabs=['기본정보','채팅방','파일관리','검토이력','AI검토보고서'];
   const tabHTML=`<div class="tabs">${tabs.map(t=>`<div class="tab ${t===currentTab?'active':''}" onclick="switchTab('${t}')">${t}</div>`).join('')}</div>`;
   let lockBanner='';
-  if(p.lockedBy&&p.lockedBy!==currentUser.id){
-    lockBanner=`<div class="lock-banner"><span>🔒</span><div>현재 <strong>${username(p.lockedBy)}</strong>님이 검토중입니다. (시작: ${p.lockTime})</div><button class="btn btn-warning btn-sm" style="margin-left:auto" onclick="forceUnlock('${id}')">강제 해제</button></div>`;
-  }
+  if(p.lockedBy&&p.lockedBy!==currentUser.id)
+    lockBanner=`<div class="lock-banner"><span>🔒</span><div><strong>${username(p.lockedBy)}</strong>님이 검토중입니다. (${p.lockTime})</div><button class="btn btn-warning btn-sm" style="margin-left:auto" onclick="forceUnlock('${id}')">강제 해제</button></div>`;
   let tabContent='';
   if(currentTab==='기본정보')tabContent=renderBasicInfo(p);
   else if(currentTab==='채팅방')tabContent=renderChatTab(p.id);
   else if(currentTab==='파일관리')tabContent=renderFilesTab(p.id);
   else if(currentTab==='검토이력')tabContent=renderHistoryTab(p.id);
   else if(currentTab==='AI검토보고서')tabContent=renderAIReport(p);
-  return `
+  return`
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
     <button class="btn btn-outline btn-sm" onclick="go('products')">← 목록</button>
-    <h2 style="font-size:15px;font-weight:700">${p.name}</h2>
-    <span class="badge s-${p.status}">${p.status}</span>
+    <h2 style="font-size:15px;font-weight:700">${p.itemNo?`[${p.itemNo}] `:''}${p.name}</h2>
+    ${sBadge(p.status)}
     ${p.lockedBy===currentUser.id?`<span class="chip lock-chip">🔒 내가 검토중</span>`:''}
   </div>
   ${lockBanner}
@@ -622,61 +715,150 @@ function renderProductDetail(id){
 function switchTab(tab){currentTab=tab;renderPage();}
 
 function renderBasicInfo(p){
-  const isLocked=p.lockedBy===currentUser.id;
-  return `
+  const showReflect=p.preInspect==='진행완료';
+
+  // 퀵 파이프라인 패널
+  const quickPanel=`
+  <div style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:10px;letter-spacing:.3px">⚡ 빠른 상태 변경</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">1</span>검토</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${STATUS_COLORS[p.status]||'#94a3b8'}22;color:${STATUS_COLORS[p.status]||'#94a3b8'}"
+          onchange="changeStatus('${p.id}',this.value)">
+          ${STATUSES.map(s=>`<option value="${s}" ${s===p.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">2</span>사전검사</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${PI_COLORS[p.preInspect]||'#94a3b8'}22;color:${PI_COLORS[p.preInspect]||'#94a3b8'}"
+          onchange="changePI('${p.id}',this.value)">
+          ${PI_STATUSES.map(s=>`<option value="${s}" ${s===p.preInspect?'selected':''}>${s==='-'?'—':s}</option>`).join('')}
+        </select>
+        ${showReflect?`<select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:11px;margin-top:3px;background:${PR_COLORS[p.preInspectReflect]||'#94a3b8'}22;color:${PR_COLORS[p.preInspectReflect]||'#94a3b8'}"
+          onchange="changePR('${p.id}',this.value)">
+          ${PR_STATUSES.map(s=>`<option value="${s}" ${s===p.preInspectReflect?'selected':''}>${s}</option>`).join('')}
+        </select>`:''}
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">3</span>라벨</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${LABEL_COLORS[p.labelStatus]||'#94a3b8'}22;color:${LABEL_COLORS[p.labelStatus]||'#94a3b8'}"
+          onchange="changeLabel('${p.id}',this.value)">
+          ${LABEL_STATUSES.map(s=>`<option value="${s}" ${s===p.labelStatus?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
+        </select>
+        ${p.labelStatus&&p.labelStatus!=='-'?`<select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:11px;margin-top:3px;background:${LABEL_REVIEW_COLORS[p.labelReview]||'#94a3b8'}22;color:${LABEL_REVIEW_COLORS[p.labelReview]||'#94a3b8'}"
+          onchange="changeLabelReview('${p.id}',this.value)">
+          ${LABEL_REVIEW_STATUSES.map(s=>`<option value="${s}" ${s===p.labelReview?'selected':''}>${s==='-'?'—(세부단계)':s}</option>`).join('')}
+        </select>`:''}
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">4</span>수입신고</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#94a3b8'}22;color:${ID_COLORS[p.importDecl]||'#94a3b8'}"
+          onchange="changeID('${p.id}',this.value)">
+          ${ID_STATUSES.map(s=>`<option value="${s}" ${s===p.importDecl?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    ${p.preInspectReflect==='검토파일미반영'&&showReflect?`<div class="alert-red" style="margin-top:8px;margin-bottom:0">⚠️ 사전검사 완료 후 검토파일 미반영 상태입니다.</div>`:''}
+  </div>`;
+
+  return`
+  ${quickPanel}
   <div class="form-row" style="margin-bottom:12px">
     <div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">제품명</div><div style="font-weight:700;font-size:15px">${p.name}</div></div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">수입사</div><div>${p.importer}</div></div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">식품유형</div><span class="tag">${p.foodType}</span></div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">등록일</div><div>${p.registeredAt}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">아이템번호</div><div style="font-weight:600">${p.itemNo||'—'}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">제품명</div><div style="font-weight:700;font-size:15px">${p.name}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">수입사</div><div>${p.importer}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">식품유형</div><span class="tag">${p.foodType}</span></div>
     </div>
     <div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">담당자</div><div>${username(p.assignee)} <button class="btn btn-outline btn-sm" style="margin-left:6px" onclick="showChangeAssignee('${p.id}')">변경</button></div></div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">우선순위</div><span class="badge ${p.priority==='높음'?'ph':p.priority==='보통'?'pm':'pl'}">${p.priority}</span></div>
-      <div style="margin-bottom:10px"><div class="text-sm" style="margin-bottom:3px">메모</div><div style="color:#64748b;font-size:12px">${p.note||'없음'}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">검토자</div><div style="font-weight:600">${p.reviewedBy?username(p.reviewedBy):'<span style="color:#94a3b8;font-size:12px">미지정 (검토 시작 시 자동)</span>'}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">우선순위</div><span class="badge ${p.priority==='높음'?'ph':p.priority==='보통'?'pm':'pl'}">${p.priority}</span></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">등록일</div><div>${p.registeredAt}</div></div>
+      ${p.note?`<div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">메모</div><div style="font-size:12px;color:#64748b">${p.note}</div></div>`:''}
     </div>
   </div><hr>
-  <div class="status-section"><h4>📋 검토 진행상태</h4><div class="status-btns">
-    ${STATUSES.map(s=>`<button style="background:${s===p.status?STATUS_COLORS[s]:'#f1f5f9'};color:${s===p.status?'#fff':'#374151'};border-color:${s===p.status?STATUS_COLORS[s]:'transparent'}" onclick="changeStatus('${p.id}','${s}')">${s}</button>`).join('')}
-  </div></div>
-  <div class="status-section"><h4>🧪 사전검사 진행여부</h4><div class="status-btns">
-    ${PI_STATUSES.map(s=>`<button style="background:${s===p.preInspect?PI_COLORS[s]:'#f1f5f9'};color:${s===p.preInspect?'#fff':'#374151'};border-color:${s===p.preInspect?PI_COLORS[s]:'transparent'}" onclick="changePI('${p.id}','${s}')">${s}</button>`).join('')}
-  </div></div>
-  <div class="status-section" style="${p.preInspect==='해당없음'?'opacity:.5':''}"><h4>📄 사전검사 결과 — 검토파일 반영여부</h4><div class="status-btns">
-    ${PR_STATUSES.map(s=>`<button style="background:${s===p.preInspectReflect?PR_COLORS[s]:'#f1f5f9'};color:${s===p.preInspectReflect?'#fff':'#374151'};border-color:${s===p.preInspectReflect?PR_COLORS[s]:'transparent'}" ${p.preInspect==='해당없음'?'disabled':''} onclick="changePR('${p.id}','${s}')">${s}</button>`).join('')}
-  </div>${p.preInspect==='완료'&&p.preInspectReflect==='미반영'?`<div style="margin-top:8px;background:#fee2e2;border-radius:6px;padding:7px 10px;font-size:12px;color:#dc2626">⚠️ 사전검사 완료 후 검토파일 미반영 상태입니다.</div>`:''}</div>
-  <div class="status-section"><h4>🚢 수입신고 진행상태</h4><div class="status-btns">
-    ${ID_STATUSES.map(s=>`<button style="background:${s===p.importDecl?ID_COLORS[s]:'#f1f5f9'};color:${s===p.importDecl?'#fff':'#374151'};border-color:${s===p.importDecl?ID_COLORS[s]:'transparent'}" onclick="changeID('${p.id}','${s}')">${s}</button>`).join('')}
-  </div></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
+
+  <div class="status-section">
+    <h4><span class="stage-label">1단계</span>검토 진행상태</h4>
+    <div class="status-btns">
+      ${STATUSES.map(s=>`<button style="background:${s===p.status?STATUS_COLORS[s]:'#f1f5f9'};color:${s===p.status?'#fff':'#374151'};border-color:${s===p.status?STATUS_COLORS[s]:'transparent'}" onclick="changeStatus('${p.id}','${s}')">${s}</button>`).join('')}
+    </div>
+  </div>
+
+  <div class="status-section">
+    <h4><span class="stage-label">2단계</span>사전검사</h4>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:#475569;font-weight:600">의뢰일</div>
+      <input type="date" id="piDateInput" value="${p.preInspectDate||''}" onchange="savePreInspectDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
+    </div>
+    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">진행여부</div>
+    <div class="status-btns" style="margin-bottom:8px">
+      ${PI_STATUSES.map(s=>`<button style="background:${s===p.preInspect?PI_COLORS[s]:'#f1f5f9'};color:${s===p.preInspect?'#fff':'#374151'};border-color:${s===p.preInspect?PI_COLORS[s]:'transparent'}" onclick="changePI('${p.id}','${s}')">${s==='- '?'—':s}</button>`).join('')}
+    </div>
+    ${showReflect?`
+    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">검토파일 반영여부</div>
+    <div class="status-btns">
+      ${PR_STATUSES.map(s=>`<button style="background:${s===p.preInspectReflect?PR_COLORS[s]:'#f1f5f9'};color:${s===p.preInspectReflect?'#fff':'#374151'};border-color:${s===p.preInspectReflect?PR_COLORS[s]:'transparent'}" onclick="changePR('${p.id}','${s}')">${s}</button>`).join('')}
+    </div>
+    ${p.preInspectReflect==='검토파일미반영'?`<div class="alert-red" style="margin-top:8px">⚠️ 사전검사 완료 후 검토파일 미반영 상태입니다.</div>`:''}`:''}
+  </div>
+
+  <div class="status-section">
+    <h4><span class="stage-label">3단계</span>라벨</h4>
+    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">진행여부</div>
+    <div class="status-btns" style="margin-bottom:8px">
+      ${LABEL_STATUSES.map(s=>`<button style="background:${s===p.labelStatus?LABEL_COLORS[s]:'#f1f5f9'};color:${s===p.labelStatus?'#fff':'#374151'};border-color:${s===p.labelStatus?LABEL_COLORS[s]:'transparent'}" onclick="changeLabel('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
+    </div>
+    ${p.labelStatus&&p.labelStatus!=='-'?`
+    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">라벨 검토단계</div>
+    <div class="status-btns">
+      ${LABEL_REVIEW_STATUSES.map(s=>`<button style="background:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'#f1f5f9'};color:${s===p.labelReview?'#fff':'#374151'};border-color:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'transparent'}" onclick="changeLabelReview('${p.id}','${s}')">${s==='-'?'—':s}</button>`).join('')}
+    </div>`:''}
+  </div>
+
+  <div class="status-section">
+    <h4><span class="stage-label">4단계</span>수입신고</h4>
+    <div class="status-btns">
+      ${ID_STATUSES.map(s=>`<button style="background:${s===p.importDecl?ID_COLORS[s]:'#f1f5f9'};color:${s===p.importDecl?'#fff':'#374151'};border-color:${s===p.importDecl?ID_COLORS[s]:'transparent'}" onclick="changeID('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
     ${!p.lockedBy?`<button class="btn btn-success" onclick="startReview('${p.id}')">🔒 검토 시작</button>`:''}
-    ${isLocked?`<button class="btn btn-danger" onclick="endReview('${p.id}')">🔓 검토 종료</button>`:''}
+    ${p.lockedBy===currentUser.id?`<button class="btn btn-danger" onclick="endReview('${p.id}')">🔓 검토 종료</button>`:''}
     <button class="btn btn-outline" onclick="go('register','${p.id}')">✏️ 정보 수정</button>
   </div>`;
 }
 
+// STATUS CHANGE FUNCTIONS
 function changeStatus(id,s){
   const p=getProduct(id);if(!p)return;
   if(p.lockedBy&&p.lockedBy!==currentUser.id){alert(`${username(p.lockedBy)}님이 검토중입니다.`);return;}
   const old=p.status;if(old===s)return;
   p.status=s;
   DB.history.push({id:uid(),productId:id,from:old,to:s,by:currentUser.id,at:nowStr(),note:''});
-  if(['검토완료','신고완료'].includes(s)){p.lockedBy=null;p.lockTime=null;}
+  if(s==='검토완료'){p.lockedBy=null;p.lockTime=null;}
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
 function changePI(id,s){
   const p=getProduct(id);if(!p)return;
   const old=p.preInspect;p.preInspect=s;
-  if(s==='해당없음')p.preInspectReflect='미반영';
+  if(s==='해당없음'||s==='-')p.preInspectReflect='검토파일미반영';
   DB.history.push({id:uid(),productId:id,from:`사전검사:${old}`,to:`사전검사:${s}`,by:currentUser.id,at:nowStr(),note:''});
   saveData(DB);renderPage();
 }
 function changePR(id,s){
   const p=getProduct(id);if(!p)return;
   const old=p.preInspectReflect;p.preInspectReflect=s;
-  DB.history.push({id:uid(),productId:id,from:`반영여부:${old}`,to:`반영여부:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  DB.history.push({id:uid(),productId:id,from:`반영:${old}`,to:`반영:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  saveData(DB);renderPage();
+}
+function changeLabel(id,s){
+  const p=getProduct(id);if(!p)return;
+  const old=p.labelStatus;p.labelStatus=s;
+  DB.history.push({id:uid(),productId:id,from:`라벨:${old}`,to:`라벨:${s}`,by:currentUser.id,at:nowStr(),note:''});
   saveData(DB);renderPage();
 }
 function changeID(id,s){
@@ -685,18 +867,45 @@ function changeID(id,s){
   DB.history.push({id:uid(),productId:id,from:`수입신고:${old}`,to:`수입신고:${s}`,by:currentUser.id,at:nowStr(),note:''});
   saveData(DB);renderPage();
 }
+function savePreInspectDate(id,val){
+  const p=getProduct(id);if(!p)return;
+  p.preInspectDate=val;saveData(DB);
+}
 function startReview(id){
   const p=getProduct(id);if(!p)return;
   if(p.lockedBy){alert(`${username(p.lockedBy)}님이 검토중입니다.`);return;}
   p.lockedBy=currentUser.id;p.lockTime=nowStr();
-  if(['접수대기','자료수집중'].includes(p.status)){
+  p.reviewedBy=currentUser.id;
+  if(p.status==='검토예정'){
     const old=p.status;p.status='검토중';
     DB.history.push({id:uid(),productId:id,from:old,to:'검토중',by:currentUser.id,at:nowStr(),note:'검토 시작'});
   }
   saveData(DB);renderPage();
 }
+function changeLabelReview(id,s){
+  const p=getProduct(id);if(!p)return;
+  const old=p.labelReview;p.labelReview=s;
+  DB.history.push({id:uid(),productId:id,from:`라벨검토:${old}`,to:`라벨검토:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  saveData(DB);renderPage();
+}
 function endReview(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
 function forceUnlock(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
+function toggleLockFromList(id){
+  const p=getProduct(id);if(!p)return;
+  if(p.lockedBy===currentUser.id){
+    p.lockedBy=null;p.lockTime=null;
+    saveData(DB);renderPage();
+  } else if(!p.lockedBy){
+    p.lockedBy=currentUser.id;p.lockTime=nowStr();
+    p.reviewedBy=currentUser.id;
+    if(p.status==='검토예정'){
+      const old=p.status;p.status='검토중';
+      DB.history.push({id:uid(),productId:id,from:old,to:'검토중',by:currentUser.id,at:nowStr(),note:'검토 시작'});
+      Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→검토중`,id);});
+    }
+    saveData(DB);renderPage();
+  }
+}
 function showChangeAssignee(id){
   const p=getProduct(id);
   const opts=Object.values(USERS).map(u=>`<option value="${u.id}" ${u.id===p.assignee?'selected':''}>${u.name}</option>`).join('');
@@ -713,18 +922,18 @@ function doChangeAssignee(id){
 // CHAT
 function renderChatTab(productId){
   const msgs=DB.chats.filter(c=>c.productId===productId).sort((a,b)=>a.at.localeCompare(b.at));
-  const colors=['#3b82f6','#10b981','#f59e0b','#8b5cf6'];
-  return `<div class="chat-box" id="chatBox">
+  const colors=['#3b82f6','#10b981'];
+  return`<div class="chat-box" id="chatBox">
     ${msgs.length===0?'<div class="empty">아직 메시지가 없습니다.</div>':msgs.map(m=>{
       const mine=m.userId===currentUser.id;
       const ci=Object.keys(USERS).indexOf(m.userId);
-      return `<div class="chat-msg ${mine?'mine':''}">
-        <div class="avatar" style="background:${colors[ci%4]}">${m.userName.charAt(0)}</div>
+      return`<div class="chat-msg ${mine?'mine':''}">
+        <div class="avatar" style="background:${colors[ci%2]}">${m.userName.charAt(0)}</div>
         <div><div class="name">${m.userName}</div><div class="bubble"><div class="text">${m.msg}</div></div><div class="time">${m.at}</div></div>
       </div>`;}).join('')}
   </div>
   <div class="chat-input-row">
-    <input id="chatInput" placeholder="메시지 입력... (Enter로 전송)" onkeydown="if(event.key==='Enter')sendChat('${productId}')">
+    <input id="chatInput" placeholder="메시지 입력... (Enter)" onkeydown="if(event.key==='Enter')sendChat('${productId}')">
     <button class="btn btn-primary" onclick="sendChat('${productId}')">전송</button>
   </div>`;
 }
@@ -732,7 +941,6 @@ function sendChat(productId){
   const inp=document.getElementById('chatInput');
   const msg=(inp.value||'').trim();if(!msg)return;
   DB.chats.push({id:uid(),productId,userId:currentUser.id,userName:currentUser.name,msg,at:nowStr()});
-  const p=getProduct(productId);
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'chat',`${currentUser.name}: ${msg.substring(0,25)}`,productId);});
   saveData(DB);inp.value='';
   document.getElementById('content').innerHTML=renderProductDetail(productId);
@@ -744,10 +952,10 @@ function renderFilesTab(productId){
   const files=DB.files.filter(f=>f.productId===productId);
   const bycat={};FILE_CATS.forEach(c=>bycat[c]=[]);
   files.forEach(f=>{if(bycat[f.cat])bycat[f.cat].push(f);});
-  return `<button class="btn btn-primary btn-sm" style="margin-bottom:12px" onclick="showUploadModal('${productId}')">📎 파일 업로드</button>
+  return`<button class="btn btn-primary btn-sm" style="margin-bottom:12px" onclick="showUploadModal('${productId}')">📎 파일 업로드</button>
   ${FILE_CATS.map(cat=>{
     const cf=bycat[cat].sort((a,b)=>b.version-a.version);
-    return `<div class="file-cat"><h4>${cat}</h4>
+    return`<div class="file-cat"><h4>${cat}</h4>
       ${cf.length===0?`<div class="text-sm" style="padding:4px 0">없음</div>`:
         cf.map(f=>`<div class="file-item">
           <div style="display:flex;align-items:center;gap:8px">📄 ${f.name} <span class="fver">v${f.version}</span></div>
@@ -760,16 +968,15 @@ function showUploadModal(productId){
   showModal(`<h2>파일 업로드</h2>
     <div class="fg"><label>분류</label><select id="upCat">${FILE_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
     <div class="fg"><label>파일명</label><input id="upName" placeholder="예: 성분표_최종.pdf"></div>
-    <div style="background:#f8fafc;border:2px dashed #d1d5db;border-radius:8px;padding:20px;text-align:center;margin-bottom:10px"><div style="font-size:28px">📂</div><div class="text-sm" style="margin-top:6px">파일명을 위에 입력하세요</div></div>
     <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">취소</button><button class="btn btn-primary" onclick="doUpload('${productId}')">업로드</button></div>`);
 }
 function doUpload(productId){
   const cat=document.getElementById('upCat').value;
   const name=(document.getElementById('upName').value||'').trim();
-  if(!name){alert('파일명 입력하세요');return;}
+  if(!name){alert('파일명을 입력하세요');return;}
   const existing=DB.files.filter(f=>f.productId===productId&&f.cat===cat);
   const version=existing.length?Math.max(...existing.map(f=>f.version))+1:1;
-  DB.files.push({id:uid(),productId,cat,name:name.includes('v')?name:`${name}_v${version}`,version,by:currentUser.id,at:nowStr()});
+  DB.files.push({id:uid(),productId,cat,name,version,by:currentUser.id,at:nowStr()});
   const p=getProduct(productId);
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'file',`${p?p.name:'제품'}: 새 파일 (${cat})`,productId);});
   saveData(DB);closeModal();renderPage();
@@ -785,7 +992,7 @@ function renderHistoryTab(productId){
   if(!hist.length)return`<div class="empty">변경 이력이 없습니다.</div>`;
   return hist.map(h=>`<div class="history-item"><div class="dot"></div><div style="flex:1">
     <div class="meta">${h.at} · <strong>${username(h.by)}</strong></div>
-    <div style="font-size:13px;margin-top:3px">${h.from||'등록'} → <strong>${h.to}</strong>${h.note?` <span class="text-sm">— ${h.note}</span>`:''}</div>
+    <div style="font-size:13px;margin-top:3px">${h.from||'등록'} → <strong>${h.to}</strong>${h.note?` — ${h.note}`:''}</div>
   </div></div>`).join('');
 }
 
@@ -793,31 +1000,28 @@ function renderHistoryTab(productId){
 function renderAIReport(p){
   const files=DB.files.filter(f=>f.productId===p.id);
   if(!files.length)return`<div style="text-align:center;padding:40px"><div style="font-size:42px">🤖</div><div style="font-size:14px;font-weight:600;margin-top:10px">파일을 먼저 업로드하세요</div><button class="btn btn-primary" style="margin-top:14px" onclick="switchTab('파일관리')">파일 업로드</button></div>`;
-  const allergens=['밀','대두','달걀','우유','땅콩'];
-  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div><strong>🤖 AI 자동 검토 결과</strong> <span class="text-sm">— ${nowStr()}</span></div>
     <button class="btn btn-success btn-sm" onclick="exportReport('${p.id}')">📄 보고서 다운로드</button>
   </div>
-  <div class="ai-section"><h4>📋 식품유형 검토</h4><ul><li>✅ 신고 식품유형: <strong>${p.foodType}</strong> — 적합</li></ul></div>
-  <div class="ai-section"><h4>🌿 원재료명 검토</h4><ul><li>✅ 원재료명 표시 형식 적합</li><li style="color:#d97706">⚠️ 복합 원재료 구성성분 괄호 표기 확인 필요</li></ul></div>
-  <div class="ai-section"><h4>⚠️ 알레르기 표시 검토</h4><ul><li>✅ 감지 알레르기 유발물질: <strong>${allergens.join(', ')}</strong></li><li style="color:#d97706">⚠️ 교차오염 주의문구 확인 필요</li></ul></div>
-  <div class="ai-section"><h4>🧬 GMO 표시 검토</h4><ul><li style="color:#d97706">⚠️ 대두 함유 — GMO 표시 의무 확인 필요</li></ul></div>
-  <div class="ai-section"><h4>🍽️ 영양성분 검토</h4><ul><li>✅ 의무 표시 영양성분 9종 확인</li><li style="color:#dc2626">❌ 트랜스지방 표시 누락 — 추가 필요</li></ul></div>
-  <div class="ai-section" style="border:1px solid #fca5a5;background:#fff5f5"><h4>📝 보완 요청사항</h4><ul>
-    <li style="color:#dc2626">❌ [필수] 트랜스지방 영양성분 표시 추가</li>
-    <li style="color:#d97706">⚠️ [권장] GMO 관련 시험성적서 제출</li>
-    <li style="color:#d97706">⚠️ [권장] 교차오염 주의문구 추가</li>
-  </ul></div>`;
+  <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px"><h4 style="font-size:13px;font-weight:700;margin-bottom:8px">📋 식품유형 검토</h4><div style="font-size:13px">✅ 신고 식품유형: <strong>${p.foodType}</strong> — 적합</div></div>
+  <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px"><h4 style="font-size:13px;font-weight:700;margin-bottom:8px">⚠️ 알레르기 표시 검토</h4><div style="font-size:13px;color:#d97706">⚠️ 교차오염 주의문구 확인 필요</div></div>
+  <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:12px"><h4 style="font-size:13px;font-weight:700;margin-bottom:8px;color:#dc2626">📝 보완 요청사항</h4>
+    <div style="font-size:13px;color:#dc2626">❌ [필수] 트랜스지방 표시 추가</div>
+    <div style="font-size:13px;color:#d97706;margin-top:4px">⚠️ [권장] GMO 관련 시험성적서 제출</div>
+  </div>`;
 }
 function exportReport(id){
   const p=getProduct(id);
-  const txt=`식품표시사항 검토보고서\n${'='.repeat(40)}\n제품명: ${p.name}\n수입사: ${p.importer}\n식품유형: ${p.foodType}\n검토일: ${nowStr()}\n검토자: ${currentUser.name}\n사전검사: ${p.preInspect} / 반영여부: ${p.preInspectReflect}\n수입신고: ${p.importDecl}\n\n[보완 요청사항]\n1. 트랜스지방 표시 추가 (필수)\n2. GMO 시험성적서 제출\n3. 교차오염 주의문구 추가`;
+  const txt=`식품표시사항 검토보고서\n${'='.repeat(40)}\n제품명: ${p.name}\n아이템번호: ${p.itemNo||'—'}\n수입사: ${p.importer}\n식품유형: ${p.foodType}\n검토일: ${nowStr()}\n검토자: ${currentUser.name}\n\n[진행현황]\n1단계 검토: ${p.status}\n2단계 사전검사: ${p.preInspect} / 반영: ${p.preInspectReflect}\n3단계 라벨: ${p.labelStatus}\n4단계 수입신고: ${p.importDecl}\n\n[보완 요청사항]\n1. 트랜스지방 표시 추가 (필수)\n2. GMO 시험성적서 제출`;
   const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`검토보고서_${p.name}_${new Date().toISOString().slice(0,10)}.txt`;a.click();URL.revokeObjectURL(url);
 }
 
+// ============================================================
 // PRODUCT FORM
+// ============================================================
 function renderProductForm(id){
   const p=id?ensureFields(getProduct(id)||{}):null;
   const userOpts=Object.values(USERS).map(u=>`<option value="${u.id}" ${p?p.assignee===u.id?'selected':'':u.id===currentUser.id?'selected':''}>${u.name}</option>`).join('');
@@ -825,12 +1029,13 @@ function renderProductForm(id){
   const prOpts=PRIORITIES.map(pr=>`<option ${p&&p.priority===pr?'selected':''}>${pr}</option>`).join('');
   const piOpts=PI_STATUSES.map(s=>`<option ${p&&p.preInspect===s?'selected':''}>${s}</option>`).join('');
   const prfOpts=PR_STATUSES.map(s=>`<option ${p&&p.preInspectReflect===s?'selected':''}>${s}</option>`).join('');
+  const lbOpts=LABEL_STATUSES.map(s=>`<option ${p&&p.labelStatus===s?'selected':''}>${s}</option>`).join('');
   const idOpts=ID_STATUSES.map(s=>`<option ${p&&p.importDecl===s?'selected':''}>${s}</option>`).join('');
-  return `<div class="card"><h3>${p&&p.id?'제품 수정':'신규 제품 등록'}</h3>
+  return`<div class="card"><h3>${p&&p.id?'제품 수정':'신규 제품 등록'}</h3>
     <div class="form-row3">
-      <div class="fg"><label>아이템번호</label><input id="f-itemno" value="${p?p.itemNo||'':''}" placeholder="예: A-001"></div>
+      <div class="fg"><label>아이템번호</label><input id="f-itemno" value="${p?p.itemNo||'':''}" placeholder="예: C2603006"></div>
       <div class="fg"><label>제품명 *</label><input id="f-name" value="${p?p.name:''}" placeholder="제품명"></div>
-      <div class="fg"><label>수입사 *</label><input id="f-imp" value="${p?p.importer:''}" placeholder="수입사명"></div>
+      <div class="fg"><label>수입사</label><input id="f-imp" value="${p?p.importer:''}" placeholder="수입사명"></div>
     </div>
     <div class="form-row">
       <div class="fg"><label>식품유형</label><select id="f-ft">${ftOpts}</select></div>
@@ -838,12 +1043,15 @@ function renderProductForm(id){
     </div>
     <div class="form-row">
       <div class="fg"><label>우선순위</label><select id="f-priority">${prOpts}</select></div>
-      ${p&&p.id?`<div class="fg"><label>검토 진행상태</label><select id="f-status">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`:'<div></div>'}
+      ${p&&p.id?`<div class="fg"><label>1단계 검토상태</label><select id="f-status">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`:'<div></div>'}
     </div>
     <hr style="margin:8px 0 14px">
-    <div class="form-row3">
+    <div class="form-row">
       <div class="fg"><label>🧪 사전검사 진행여부</label><select id="f-pi">${piOpts}</select></div>
-      <div class="fg"><label>📄 사전검사 반영여부</label><select id="f-pr">${prfOpts}</select></div>
+      <div class="fg"><label>📄 검토파일 반영여부</label><select id="f-pr">${prfOpts}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>🏷️ 라벨 진행상태</label><select id="f-lb">${lbOpts}</select></div>
       <div class="fg"><label>🚢 수입신고 상태</label><select id="f-id">${idOpts}</select></div>
     </div>
     <div class="fg"><label>메모</label><textarea id="f-note" rows="2">${p?p.note:''}</textarea></div>
@@ -857,18 +1065,19 @@ function saveProduct(id){
   const itemNo=(document.getElementById('f-itemno').value||'').trim();
   const name=(document.getElementById('f-name').value||'').trim();
   const imp=(document.getElementById('f-imp').value||'').trim();
-  if(!name||!imp){alert('제품명과 수입사는 필수입니다.');return;}
+  if(!name){alert('제품명은 필수입니다.');return;}
   const ft=document.getElementById('f-ft').value;
   const assignee=document.getElementById('f-assignee').value;
   const priority=document.getElementById('f-priority').value;
   const note=(document.getElementById('f-note').value||'').trim();
   const pi=document.getElementById('f-pi').value;
   const pr=document.getElementById('f-pr').value;
+  const lb=document.getElementById('f-lb').value;
   const idv=document.getElementById('f-id').value;
   if(id){
     const p=getProduct(id);const oldA=p.assignee;
     p.itemNo=itemNo;p.name=name;p.importer=imp;p.foodType=ft;p.assignee=assignee;p.priority=priority;p.note=note;
-    p.preInspect=pi;p.preInspectReflect=pr;p.importDecl=idv;
+    p.preInspect=pi;p.preInspectReflect=pr;p.labelStatus=lb;p.importDecl=idv;
     const ns=document.getElementById('f-status')?.value;
     if(ns&&ns!==p.status){DB.history.push({id:uid(),productId:id,from:p.status,to:ns,by:currentUser.id,at:nowStr(),note:'정보수정'});p.status=ns;}
     if(assignee!==oldA)addNotif(assignee,'assign',`${name} 담당자로 지정되었습니다.`,id);
@@ -876,67 +1085,67 @@ function saveProduct(id){
   } else {
     const newId=uid();
     const today=new Date().toISOString().slice(0,10);
-    DB.products.push({id:newId,itemNo,name,importer:imp,foodType:ft,registeredAt:today,assignee,priority,status:'접수대기',lockedBy:null,lockTime:null,note,preInspect:pi,preInspectReflect:pr,importDecl:idv});
-    DB.history.push({id:uid(),productId:newId,from:'',to:'접수대기',by:currentUser.id,at:nowStr(),note:'제품 등록'});
+    DB.products.push({id:newId,itemNo,name,importer:imp,foodType:ft,registeredAt:today,assignee,priority,status:'검토예정',lockedBy:null,lockTime:null,note,preInspect:pi,preInspectDate:'',preInspectReflect:pr,labelStatus:lb,importDecl:idv});
+    DB.history.push({id:uid(),productId:newId,from:'',to:'검토예정',by:currentUser.id,at:nowStr(),note:'제품 등록'});
     addNotif(assignee,'assign',`${name} 담당자로 지정되었습니다.`,newId);
     saveData(DB);go('product',newId);
   }
 }
 
+// ============================================================
 // SEARCH
+// ============================================================
 function renderSearch(){
-  return `<div class="card"><h3>🔍 고급 검색</h3>
+  return`<div class="card"><h3>🔍 고급 검색</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="fg"><label>제품명</label><input id="s-name" oninput="doSearch()"></div>
+      <div class="fg"><label>아이템번호 / 제품명</label><input id="s-name" oninput="doSearch()" placeholder="번호 일부만 입력해도 검색됩니다"></div>
       <div class="fg"><label>수입사</label><input id="s-imp" oninput="doSearch()"></div>
-      <div class="fg"><label>식품유형</label><select id="s-ft" onchange="doSearch()"><option value="">전체</option>${FOOD_TYPES.map(f=>`<option>${f}</option>`).join('')}</select></div>
       <div class="fg"><label>담당자</label><select id="s-assignee" onchange="doSearch()"><option value="">전체</option>${Object.values(USERS).map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select></div>
       <div class="fg"><label>검토상태</label><select id="s-status" onchange="doSearch()"><option value="">전체</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="fg"><label>사전검사</label><select id="s-pi" onchange="doSearch()"><option value="">전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
-      <div class="fg"><label>반영여부</label><select id="s-pr" onchange="doSearch()"><option value="">전체</option>${PR_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="fg"><label>수입신고</label><select id="s-id" onchange="doSearch()"><option value="">전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
     </div>
-    <table><tr><th>No.</th><th>제품명</th><th>수입사</th><th>식품유형</th><th>담당자</th><th>검토상태</th><th>사전검사</th><th>반영여부</th><th>수입신고</th><th></th></tr>
+    <table><tr><th>No.</th><th>제품명</th><th>수입사</th><th>담당자</th><th>1단계</th><th>2단계</th><th>3단계</th><th>4단계</th><th></th></tr>
     <tbody id="search-results">${renderSearchRows(DB.products.map(ensureFields))}</tbody></table>
   </div>`;
 }
 function renderSearchRows(prods){
-  if(!prods.length)return`<tr><td colspan="10" class="empty">결과 없음</td></tr>`;
+  if(!prods.length)return`<tr><td colspan="9" class="empty">결과 없음</td></tr>`;
   return prods.map(p=>`<tr>
     <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
     <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
-    <td>${p.importer}</td><td><span class="tag" style="font-size:10px">${p.foodType}</span></td>
-    <td style="font-size:12px">${username(p.assignee)}</td><td><span class="badge s-${p.status}">${p.status}</span></td>
-    <td>${piBadge(p.preInspect)}</td><td>${prBadge(p.preInspectReflect)}</td><td>${idBadge(p.importDecl)}</td>
+    <td style="font-size:11px">${p.importer}</td>
+    <td style="font-size:12px">${username(p.assignee)}</td>
+    <td>${sBadge(p.status)}</td>
+    <td>${piBadge(p.preInspect)}</td>
+    <td>${labelBadge(p.labelStatus)}</td>
+    <td>${idBadge(p.importDecl)}</td>
     <td><button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td>
   </tr>`).join('');
 }
 function doSearch(){
   const name=(document.getElementById('s-name')||{}).value?.toLowerCase()||'';
   const imp=(document.getElementById('s-imp')||{}).value?.toLowerCase()||'';
-  const ft=(document.getElementById('s-ft')||{}).value||'';
   const assignee=(document.getElementById('s-assignee')||{}).value||'';
   const status=(document.getElementById('s-status')||{}).value||'';
   const pi=(document.getElementById('s-pi')||{}).value||'';
-  const pr=(document.getElementById('s-pr')||{}).value||'';
   const idv=(document.getElementById('s-id')||{}).value||'';
   let prods=DB.products.map(ensureFields);
-  if(name)prods=prods.filter(p=>p.name.toLowerCase().includes(name));
-  if(imp)prods=prods.filter(p=>p.importer.toLowerCase().includes(imp));
-  if(ft)prods=prods.filter(p=>p.foodType===ft);
+  if(name)prods=prods.filter(p=>(p.itemNo||'').toLowerCase().includes(name)||(p.name||'').toLowerCase().includes(name)||(p.importer||'').toLowerCase().includes(name));
   if(assignee)prods=prods.filter(p=>p.assignee===assignee);
   if(status)prods=prods.filter(p=>p.status===status);
   if(pi)prods=prods.filter(p=>p.preInspect===pi);
-  if(pr)prods=prods.filter(p=>p.preInspectReflect===pr);
   if(idv)prods=prods.filter(p=>p.importDecl===idv);
   const el=document.getElementById('search-results');if(el)el.innerHTML=renderSearchRows(prods);
 }
 
+// ============================================================
 // NOTIFICATIONS
+// ============================================================
 function renderNotifications(){
   const my=DB.notifications.filter(n=>n.userId===currentUser.id).sort((a,b)=>b.at.localeCompare(a.at));
   const unread=my.filter(n=>!n.read).length;
-  return `<div class="card">
+  return`<div class="card">
     <div class="flex-between"><h3>🔔 알림 ${unread>0?`<span class="notif-count">${unread}</span>`:''}</h3>
       <button class="btn btn-outline btn-sm" onclick="markAllRead()">모두 읽음</button></div>
     ${my.length===0?'<div class="empty">알림이 없습니다.</div>':my.map(n=>`
@@ -953,7 +1162,9 @@ function markRead(nid,productId){
 }
 function markAllRead(){DB.notifications.filter(n=>n.userId===currentUser.id).forEach(n=>n.read=true);saveData(DB);renderPage();}
 
+// ============================================================
 // GOOGLE SHEETS IMPORT
+// ============================================================
 let parsedCSVData=null;
 function showImportModal(){
   showModal(`<h2>📥 구글 시트 데이터 가져오기</h2>
@@ -963,14 +1174,14 @@ function showImportModal(){
     <div class="import-tab" id="it-manual" onclick="switchImportTab('manual')">📋 수동 붙여넣기</div>
   </div>
   <div id="import-auto">
-    <div class="fg"><label>구글 시트 URL</label><input id="sheet-url" value="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=${SHEET_GID}" style="font-size:11px"></div>
+    <div class="fg"><label>구글 시트 URL</label><input id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." style="font-size:11px"></div>
     <div class="alert-warn">⚠️ 시트가 <strong>공개(누구나 볼 수 있음)</strong>로 공유된 경우만 작동합니다.</div>
     <button class="btn btn-primary" onclick="fetchGoogleSheet()">🔄 불러오기</button>
     <div id="fetch-status" style="margin-top:10px;font-size:13px"></div>
   </div>
   <div id="import-manual" style="display:none">
     <div class="alert-info">구글 시트에서 전체 선택(Ctrl+A) → 복사(Ctrl+C) 후 아래에 붙여넣기</div>
-    <div class="fg"><label>데이터 붙여넣기</label><textarea id="csv-paste" rows="6" placeholder="제품명&#9;수입사&#9;식품유형&#9;담당자&#9;상태..."></textarea></div>
+    <div class="fg"><label>데이터 붙여넣기</label><textarea id="csv-paste" rows="6" placeholder="아이템번호&#9;제품명&#9;수입사..."></textarea></div>
     <button class="btn btn-primary btn-sm" onclick="parseManualCSV()">미리보기</button>
   </div>
   <div id="csv-preview-area" style="margin-top:12px"></div>
@@ -991,9 +1202,8 @@ async function fetchGoogleSheet(){
   const urlInput=(document.getElementById('sheet-url').value||'').trim();
   const idMatch=urlInput.match(/\/d\/([a-zA-Z0-9_-]+)/);
   const gidMatch=urlInput.match(/gid=(\d+)/);
-  const sheetId=idMatch?idMatch[1]:SHEET_ID;
-  const gid=gidMatch?gidMatch[1]:SHEET_GID;
-  const csvUrl=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+  if(!idMatch){statusEl.innerHTML='<div class="alert-warn">URL을 확인하세요.</div>';return;}
+  const csvUrl=`https://docs.google.com/spreadsheets/d/${idMatch[1]}/export?format=csv${gidMatch?'&gid='+gidMatch[1]:''}`;
   try{
     const resp=await fetch(csvUrl);
     if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
@@ -1032,18 +1242,19 @@ function parseManualCSV(){
 }
 function showCSVPreview(parsed){
   const{headers,rows}=parsed;
-  const fieldOpts=`<option value="">무시</option><option value="itemNo">아이템번호</option><option value="name">제품명</option><option value="importer">수입사</option><option value="foodType">식품유형</option><option value="assignee">담당자</option><option value="status">검토상태</option><option value="preInspect">사전검사</option><option value="preInspectReflect">반영여부</option><option value="importDecl">수입신고</option><option value="priority">우선순위</option><option value="registeredAt">등록일</option><option value="note">메모</option>`;
+  const fieldOpts=`<option value="">무시</option><option value="itemNo">아이템번호</option><option value="name">제품명</option><option value="importer">수입사</option><option value="foodType">식품유형</option><option value="assignee">담당자</option><option value="status">검토상태</option><option value="preInspect">사전검사</option><option value="preInspectReflect">반영여부</option><option value="labelStatus">라벨상태</option><option value="importDecl">수입신고</option><option value="priority">우선순위</option><option value="registeredAt">등록일</option><option value="note">메모</option>`;
   const autoMap={};
   headers.forEach((h,i)=>{
     const hl=h.toLowerCase().replace(/\s/g,'');
-    if(hl.includes('아이템')||hl.includes('itemno')||hl.includes('item_no'))autoMap[i]='itemNo';
+    if(hl.includes('아이템')||hl.includes('itemno'))autoMap[i]='itemNo';
     else if(hl.includes('제품명')||hl.includes('상품명'))autoMap[i]='name';
     else if(hl.includes('수입사'))autoMap[i]='importer';
     else if(hl.includes('식품유형')||hl.includes('유형'))autoMap[i]='foodType';
     else if(hl.includes('담당자'))autoMap[i]='assignee';
-    else if(hl.includes('상태'))autoMap[i]='status';
+    else if(hl.includes('상태')&&!hl.includes('사전')&&!hl.includes('신고'))autoMap[i]='status';
     else if(hl.includes('사전검사')&&!hl.includes('반영'))autoMap[i]='preInspect';
     else if(hl.includes('반영'))autoMap[i]='preInspectReflect';
+    else if(hl.includes('라벨'))autoMap[i]='labelStatus';
     else if(hl.includes('수입신고')||hl.includes('신고'))autoMap[i]='importDecl';
     else if(hl.includes('우선순위'))autoMap[i]='priority';
     else if(hl.includes('등록일')||hl.includes('접수일'))autoMap[i]='registeredAt';
@@ -1073,14 +1284,14 @@ function doImport(){
     const assigneeName=get('assignee');
     let assigneeId=currentUser.id;
     Object.values(USERS).forEach(u=>{if(u.name===assigneeName)assigneeId=u.id;});
-    const rawStatus=get('status');const status=STATUSES.includes(rawStatus)?rawStatus:'접수대기';
-    const rawPI=get('preInspect');const preInspect=PI_STATUSES.includes(rawPI)?rawPI:'해당없음';
-    const rawPR=get('preInspectReflect');const preInspectReflect=PR_STATUSES.includes(rawPR)?rawPR:'미반영';
+    const rawStatus=get('status');const status=STATUSES.includes(rawStatus)?rawStatus:'검토예정';
+    const rawPI=get('preInspect');const preInspect=PI_STATUSES.includes(rawPI)?rawPI:'-';
+    const rawPR=get('preInspectReflect');const preInspectReflect=PR_STATUSES.includes(rawPR)?rawPR:'검토파일미반영';
+    const rawLB=get('labelStatus');const labelStatus=LABEL_STATUSES.includes(rawLB)?rawLB:'-';
     const rawID=get('importDecl');const importDecl=ID_STATUSES.includes(rawID)?rawID:'-';
     const rawPrio=get('priority');const priority=PRIORITIES.includes(rawPrio)?rawPrio:'보통';
-    const itemNo=get('itemNo')||'';
     const newId=uid();
-    DB.products.push({id:newId,itemNo,name,importer:get('importer')||'',foodType:get('foodType')||'기타',registeredAt:get('registeredAt')||new Date().toISOString().slice(0,10),assignee:assigneeId,priority,status,lockedBy:null,lockTime:null,note:get('note')||'',preInspect,preInspectReflect,importDecl});
+    DB.products.push({id:newId,itemNo:get('itemNo')||'',name,importer:get('importer')||'',foodType:get('foodType')||'기타',registeredAt:get('registeredAt')||new Date().toISOString().slice(0,10),assignee:assigneeId,priority,status,lockedBy:null,lockTime:null,note:get('note')||'',preInspect,preInspectDate:'',preInspectReflect,labelStatus,importDecl});
     DB.history.push({id:uid(),productId:newId,from:'',to:status,by:currentUser.id,at:nowStr(),note:'구글시트 이관'});
     existingNames.add(name.toLowerCase());added++;
   });
@@ -1089,7 +1300,9 @@ function doImport(){
   go('products');
 }
 
+// ============================================================
 // MODAL
+// ============================================================
 function showModal(html){document.getElementById('modalContainer').innerHTML=`<div class="modal-overlay" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()">${html}</div></div>`;}
 function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modalContainer').innerHTML='';}
 
@@ -1097,12 +1310,8 @@ function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getEleme
 // INIT
 // ============================================================
 window.onload=function(){
-  renderPage();
-  updateNotifBadge();
-  if(API_URL){
-    setSyncStatus('syncing');
-    startSyncPolling();
-  }
+  renderPage();updateNotifBadge();
+  if(API_URL){setSyncStatus('syncing');startSyncPolling();}
 };
 </script>
 </body>
