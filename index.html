@@ -277,21 +277,28 @@ function setSyncStatus(s){
   else if(s==='err'){dot.className='sync-dot err';txt.textContent='연결 오류';txt.style.color='#f87171';}
   else{dot.className='sync-dot';txt.textContent='클라우드 미연결';txt.style.color='#64748b';}
 }
+let isSaving=false;
 async function cloudSave(data){
   if(!API_URL)return;
+  isSaving=true;
   try{
     setSyncStatus('syncing');
     await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({data,ts:Date.now()})});
     setSyncStatus('ok');
   }catch(e){setSyncStatus('err');}
+  finally{isSaving=false;}
 }
 async function cloudLoad(silent){
-  if(!API_URL)return;
+  if(!API_URL||isSaving)return; // 저장 중엔 절대 로드 금지
   if(!silent)setSyncStatus('syncing');
   try{
     const r=await fetch(API_URL+'?t='+Date.now());
     const json=await r.json();
-    if(json.status==='ok'&&json.data){
+    if(json.status==='ok'&&json.data&&Array.isArray(json.data.products)){
+      const cloudCount=json.data.products.length;
+      const localCount=DB.products.length;
+      // 클라우드가 비어있고 로컬에 데이터 있으면 로컬 우선 (덮어쓰기 방지)
+      if(cloudCount===0&&localCount>0){setSyncStatus('ok');return;}
       if(JSON.stringify(json.data)!==JSON.stringify(DB)){
         DB=json.data;localStorage.setItem(STORE_KEY,JSON.stringify(DB));renderPage();
       }
