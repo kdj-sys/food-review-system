@@ -58,6 +58,11 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f1f5f9;color:#1e293b;dis
 /* 4단계 수입신고 */
 .id-수입신고준비중{background:#e0f2fe;color:#0369a1;}
 .id-신고완료{background:#d1fae5;color:#065f46;}
+/* IFACS 검토 요청 상태 */
+.ic-요청생성{background:#e0f2fe;color:#0369a1;}
+.ic-진행중{background:#fef3c7;color:#d97706;}
+.ic-완료{background:#dcfce7;color:#15803d;}
+.ic-실패{background:#fee2e2;color:#dc2626;}
 .ph{background:#fee2e2;color:#dc2626;}
 .pm{background:#fef9c3;color:#ca8a04;}
 .pl{background:#f0fdf4;color:#16a34a;}
@@ -174,6 +179,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <a onclick="go('products')" data-page="products"><span class="icon">📋</span>제품 목록</a>
     <a onclick="go('register')" data-page="register"><span class="icon">➕</span>제품 등록</a>
     <a onclick="go('search')" data-page="search"><span class="icon">🔍</span>검색</a>
+    <div class="section-title">AI 검토</div>
+    <a onclick="go('ifacs')" data-page="ifacs"><span class="icon">🧪</span>IFACS 검토</a>
     <div class="section-title">업무관리</div>
     <a onclick="go('notifications')" data-page="notifications" id="nav-notif"><span class="icon">🔔</span>알림</a>
     <a onclick="showImportModal()" data-page="import" style="display:none"><span class="icon">📥</span>구글시트 이관</a>
@@ -233,6 +240,10 @@ const ID_COLORS={'-':'#94a3b8','수입신고준비중':'#0369a1','신고완료':
 const FILE_CATS=['성분표','공정도','포장재질 자료','제조사 회신자료','시험성적서','표시시안','검토보고서'];
 const FOOD_TYPES=['과자류','캔디류','빵류','초콜릿류','잼류','음료류','주류','통조림류','냉동식품','육가공품','수산가공품','유가공품','건강기능식품','조미식품','기타'];
 const PRIORITIES=['높음','보통','낮음'];
+// IFACS 검토 요청
+const IFACS_MODES=[{v:'cross',label:'cross (A+B 교차검증)'},{v:'unified',label:'unified (A 단독)'},{v:'bonly',label:'bonly (B 단독)'}];
+const IFACS_STATUSES=['요청생성','진행중','완료','실패'];
+const IFACS_COLORS={'요청생성':'#0369a1','진행중':'#d97706','완료':'#15803d','실패':'#dc2626'};
 
 const USERS={
   u1:{id:'u1',name:'김다진',role:'admin'},
@@ -249,9 +260,10 @@ function loadData(){try{const r=localStorage.getItem(STORE_KEY);return r?JSON.pa
 function saveData(d){localStorage.setItem(STORE_KEY,JSON.stringify(d));cloudSave(d);}
 
 let DB=loadData()||initDB();
+if(!DB.ifacsRequests)DB.ifacsRequests=[];
 
 function initDB(){
-  const d={products:[],history:[],chats:[],files:[],notifications:[]};
+  const d={products:[],history:[],chats:[],files:[],notifications:[],ifacsRequests:[]};
   d.products=[
     {id:'p1',itemNo:'C2603006',name:'Nattia 24pc',importer:'코스트코',foodType:'과자류',registeredAt:'2026-06-20',assignee:'u1',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,reviewedBy:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',labelReview:'-',importDecl:'-'},
     {id:'p2',itemNo:'75494',name:'GRISSOL BAGUETTES SEASALT',importer:'코스트코',foodType:'빵류',registeredAt:'2026-06-21',assignee:'u2',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
@@ -261,7 +273,7 @@ function initDB(){
     {id:'p6',itemNo:'C-002',name:'Chocolate Truffle Box',importer:'코스트코',foodType:'초콜릿류',registeredAt:'2026-06-24',assignee:'u2',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
     {id:'p7',itemNo:'D-001',name:'Frozen Pizza Margherita',importer:'코스트코',foodType:'냉동식품',registeredAt:'2026-06-25',assignee:'u1',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
   ];
-  d.history=[];d.chats=[];d.files=[];d.notifications=[];
+  d.history=[];d.chats=[];d.files=[];d.notifications=[];d.ifacsRequests=[];
   saveData(d);return d;
 }
 
@@ -392,7 +404,7 @@ function go(page,arg){
 }
 function renderPage(){
   document.getElementById('topbarDate').textContent=nowStr();
-  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세'};
+  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',ifacs:'IFACS 검토 요청'};
   document.getElementById('pageTitle').textContent=titles[currentPage]||'';
   const c=document.getElementById('content');
   if(currentPage==='dashboard')c.innerHTML=renderDashboard();
@@ -401,6 +413,7 @@ function renderPage(){
   else if(currentPage==='register')c.innerHTML=renderProductForm(currentProductId);
   else if(currentPage==='search')c.innerHTML=renderSearch();
   else if(currentPage==='notifications')c.innerHTML=renderNotifications();
+  else if(currentPage==='ifacs')c.innerHTML=renderIfacs();
   updateNotifBadge();
 }
 function switchUser(id){currentUser=USERS[id];renderPage();}
@@ -1168,6 +1181,81 @@ function markRead(nid,productId){
   if(productId&&productId!=='undefined'){currentTab='기본정보';go('product',productId);}else renderPage();
 }
 function markAllRead(){DB.notifications.filter(n=>n.userId===currentUser.id).forEach(n=>n.read=true);saveData(DB);renderPage();}
+
+// ============================================================
+// IFACS 검토 요청
+// ============================================================
+function renderIfacs(){
+  const reqs=[...DB.ifacsRequests].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  const modeOpts=IFACS_MODES.map(m=>`<option value="${m.v}">${m.label}</option>`).join('');
+  return`<div class="alert-info">
+    🧪 <strong>IFACS 검토 요청 관리</strong> — ifacs5 검토 도구는 Claude와의 대화(MCP 세션)에서만 실행할 수 있어, 이 화면이 직접 검토를 수행하지는 않습니다.<br>
+    아래에서 요청을 등록한 뒤 <strong>📋 복사</strong> 버튼으로 안내 문구를 복사해 Claude에게 전달하면 실제 검토(start_review)가 시작됩니다. 진행 상태·Job ID·결과는 Claude가 알려주는 내용을 이 표에 기록해두는 용도입니다.
+  </div>
+  <div class="card">
+    <h3>➕ 새 검토 요청</h3>
+    <div class="form-row3">
+      <div class="fg"><label>상품명 (선택)</label><input id="if-product" placeholder="예: Nattia 24pc"></div>
+      <div class="fg"><label>서류 폴더 경로 *</label><input id="if-dir" placeholder="예: /data/products/nattia_24pc"></div>
+      <div class="fg"><label>검토 모드</label><select id="if-mode">${modeOpts}</select></div>
+    </div>
+    <div class="fg"><label>메모</label><textarea id="if-note" rows="2" placeholder="검토 관련 참고사항"></textarea></div>
+    <button class="btn btn-primary" onclick="createIfacsRequest()">➕ 요청 생성</button>
+  </div>
+  <div class="card">
+    <h3>📋 검토 요청 목록 (${reqs.length})</h3>
+    ${reqs.length===0?'<div class="empty">등록된 검토 요청이 없습니다.</div>':`<table>
+      <thead><tr><th>상품명</th><th>폴더</th><th>모드</th><th>상태</th><th>Job ID</th><th>결과 요약</th><th>생성</th><th></th></tr></thead>
+      <tbody>${reqs.map(r=>renderIfacsRow(r)).join('')}</tbody>
+    </table>`}
+  </div>`;
+}
+function renderIfacsRow(r){
+  const bg=IFACS_COLORS[r.status]||'#94a3b8';
+  return`<tr id="if-row-${r.id}">
+    <td><strong>${r.productName||'—'}</strong>${r.note?`<div style="font-size:10px;color:#94a3b8">${r.note}</div>`:''}</td>
+    <td style="font-size:11px;color:#64748b;max-width:200px;word-break:break-all">${r.inputDir}</td>
+    <td><span class="badge" style="background:#f1f5f9;color:#475569">${r.mode}</span></td>
+    <td><select class="inline-select" style="background:${bg}22;color:${bg};border:1px solid ${bg}66" onchange="updateIfacsField('${r.id}','status',this.value)">
+      ${IFACS_STATUSES.map(s=>`<option value="${s}" ${s===r.status?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td><input value="${r.jobId||''}" placeholder="job_id" onchange="updateIfacsField('${r.id}','jobId',this.value)" style="width:100px;font-size:11px;padding:4px 6px;border:1px solid #d1d5db;border-radius:5px"></td>
+    <td><input value="${r.resultSummary||''}" placeholder="예: 통과" onchange="updateIfacsField('${r.id}','resultSummary',this.value)" style="width:130px;font-size:11px;padding:4px 6px;border:1px solid #d1d5db;border-radius:5px"></td>
+    <td style="font-size:11px;color:#94a3b8;white-space:nowrap">${r.createdAt}</td>
+    <td style="display:flex;gap:3px;white-space:nowrap">
+      <button class="btn btn-outline btn-sm" id="if-copy-${r.id}" onclick="copyIfacsPrompt('${r.id}')">📋 복사</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteIfacsRequest('${r.id}')">삭</button>
+    </td>
+  </tr>`;
+}
+function createIfacsRequest(){
+  const productName=(document.getElementById('if-product').value||'').trim();
+  const inputDir=(document.getElementById('if-dir').value||'').trim();
+  const mode=document.getElementById('if-mode').value;
+  const note=(document.getElementById('if-note').value||'').trim();
+  if(!inputDir){alert('서류 폴더 경로는 필수입니다.');return;}
+  DB.ifacsRequests.push({id:uid(),productName,inputDir,mode,note,status:'요청생성',jobId:'',resultSummary:'',createdAt:nowStr(),createdBy:currentUser.id});
+  saveData(DB);renderPage();
+}
+function updateIfacsField(id,field,value){
+  const r=DB.ifacsRequests.find(x=>x.id===id);if(!r)return;
+  r[field]=value;saveData(DB);
+}
+function deleteIfacsRequest(id){
+  if(!confirm('이 검토 요청을 삭제하시겠습니까?'))return;
+  DB.ifacsRequests=DB.ifacsRequests.filter(r=>r.id!==id);saveData(DB);renderPage();
+}
+function ifacsPromptText(r){
+  return`ifacs5 커넥터로 아래 상품 서류를 검토해주세요.\n- 상품명: ${r.productName||'(미지정)'}\n- 폴더(input_dir): ${r.inputDir}\n- mode: ${r.mode}${r.note?`\n- 참고: ${r.note}`:''}\n완료되면 판정 결과와 job_id를 알려주세요.`;
+}
+function copyIfacsPrompt(id){
+  const r=DB.ifacsRequests.find(x=>x.id===id);if(!r)return;
+  const text=ifacsPromptText(r);
+  const btn=document.getElementById(`if-copy-${id}`);
+  const done=()=>{if(!btn)return;const orig=btn.textContent;btn.textContent='✅ 복사됨';setTimeout(()=>{btn.textContent=orig;},1500);};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(()=>alert(text));
+  else alert(text);
+}
 
 // ============================================================
 // GOOGLE SHEETS IMPORT
