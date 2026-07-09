@@ -63,6 +63,14 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f1f5f9;color:#1e293b;dis
 .ic-진행중{background:#fef3c7;color:#d97706;}
 .ic-완료{background:#dcfce7;color:#15803d;}
 .ic-실패{background:#fee2e2;color:#dc2626;}
+/* 검토 보고서 */
+.report-section textarea{min-height:90px;font-family:inherit;line-height:1.5;}
+@media print{
+  #sidebar,#topbar,.no-print{display:none!important;}
+  #main,#content{overflow:visible!important;height:auto!important;}
+  body{display:block!important;}
+  .card{box-shadow:none;border:1px solid #e2e8f0;}
+}
 .ph{background:#fee2e2;color:#dc2626;}
 .pm{background:#fef9c3;color:#ca8a04;}
 .pl{background:#f0fdf4;color:#16a34a;}
@@ -244,13 +252,24 @@ const PRIORITIES=['높음','보통','낮음'];
 const IFACS_MODES=[{v:'cross',label:'cross (A+B 교차검증)'},{v:'unified',label:'unified (A 단독)'},{v:'bonly',label:'bonly (B 단독)'}];
 const IFACS_STATUSES=['요청생성','진행중','완료','실패'];
 const IFACS_COLORS={'요청생성':'#0369a1','진행중':'#d97706','완료':'#15803d','실패':'#dc2626'};
+// 검토 보고서 템플릿 — 회사 양식(Word/Excel)이 확정되면 이 배열만 교체하면 됨
+const REPORT_SECTIONS=[
+  {key:'m1',title:'1. 사전정보',hint:'상품명·수입사·식품유형 등 기본 정보'},
+  {key:'m2',title:'2. 공정분석',hint:'제조공정 개요'},
+  {key:'m3',title:'3. 성분분석',hint:'원재료·성분 목록 (하위성분 계층 포함)'},
+  {key:'m4',title:'4. HS CODE',hint:'적용 HS CODE 및 판단 근거'},
+  {key:'m5',title:'5. 식품유형',hint:'식품유형 분류 결과'},
+  {key:'m6',title:'6. 표시사항',hint:'한글표시사항 검토 결과 및 보완사항'},
+  {key:'m7',title:'7. 수입요건',hint:'수입요건(허가·신고 등) 충족 여부'},
+  {key:'m8',title:'8. 최종 판정',hint:'엔진 A/B 판정 종합 및 결론'},
+];
 
 const USERS={
   u1:{id:'u1',name:'김다진',role:'admin'},
   u2:{id:'u2',name:'남서우 부장',role:'admin'},
 };
 
-let currentUser=USERS.u1, currentPage='dashboard', currentProductId=null, currentTab='기본정보';
+let currentUser=USERS.u1, currentPage='dashboard', currentProductId=null, currentTab='기본정보', currentReportId=null;
 let syncInterval=null;
 
 // ============================================================
@@ -261,9 +280,10 @@ function saveData(d){localStorage.setItem(STORE_KEY,JSON.stringify(d));cloudSave
 
 let DB=loadData()||initDB();
 if(!DB.ifacsRequests)DB.ifacsRequests=[];
+if(!DB.reports)DB.reports=[];
 
 function initDB(){
-  const d={products:[],history:[],chats:[],files:[],notifications:[],ifacsRequests:[]};
+  const d={products:[],history:[],chats:[],files:[],notifications:[],ifacsRequests:[],reports:[]};
   d.products=[
     {id:'p1',itemNo:'C2603006',name:'Nattia 24pc',importer:'코스트코',foodType:'과자류',registeredAt:'2026-06-20',assignee:'u1',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,reviewedBy:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',labelReview:'-',importDecl:'-'},
     {id:'p2',itemNo:'75494',name:'GRISSOL BAGUETTES SEASALT',importer:'코스트코',foodType:'빵류',registeredAt:'2026-06-21',assignee:'u2',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
@@ -273,7 +293,7 @@ function initDB(){
     {id:'p6',itemNo:'C-002',name:'Chocolate Truffle Box',importer:'코스트코',foodType:'초콜릿류',registeredAt:'2026-06-24',assignee:'u2',priority:'보통',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
     {id:'p7',itemNo:'D-001',name:'Frozen Pizza Margherita',importer:'코스트코',foodType:'냉동식품',registeredAt:'2026-06-25',assignee:'u1',priority:'높음',status:'보완요청',lockedBy:null,lockTime:null,note:'',preInspect:'진행완료',preInspectDate:'',preInspectReflect:'반영완료',labelStatus:'-',importDecl:'-'},
   ];
-  d.history=[];d.chats=[];d.files=[];d.notifications=[];d.ifacsRequests=[];
+  d.history=[];d.chats=[];d.files=[];d.notifications=[];d.ifacsRequests=[];d.reports=[];
   saveData(d);return d;
 }
 
@@ -398,13 +418,14 @@ function idBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:1
 // ============================================================
 function go(page,arg){
   currentPage=page;currentProductId=arg||null;
+  if(page==='report')currentReportId=arg||null;
   if(page!=='product')currentTab='기본정보';
   renderPage();
   document.querySelectorAll('#nav a[data-page]').forEach(a=>a.classList.toggle('active',a.dataset.page===page));
 }
 function renderPage(){
   document.getElementById('topbarDate').textContent=nowStr();
-  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',ifacs:'IFACS 검토 요청'};
+  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',ifacs:'IFACS 검토 요청',report:'검토 보고서'};
   document.getElementById('pageTitle').textContent=titles[currentPage]||'';
   const c=document.getElementById('content');
   if(currentPage==='dashboard')c.innerHTML=renderDashboard();
@@ -414,6 +435,7 @@ function renderPage(){
   else if(currentPage==='search')c.innerHTML=renderSearch();
   else if(currentPage==='notifications')c.innerHTML=renderNotifications();
   else if(currentPage==='ifacs')c.innerHTML=renderIfacs();
+  else if(currentPage==='report')c.innerHTML=renderReport(currentReportId);
   updateNotifBadge();
 }
 function switchUser(id){currentUser=USERS[id];renderPage();}
@@ -1208,6 +1230,21 @@ function renderIfacs(){
       <thead><tr><th>상품명</th><th>폴더</th><th>모드</th><th>상태</th><th>Job ID</th><th>결과 요약</th><th>생성</th><th></th></tr></thead>
       <tbody>${reqs.map(r=>renderIfacsRow(r)).join('')}</tbody>
     </table>`}
+  </div>
+  <div class="card">
+    <h3>📄 작성된 검토 보고서 (${DB.reports.length})</h3>
+    ${DB.reports.length===0?'<div class="empty">아직 작성된 보고서가 없습니다. 위 요청 목록에서 \'보고서\' 버튼으로 만들 수 있습니다.</div>':`<table>
+      <thead><tr><th>상품명</th><th>작성일</th><th>수정일</th><th></th></tr></thead>
+      <tbody>${[...DB.reports].sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)).map(rp=>`<tr>
+        <td><strong style="cursor:pointer;color:#2563eb" onclick="go('report','${rp.id}')">${rp.productName||'(제목 없음)'}</strong></td>
+        <td style="font-size:11px;color:#94a3b8">${rp.createdAt}</td>
+        <td style="font-size:11px;color:#94a3b8">${rp.updatedAt}</td>
+        <td style="display:flex;gap:3px">
+          <button class="btn btn-outline btn-sm" onclick="go('report','${rp.id}')">열기</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteReport('${rp.id}')">삭</button>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table>`}
   </div>`;
 }
 function renderIfacsRow(r){
@@ -1224,6 +1261,7 @@ function renderIfacsRow(r){
     <td style="font-size:11px;color:#94a3b8;white-space:nowrap">${r.createdAt}</td>
     <td style="display:flex;gap:3px;white-space:nowrap">
       <button class="btn btn-outline btn-sm" id="if-copy-${r.id}" onclick="copyIfacsPrompt('${r.id}')">📋 복사</button>
+      <button class="btn btn-success btn-sm" onclick="createOrOpenReport('${r.id}')">📄 보고서</button>
       <button class="btn btn-danger btn-sm" onclick="deleteIfacsRequest('${r.id}')">삭</button>
     </td>
   </tr>`;
@@ -1255,6 +1293,60 @@ function copyIfacsPrompt(id){
   const done=()=>{if(!btn)return;const orig=btn.textContent;btn.textContent='✅ 복사됨';setTimeout(()=>{btn.textContent=orig;},1500);};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(()=>alert(text));
   else alert(text);
+}
+
+// ============================================================
+// 검토 보고서 (IFACS 결과 → 보고서 양식)
+// ============================================================
+function createOrOpenReport(ifacsRequestId){
+  const existing=DB.reports.find(rp=>rp.ifacsRequestId===ifacsRequestId);
+  if(existing){go('report',existing.id);return;}
+  const req=DB.ifacsRequests.find(r=>r.id===ifacsRequestId);
+  const rp={id:uid(),ifacsRequestId,productName:req?req.productName:'',createdAt:nowStr(),updatedAt:nowStr(),
+    sections:REPORT_SECTIONS.map(s=>({key:s.key,title:s.title,content:''}))};
+  DB.reports.push(rp);saveData(DB);go('report',rp.id);
+}
+function renderReport(id){
+  const rp=DB.reports.find(x=>x.id===id);
+  if(!rp)return'<div class="empty">보고서를 찾을 수 없습니다.</div>';
+  const req=DB.ifacsRequests.find(r=>r.id===rp.ifacsRequestId);
+  return`<div class="no-print" style="margin-bottom:14px">
+    <button class="btn btn-outline btn-sm" onclick="go('ifacs')">← IFACS 목록으로</button>
+  </div>
+  <div class="card">
+    <div class="flex-between">
+      <h3>📄 수입식품 검토 보고서 — ${rp.productName||'(제목 없음)'}</h3>
+      <div class="no-print" style="display:flex;gap:6px">
+        <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ 인쇄/PDF</button>
+        <button class="btn btn-outline btn-sm" disabled title="회사 양식 파일을 전달받으면 연동됩니다" style="opacity:.5;cursor:not-allowed">📤 Word/Excel 내보내기 (준비중)</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>상품명</label><input id="rp-name" value="${rp.productName||''}" onchange="updateReportMeta('${rp.id}','productName',this.value)"></div>
+      <div class="fg"><label>연결된 IFACS 요청</label><input value="${req?`${req.inputDir} (${req.mode}, ${req.status}${req.jobId?', job:'+req.jobId:''})`:'(연결 없음)'}" disabled></div>
+    </div>
+  </div>
+  ${REPORT_SECTIONS.map(s=>{
+    const sec=rp.sections.find(x=>x.key===s.key)||{content:''};
+    return`<div class="card report-section">
+      <h3>${s.title}</h3>
+      <div class="text-sm" style="color:#94a3b8;margin-bottom:8px">${s.hint}</div>
+      <textarea onchange="updateReportSection('${rp.id}','${s.key}',this.value)" placeholder="ifacs5 검토 결과에서 필요한 내용만 정리해서 입력하세요.">${sec.content}</textarea>
+    </div>`;
+  }).join('')}`;
+}
+function updateReportMeta(id,field,value){
+  const rp=DB.reports.find(x=>x.id===id);if(!rp)return;
+  rp[field]=value;rp.updatedAt=nowStr();saveData(DB);
+}
+function updateReportSection(id,key,value){
+  const rp=DB.reports.find(x=>x.id===id);if(!rp)return;
+  const sec=rp.sections.find(x=>x.key===key);if(sec)sec.content=value;
+  rp.updatedAt=nowStr();saveData(DB);
+}
+function deleteReport(id){
+  if(!confirm('이 보고서를 삭제하시겠습니까?'))return;
+  DB.reports=DB.reports.filter(rp=>rp.id!==id);saveData(DB);renderPage();
 }
 
 // ============================================================
