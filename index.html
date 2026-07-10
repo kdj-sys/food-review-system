@@ -1379,7 +1379,10 @@ function renderManufacturers(){
   <div class="card">
     <div class="flex-between">
       <h3>🏭 해외제조업소 등록 관리 (${DB.manufacturers.length}건)</h3>
-      <button class="btn btn-primary btn-sm" onclick="showManufModal()">➕ 업소 등록</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-purple btn-sm" onclick="showMaruManufSearch()">🔎 정보마루 실시간 조회</button>
+        <button class="btn btn-primary btn-sm" onclick="showManufModal()">➕ 업소 등록</button>
+      </div>
     </div>
     <div style="margin-bottom:10px">
       <input id="mf-search" placeholder="🔍 업소명 / 국가 / 등록번호 / 연결제품" oninput="filterManuf()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;min-width:280px">
@@ -1415,11 +1418,11 @@ function filterManuf(){
     </tr>`;
   }).join('');
 }
-function showManufModal(id){
+function showManufModal(id,prefill){
   ensureManufDB();
-  const m=id?DB.manufacturers.find(x=>x.id===id):null;
+  const m=id?DB.manufacturers.find(x=>x.id===id):(prefill||null);
   const roleOpts=MANUF_ROLES.map(r=>`<option ${m&&m.role===r?'selected':''}>${r}</option>`).join('');
-  showModal(`<h2>🏭 ${m?'해외제조업소 수정':'해외제조업소 등록'}</h2>
+  showModal(`<h2>🏭 ${id?'해외제조업소 수정':'해외제조업소 등록'}</h2>
   <div class="form-row">
     <div class="fg"><label>업소명(제조사명) *</label><input id="mm-name" value="${m?(m.name||''):''}" placeholder="예: ABC Foods Co., Ltd."></div>
     <div class="fg"><label>제조국</label><input id="mm-country" value="${m?(m.country||''):''}" placeholder="예: 미국"></div>
@@ -1437,7 +1440,7 @@ function showManufModal(id){
   <div class="fg"><label>메모</label><textarea id="mm-note" rows="2" placeholder="등록번호·만료일 확인 결과 등">${m?(m.note||''):''}</textarea></div>
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal()">취소</button>
-    <button class="btn btn-primary" onclick="saveManuf('${id||''}')">💾 ${m?'저장':'등록'}</button>
+    <button class="btn btn-primary" onclick="saveManuf('${id||''}')">💾 ${id?'저장':'등록'}</button>
   </div>`);
 }
 function saveManuf(id){
@@ -1483,10 +1486,12 @@ function renderIngredients(){
   <div class="card">
     <div class="flex-between"><h3>🧪 성분코드조회</h3><span id="ing-count" class="text-sm"></span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <input id="ing-q" placeholder="🔍 성분명(영문/국문) 또는 코드 입력" oninput="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:280px;flex:1">
+      <input id="ing-q" placeholder="🔍 성분명(영문/국문) 또는 코드 입력" oninput="filterIngredients()" onkeydown="if(event.key==='Enter')runMaruIngredient()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:240px;flex:1">
       <select id="ing-cat" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 분류</option></select>
       <select id="ing-avail" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 사용여부</option></select>
+      <button class="btn btn-purple btn-sm" onclick="runMaruIngredient()">🌐 정보마루 실시간</button>
     </div>
+    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>(위 검색창, 오프라인·빠름) / <strong>정보마루 실시간</strong>(버튼, 최신 성분코드 조회)</div>
     <div id="ing-status"></div>
     <div id="ing-results"></div>
   </div>`;
@@ -1613,6 +1618,98 @@ function filterIngredients(){
     </tr>`).join('')}
   </table></div>
   ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}`;
+}
+
+// ============================================================
+// 수입식품정보마루 실시간 조회 (앱스 스크립트 프록시 경유)
+// ============================================================
+async function maruFetch(qs){
+  if(!API_URL){alert('먼저 사이드바 하단 [클라우드 설정]에서 앱스 스크립트 URL을 등록해야 실시간 조회가 됩니다.');return null;}
+  const r=await fetch(API_URL+'?'+qs);
+  const j=await r.json();
+  if(j.status!=='ok')throw new Error(j.msg||'조회 실패');
+  return j;
+}
+
+// --- 해외제조업소 실시간 조회 ---
+let MARU_MANUF_RESULTS=[];
+function showMaruManufSearch(){
+  showModal(`<h2>🔎 정보마루 해외제조업소 실시간 조회</h2>
+  <div class="alert-info">수입식품정보마루에서 실시간으로 등록정보를 가져옵니다. 결과에서 <strong>➕ 등록</strong>을 누르면 자동으로 입력됩니다.</div>
+  <div class="form-row">
+    <div class="fg"><label>제조업소명(영문)</label><input id="maru-mf-name" placeholder="예: TATURA MILK" onkeydown="if(event.key==='Enter')runMaruManufSearch()"></div>
+    <div class="fg"><label>제조업소코드</label><input id="maru-mf-code" placeholder="예: AU000000020" onkeydown="if(event.key==='Enter')runMaruManufSearch()"></div>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="runMaruManufSearch()">🔎 조회</button>
+  <div id="maru-mf-status" style="margin-top:10px;font-size:13px"></div>
+  <div id="maru-mf-results" style="margin-top:8px"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">닫기</button></div>`);
+}
+async function runMaruManufSearch(){
+  const name=(document.getElementById('maru-mf-name').value||'').trim();
+  const code=(document.getElementById('maru-mf-code').value||'').trim();
+  if(!name&&!code){alert('제조업소명 또는 코드를 입력하세요.');return;}
+  const st=document.getElementById('maru-mf-status');
+  st.innerHTML='<span style="color:#3b82f6">⏳ 정보마루 조회 중...</span>';
+  document.getElementById('maru-mf-results').innerHTML='';
+  try{
+    const j=await maruFetch('proxy=manufacturer&q='+encodeURIComponent(name)+'&code='+encodeURIComponent(code));
+    if(!j)return;
+    MARU_MANUF_RESULTS=j.rows||[];
+    st.innerHTML=`<span style="color:#16a34a">✅ ${j.count}건 조회됨</span>`;
+    const res=document.getElementById('maru-mf-results');
+    if(!MARU_MANUF_RESULTS.length){res.innerHTML='<div class="empty">검색 결과가 없습니다.</div>';return;}
+    res.innerHTML=`<div style="overflow-x:auto;max-height:340px;overflow-y:auto"><table>
+      <tr><th>업소명</th><th>국가</th><th>등록일</th><th>만료일</th><th></th></tr>
+      ${MARU_MANUF_RESULTS.map((m,i)=>{
+        const exp=daysBetween(m.expiry);
+        const ec=exp===null?'#94a3b8':exp<0?'#dc2626':exp<=60?'#d97706':'#16a34a';
+        return`<tr>
+          <td><strong style="font-size:12px">${m.name||'—'}</strong><div style="font-size:10px;color:#94a3b8">${m.code||''} · ${m.bizKind||''}</div><div style="font-size:10px;color:#94a3b8">${m.address||''}</div></td>
+          <td style="font-size:11px">${m.country||'—'}</td>
+          <td style="font-size:11px">${m.regDate||'—'}</td>
+          <td style="font-size:11px;color:${ec};font-weight:600">${m.expiry||'—'}</td>
+          <td><button class="btn btn-success btn-sm" onclick="importMaruManuf(${i})">➕ 등록</button></td>
+        </tr>`;}).join('')}
+    </table></div>`;
+  }catch(e){st.innerHTML=`<div class="alert-warn">❌ 조회 실패: ${e.message}</div>`;}
+}
+function importMaruManuf(i){
+  const m=MARU_MANUF_RESULTS[i];if(!m)return;
+  const noteParts=[];
+  if(m.bizKind)noteParts.push('영업종류:'+m.bizKind);
+  if(m.foodKind)noteParts.push('식품종류:'+m.foodKind);
+  if(m.remark)noteParts.push('비고:'+m.remark);
+  showManufModal(null,{
+    name:m.name||'',country:m.country||'',address:m.address||'',
+    regNo:m.code||'',role:'제조사',regDate:m.regDate||'',expiry:m.expiry||'',
+    linkProduct:'',note:noteParts.join(' / ')
+  });
+}
+
+// --- 성분코드 실시간 조회 ---
+async function runMaruIngredient(){
+  const q=(document.getElementById('ing-q').value||'').trim();
+  if(!q){alert('검색어를 입력하세요.');return;}
+  const st=document.getElementById('ing-status');
+  const res=document.getElementById('ing-results');
+  st.innerHTML='<div class="text-sm" style="padding:10px 0;color:#3b82f6">⏳ 정보마루 실시간 조회 중...</div>';
+  res.innerHTML='';
+  try{
+    const j=await maruFetch('proxy=ingredient&q='+encodeURIComponent(q));
+    if(!j){st.innerHTML='';return;}
+    st.innerHTML=`<div class="alert-info" style="margin:8px 0">🌐 정보마루 실시간 결과: <strong>${j.count}건</strong> (검색어: ${q})</div>`;
+    const rows=j.rows||[];
+    if(!rows.length){res.innerHTML='<div class="empty">정보마루 검색 결과가 없습니다.</div>';return;}
+    res.innerHTML=`<div style="overflow-x:auto"><table>
+      <tr><th>성분코드</th><th>성분명(한글)</th><th>성분명(영문)</th></tr>
+      ${rows.map(r=>`<tr>
+        <td style="font-family:monospace;font-size:11px;color:#64748b;white-space:nowrap">${r.code||'—'}</td>
+        <td style="font-size:12px"><strong>${r.korean||'—'}</strong></td>
+        <td style="font-size:11px;color:#475569">${r.english||'—'}</td>
+      </tr>`).join('')}
+    </table></div>`;
+  }catch(e){st.innerHTML=`<div class="alert-warn">❌ 조회 실패: ${e.message}</div>`;}
 }
 
 // ============================================================
