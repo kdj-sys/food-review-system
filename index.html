@@ -1496,12 +1496,13 @@ function renderIngredients(){
   <div class="card">
     <div class="flex-between"><h3>🧪 성분코드조회</h3><span id="ing-count" class="text-sm"></span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <input id="ing-q" placeholder="🔍 성분명(영문/국문) 또는 코드 입력" oninput="filterIngredients()" onkeydown="if(event.key==='Enter')runMaruIngredient()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:240px;flex:1">
+      <input id="ing-q" placeholder="🔍 성분명(영문/국문) 또는 코드 입력" oninput="filterIngredients()" onkeydown="if(event.key==='Enter')runMaruIngredient()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:200px;flex:1">
       <select id="ing-cat" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 분류</option></select>
       <select id="ing-avail" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 사용여부</option></select>
-      <button class="btn btn-purple btn-sm" onclick="runMaruIngredient()">🌐 정보마루 실시간</button>
+      <button class="btn btn-success btn-sm" onclick="filterIngredients()">🔎 chunil DB 검색</button>
+      <button class="btn btn-primary btn-sm" onclick="runMaruIngredient()">🌐 정보마루 조회</button>
     </div>
-    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>(위 검색창, 오프라인·빠름) / <strong>정보마루 실시간</strong>(버튼, 최신 성분코드 조회)</div>
+    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>: 사내 성분DB (오프라인·빠름, 사용가능 여부까지 표시) &nbsp;·&nbsp; <strong>🌐 정보마루 조회</strong>: 수입식품정보마루 실시간 성분코드 조회</div>
     <div id="ing-status"></div>
     <div id="ing-results"></div>
   </div>`;
