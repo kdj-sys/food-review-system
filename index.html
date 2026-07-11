@@ -410,6 +410,7 @@ function renderPage(){
   updateNotifBadge();
 }
 function switchUser(id){currentUser=USERS[id];renderPage();}
+function goProductsFilter(status){go('products');setTimeout(()=>{const el=document.getElementById('fl-status');if(el){el.value=status;filterList();}},30);}
 
 // ============================================================
 // DASHBOARD
@@ -425,14 +426,6 @@ function renderDashboard(){
   const total=prods.length;
   const statusCounts={};STATUSES.forEach(s=>statusCounts[s]=0);
   prods.forEach(p=>statusCounts[p.status]=(statusCounts[p.status]||0)+1);
-  const myProds=prods.filter(p=>p.assignee===currentUser.id);
-  const myActive=myProds.filter(p=>p.status!=='검토완료').length;
-  const myDone=myProds.filter(p=>p.status==='검토완료').length;
-  const mySupp=myProds.filter(p=>['보완요청','보완회신대기'].includes(p.status)).length;
-  const assigneeRows=Object.values(USERS).map(u=>{
-    const up=prods.filter(p=>p.assignee===u.id);
-    return`<tr><td><strong>${u.name}</strong></td><td style="color:#3b82f6;font-weight:600">${up.filter(p=>p.status!=='검토완료').length}</td><td style="color:#22c55e;font-weight:600">${up.filter(p=>p.status==='검토완료').length}</td><td style="color:#f97316;font-weight:600">${up.filter(p=>['보완요청','보완회신대기'].includes(p.status)).length}</td><td>${up.length}</td></tr>`;
-  }).join('');
   const recentH=[...DB.history].sort((a,b)=>b.at.localeCompare(a.at)).slice(0,5);
 
   // 칸반 보드 (상태별 카드)
@@ -447,7 +440,7 @@ function renderDashboard(){
       ${col.length===0?`<div style="font-size:11px;color:#cbd5e1;text-align:center;padding:10px 0">없음</div>`:
         col.map(p=>`<div class="kanban-card" onclick="go('product','${p.id}')" style="border-left-color:${bcolor}">
           <div class="kc-name">${p.itemNo?`[${p.itemNo}] `:''}${p.name}</div>
-          <div class="kc-meta">${username(p.assignee)}</div>
+          <div class="kc-meta">${p.importer||''}</div>
           <div class="kc-pipe">
             ${[
               {c:PI_COLORS[p.preInspect]||'#e2e8f0',t:`사전검사: ${p.preInspect||'-'}`},
@@ -469,33 +462,33 @@ function renderDashboard(){
   </div>
 
   <div id="dash-stat">
+  <div class="card" style="margin-bottom:14px">
+    <h3>📋 검토 상태 현황 <span style="font-weight:400;color:#64748b;font-size:11px">— 카드를 클릭하면 해당 상태 목록으로 이동합니다</span></h3>
+    <div class="stat-grid" style="margin-bottom:0;grid-template-columns:repeat(5,1fr)">
+      ${STATUSES.map(s=>`
+      <div class="stat-card" style="border-color:${STATUS_COLORS[s]};text-align:center" onclick="goProductsFilter('${s}')">
+        <div class="val" style="color:${STATUS_COLORS[s]}">${statusCounts[s]||0}</div>
+        <div class="lbl" style="margin-top:6px"><span class="badge s-${s}">${s}</span></div>
+      </div>`).join('')}
+    </div>
+  </div>
+
   <div class="stat-grid">
-    <div class="stat-card" style="border-color:#6366f1" onclick="go('products')"><div class="val" style="color:#4338ca">${reviewing}</div><div class="lbl">🔍 검토 진행중</div></div>
     <div class="stat-card" style="border-color:#3b82f6"><div class="val" style="color:#1d4ed8">${piInProg}</div><div class="lbl">🧪 사전검사 진행중</div></div>
     <div class="stat-card" style="border-color:#ef4444"><div class="val" style="color:#dc2626">${piNotRefl}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
     <div class="stat-card" style="border-color:#7c3aed"><div class="val" style="color:#6d28d9">${labelInProg}</div><div class="lbl">🏷️ 라벨 진행중</div></div>
     <div class="stat-card" style="border-color:#f59e0b"><div class="val" style="color:#d97706">${idInProg}</div><div class="lbl">🚢 수입신고 준비중</div></div>
     <div class="stat-card" style="border-color:#10b981"><div class="val" style="color:#059669">${idDone}</div><div class="lbl">✅ 신고 완료</div></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-    <div class="card">
-      <h3>내 업무 현황 <span style="font-weight:400;color:#64748b;font-size:11px">(${currentUser.name})</span></h3>
-      <div style="display:flex;gap:10px;margin-bottom:14px">
-        <div style="background:#eff6ff;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#2563eb">${myActive}</div><div style="font-size:11px;color:#64748b">진행중</div></div>
-        <div style="background:#f0fdf4;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#16a34a">${myDone}</div><div style="font-size:11px;color:#64748b">완료</div></div>
-        <div style="background:#fff7ed;padding:10px 16px;border-radius:8px;text-align:center;flex:1"><div style="font-size:22px;font-weight:700;color:#ea580c">${mySupp}</div><div style="font-size:11px;color:#64748b">보완</div></div>
-      </div>
-      <table><tr><th>담당자</th><th>진행중</th><th>완료</th><th>보완</th><th>전체</th></tr>${assigneeRows}</table>
-    </div>
-    <div class="card">
-      <h3>1단계 검토 현황</h3>
-      ${STATUSES.filter(s=>statusCounts[s]>0).map(s=>`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span class="badge s-${s}" style="width:90px;text-align:center">${s}</span>
-        <div style="flex:1;background:#f1f5f9;border-radius:4px;height:7px;overflow:hidden"><div style="width:${total?Math.round((statusCounts[s]/total)*100):0}%;background:${STATUS_COLORS[s]};height:100%;border-radius:4px"></div></div>
-        <span style="font-size:12px;font-weight:600;width:18px;text-align:right">${statusCounts[s]}</span>
-      </div>`).join('')}
-    </div>
+
+  <div class="card">
+    <h3>📊 1단계 검토 진행 현황 <span style="font-weight:400;color:#64748b;font-size:11px">(전체 ${total}건)</span></h3>
+    ${STATUSES.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+      <span class="badge s-${s}" style="width:110px;text-align:center">${s}</span>
+      <div style="flex:1;background:#f1f5f9;border-radius:5px;height:12px;overflow:hidden"><div style="width:${total?Math.round((statusCounts[s]/total)*100):0}%;background:${STATUS_COLORS[s]};height:100%;border-radius:5px;transition:width .3s"></div></div>
+      <span style="font-size:13px;font-weight:700;width:64px;text-align:right;color:${STATUS_COLORS[s]}">${statusCounts[s]||0}건</span>
+    </div>`).join('')}
   </div>
   ${piNotRefl>0?`<div class="card" style="border:1px solid #fca5a5">
     <h3 style="color:#dc2626">⚠️ 사전검사 완료 후 검토파일 미반영 (${piNotRefl}건)</h3>
@@ -640,7 +633,6 @@ function showBulkUpdate(){
   const checkedIds=getCheckedIds();
   const targetCount=checkedIds.length>0?checkedIds.length:DB.products.length;
   const targetLabel=checkedIds.length>0?`선택된 ${targetCount}건`:`전체 ${targetCount}건`;
-  const userOpts=Object.values(USERS).map(u=>`<option value="${u.id}">${u.name}</option>`).join('');
   showModal(`<h2>✏️ 일괄 수정</h2>
   <div class="${checkedIds.length>0?'alert-info':'alert-warn'}">
     ${checkedIds.length>0?`✅ <strong>선택된 ${targetCount}건</strong>을 수정합니다.`:`체크된 제품이 없어 <strong>전체 ${targetCount}건</strong>을 수정합니다.`}
@@ -649,19 +641,15 @@ function showBulkUpdate(){
   <input type="hidden" id="bu-ids" value="${checkedIds.join(',')}">
   <div class="form-row">
     <div class="fg"><label>수입사</label><input id="bu-imp" placeholder="예: 코스트코"></div>
-    <div class="fg"><label>담당자</label><select id="bu-assignee"><option value="">변경 안 함</option>${userOpts}</select></div>
-  </div>
-  <div class="form-row">
     <div class="fg"><label>1단계 검토상태</label><select id="bu-status"><option value="">변경 안 함</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+  </div>
+  <div class="form-row">
     <div class="fg"><label>2단계 사전검사</label><select id="bu-pi"><option value="">변경 안 함</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
-  </div>
-  <div class="form-row">
     <div class="fg"><label>검토파일 반영여부</label><select id="bu-pr"><option value="">변경 안 함</option>${PR_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
-    <div class="fg"><label>3단계 라벨</label><select id="bu-lb"><option value="">변경 안 함</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
   </div>
   <div class="form-row">
+    <div class="fg"><label>3단계 라벨</label><select id="bu-lb"><option value="">변경 안 함</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
     <div class="fg"><label>4단계 수입신고</label><select id="bu-id"><option value="">변경 안 함</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
-    <div></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal()">취소</button>
@@ -670,20 +658,18 @@ function showBulkUpdate(){
 }
 function doBulkUpdate(){
   const imp=(document.getElementById('bu-imp').value||'').trim();
-  const assignee=document.getElementById('bu-assignee').value;
   const status=document.getElementById('bu-status').value;
   const pi=document.getElementById('bu-pi').value;
   const pr=document.getElementById('bu-pr').value;
   const lb=document.getElementById('bu-lb').value;
   const idv=document.getElementById('bu-id').value;
-  if(!imp&&!assignee&&!status&&!pi&&!pr&&!lb&&!idv){alert('수정할 항목을 하나 이상 선택하세요.');return;}
+  if(!imp&&!status&&!pi&&!pr&&!lb&&!idv){alert('수정할 항목을 하나 이상 선택하세요.');return;}
   const idsStr=(document.getElementById('bu-ids').value||'').trim();
   const targetIds=idsStr?idsStr.split(',').filter(Boolean):null;
   const targets=targetIds?DB.products.filter(p=>targetIds.includes(p.id)):DB.products;
   if(!confirm(`${targets.length}건을 수정하시겠습니까?`))return;
   targets.forEach(p=>{
     if(imp)p.importer=imp;
-    if(assignee)p.assignee=assignee;
     if(status)p.status=status;
     if(pi)p.preInspect=pi;
     if(pr)p.preInspectReflect=pr;
@@ -919,18 +905,6 @@ function toggleLockFromList(id){
     saveData(DB);renderPage();
   }
 }
-function showChangeAssignee(id){
-  const p=getProduct(id);
-  const opts=Object.values(USERS).map(u=>`<option value="${u.id}" ${u.id===p.assignee?'selected':''}>${u.name}</option>`).join('');
-  showModal(`<h2>담당자 변경</h2><div class="fg"><label>새 담당자</label><select id="newA">${opts}</select></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">취소</button><button class="btn btn-primary" onclick="doChangeAssignee('${id}')">변경</button></div>`);
-}
-function doChangeAssignee(id){
-  const p=getProduct(id);const newA=document.getElementById('newA').value;
-  const old=p.assignee;p.assignee=newA;
-  DB.history.push({id:uid(),productId:id,from:`담당:${username(old)}`,to:`담당:${username(newA)}`,by:currentUser.id,at:nowStr(),note:'담당자 변경'});
-  addNotif(newA,'assign',`${p.name} 담당자로 지정되었습니다.`,id);
-  saveData(DB);closeModal();renderPage();
-}
 
 // CHAT
 function renderChatTab(productId){
@@ -1037,7 +1011,6 @@ function exportReport(id){
 // ============================================================
 function renderProductForm(id){
   const p=id?ensureFields(getProduct(id)||{}):null;
-  const userOpts=Object.values(USERS).map(u=>`<option value="${u.id}" ${p?p.assignee===u.id?'selected':'':u.id===currentUser.id?'selected':''}>${u.name}</option>`).join('');
   const ftOpts=FOOD_TYPES.map(f=>`<option ${p&&p.foodType===f?'selected':''}>${f}</option>`).join('');
   const prOpts=PRIORITIES.map(pr=>`<option ${p&&p.priority===pr?'selected':''}>${pr}</option>`).join('');
   const piOpts=PI_STATUSES.map(s=>`<option ${p&&p.preInspect===s?'selected':''}>${s}</option>`).join('');
@@ -1052,12 +1025,12 @@ function renderProductForm(id){
     </div>
     <div class="form-row">
       <div class="fg"><label>식품유형</label><select id="f-ft">${ftOpts}</select></div>
-      <div class="fg"><label>담당자</label><select id="f-assignee">${userOpts}</select></div>
-    </div>
-    <div class="form-row">
       <div class="fg"><label>우선순위</label><select id="f-priority">${prOpts}</select></div>
-      ${p&&p.id?`<div class="fg"><label>1단계 검토상태</label><select id="f-status">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`:'<div></div>'}
     </div>
+    ${p&&p.id?`<div class="form-row">
+      <div class="fg"><label>1단계 검토상태</label><select id="f-status">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div></div>
+    </div>`:''}
     <hr style="margin:8px 0 14px">
     <div class="form-row">
       <div class="fg"><label>🧪 사전검사 진행여부</label><select id="f-pi">${piOpts}</select></div>
@@ -1080,7 +1053,6 @@ function saveProduct(id){
   const imp=(document.getElementById('f-imp').value||'').trim();
   if(!name){alert('제품명은 필수입니다.');return;}
   const ft=document.getElementById('f-ft').value;
-  const assignee=document.getElementById('f-assignee').value;
   const priority=document.getElementById('f-priority').value;
   const note=(document.getElementById('f-note').value||'').trim();
   const pi=document.getElementById('f-pi').value;
@@ -1088,19 +1060,17 @@ function saveProduct(id){
   const lb=document.getElementById('f-lb').value;
   const idv=document.getElementById('f-id').value;
   if(id){
-    const p=getProduct(id);const oldA=p.assignee;
-    p.itemNo=itemNo;p.name=name;p.importer=imp;p.foodType=ft;p.assignee=assignee;p.priority=priority;p.note=note;
+    const p=getProduct(id);
+    p.itemNo=itemNo;p.name=name;p.importer=imp;p.foodType=ft;p.priority=priority;p.note=note;
     p.preInspect=pi;p.preInspectReflect=pr;p.labelStatus=lb;p.importDecl=idv;
     const ns=document.getElementById('f-status')?.value;
     if(ns&&ns!==p.status){DB.history.push({id:uid(),productId:id,from:p.status,to:ns,by:currentUser.id,at:nowStr(),note:'정보수정'});p.status=ns;}
-    if(assignee!==oldA)addNotif(assignee,'assign',`${name} 담당자로 지정되었습니다.`,id);
     saveData(DB);go('product',id);
   } else {
     const newId=uid();
     const today=new Date().toISOString().slice(0,10);
-    DB.products.push({id:newId,itemNo,name,importer:imp,foodType:ft,registeredAt:today,assignee,priority,status:'검토예정',lockedBy:null,lockTime:null,note,preInspect:pi,preInspectDate:'',preInspectReflect:pr,labelStatus:lb,importDecl:idv});
+    DB.products.push({id:newId,itemNo,name,importer:imp,foodType:ft,registeredAt:today,priority,status:'검토예정',lockedBy:null,lockTime:null,note,preInspect:pi,preInspectDate:'',preInspectReflect:pr,labelStatus:lb,importDecl:idv});
     DB.history.push({id:uid(),productId:newId,from:'',to:'검토예정',by:currentUser.id,at:nowStr(),note:'제품 등록'});
-    addNotif(assignee,'assign',`${name} 담당자로 지정되었습니다.`,newId);
     saveData(DB);go('product',newId);
   }
 }
@@ -1113,22 +1083,20 @@ function renderSearch(){
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
       <div class="fg"><label>아이템번호 / 제품명</label><input id="s-name" oninput="doSearch()" placeholder="번호 일부만 입력해도 검색됩니다"></div>
       <div class="fg"><label>수입사</label><input id="s-imp" oninput="doSearch()"></div>
-      <div class="fg"><label>담당자</label><select id="s-assignee" onchange="doSearch()"><option value="">전체</option>${Object.values(USERS).map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select></div>
       <div class="fg"><label>검토상태</label><select id="s-status" onchange="doSearch()"><option value="">전체</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="fg"><label>사전검사</label><select id="s-pi" onchange="doSearch()"><option value="">전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="fg"><label>수입신고</label><select id="s-id" onchange="doSearch()"><option value="">전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
     </div>
-    <table><tr><th>No.</th><th>제품명</th><th>수입사</th><th>담당자</th><th>1단계</th><th>2단계</th><th>3단계</th><th>4단계</th><th></th></tr>
+    <table><tr><th>No.</th><th>제품명</th><th>수입사</th><th>1단계</th><th>2단계</th><th>3단계</th><th>4단계</th><th></th></tr>
     <tbody id="search-results">${renderSearchRows(DB.products.map(ensureFields))}</tbody></table>
   </div>`;
 }
 function renderSearchRows(prods){
-  if(!prods.length)return`<tr><td colspan="9" class="empty">결과 없음</td></tr>`;
+  if(!prods.length)return`<tr><td colspan="8" class="empty">결과 없음</td></tr>`;
   return prods.map(p=>`<tr>
     <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
     <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
     <td style="font-size:11px">${p.importer}</td>
-    <td style="font-size:12px">${username(p.assignee)}</td>
     <td>${sBadge(p.status)}</td>
     <td>${piBadge(p.preInspect)}</td>
     <td>${labelBadge(p.labelStatus)}</td>
@@ -1139,13 +1107,12 @@ function renderSearchRows(prods){
 function doSearch(){
   const name=(document.getElementById('s-name')||{}).value?.toLowerCase()||'';
   const imp=(document.getElementById('s-imp')||{}).value?.toLowerCase()||'';
-  const assignee=(document.getElementById('s-assignee')||{}).value||'';
   const status=(document.getElementById('s-status')||{}).value||'';
   const pi=(document.getElementById('s-pi')||{}).value||'';
   const idv=(document.getElementById('s-id')||{}).value||'';
   let prods=DB.products.map(ensureFields);
   if(name)prods=prods.filter(p=>(p.itemNo||'').toLowerCase().includes(name)||(p.name||'').toLowerCase().includes(name)||(p.importer||'').toLowerCase().includes(name));
-  if(assignee)prods=prods.filter(p=>p.assignee===assignee);
+  if(imp)prods=prods.filter(p=>(p.importer||'').toLowerCase().includes(imp));
   if(status)prods=prods.filter(p=>p.status===status);
   if(pi)prods=prods.filter(p=>p.preInspect===pi);
   if(idv)prods=prods.filter(p=>p.importDecl===idv);
@@ -1255,7 +1222,7 @@ function parseManualCSV(){
 }
 function showCSVPreview(parsed){
   const{headers,rows}=parsed;
-  const fieldOpts=`<option value="">무시</option><option value="itemNo">아이템번호</option><option value="name">제품명</option><option value="importer">수입사</option><option value="foodType">식품유형</option><option value="assignee">담당자</option><option value="status">검토상태</option><option value="preInspect">사전검사</option><option value="preInspectReflect">반영여부</option><option value="labelStatus">라벨상태</option><option value="importDecl">수입신고</option><option value="priority">우선순위</option><option value="registeredAt">등록일</option><option value="note">메모</option>`;
+  const fieldOpts=`<option value="">무시</option><option value="itemNo">아이템번호</option><option value="name">제품명</option><option value="importer">수입사</option><option value="foodType">식품유형</option><option value="status">검토상태</option><option value="preInspect">사전검사</option><option value="preInspectReflect">반영여부</option><option value="labelStatus">라벨상태</option><option value="importDecl">수입신고</option><option value="priority">우선순위</option><option value="registeredAt">등록일</option><option value="note">메모</option>`;
   const autoMap={};
   headers.forEach((h,i)=>{
     const hl=h.toLowerCase().replace(/\s/g,'');
@@ -1263,7 +1230,6 @@ function showCSVPreview(parsed){
     else if(hl.includes('제품명')||hl.includes('상품명'))autoMap[i]='name';
     else if(hl.includes('수입사'))autoMap[i]='importer';
     else if(hl.includes('식품유형')||hl.includes('유형'))autoMap[i]='foodType';
-    else if(hl.includes('담당자'))autoMap[i]='assignee';
     else if(hl.includes('상태')&&!hl.includes('사전')&&!hl.includes('신고'))autoMap[i]='status';
     else if(hl.includes('사전검사')&&!hl.includes('반영'))autoMap[i]='preInspect';
     else if(hl.includes('반영'))autoMap[i]='preInspectReflect';
@@ -1294,9 +1260,6 @@ function doImport(){
     const get=field=>mapping[field]!==undefined?(row[mapping[field]]||'').trim():'';
     const name=get('name');if(!name)return;
     if(existingNames.has(name.toLowerCase())){skipped++;return;}
-    const assigneeName=get('assignee');
-    let assigneeId=currentUser.id;
-    Object.values(USERS).forEach(u=>{if(u.name===assigneeName)assigneeId=u.id;});
     const rawStatus=get('status');const status=STATUSES.includes(rawStatus)?rawStatus:'검토예정';
     const rawPI=get('preInspect');const preInspect=PI_STATUSES.includes(rawPI)?rawPI:'-';
     const rawPR=get('preInspectReflect');const preInspectReflect=PR_STATUSES.includes(rawPR)?rawPR:'검토파일미반영';
@@ -1304,7 +1267,7 @@ function doImport(){
     const rawID=get('importDecl');const importDecl=ID_STATUSES.includes(rawID)?rawID:'-';
     const rawPrio=get('priority');const priority=PRIORITIES.includes(rawPrio)?rawPrio:'보통';
     const newId=uid();
-    DB.products.push({id:newId,itemNo:get('itemNo')||'',name,importer:get('importer')||'',foodType:get('foodType')||'기타',registeredAt:get('registeredAt')||new Date().toISOString().slice(0,10),assignee:assigneeId,priority,status,lockedBy:null,lockTime:null,note:get('note')||'',preInspect,preInspectDate:'',preInspectReflect,labelStatus,importDecl});
+    DB.products.push({id:newId,itemNo:get('itemNo')||'',name,importer:get('importer')||'',foodType:get('foodType')||'기타',registeredAt:get('registeredAt')||new Date().toISOString().slice(0,10),priority,status,lockedBy:null,lockTime:null,note:get('note')||'',preInspect,preInspectDate:'',preInspectReflect,labelStatus,importDecl});
     DB.history.push({id:uid(),productId:newId,from:'',to:status,by:currentUser.id,at:nowStr(),note:'구글시트 이관'});
     existingNames.add(name.toLowerCase());added++;
   });
