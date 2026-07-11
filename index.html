@@ -1334,7 +1334,17 @@ function manufExpiryInfo(m){
 }
 function manufBadge(m){const i=manufExpiryInfo(m);return`<span class="badge" style="background:${i.color}22;color:${i.color}">${i.label}</span>`;}
 
+let manufTab='manage';
+function setManufTab(t){manufTab=t;renderPage();if(t==='maru')setTimeout(()=>{const el=document.getElementById('dmf-name');if(el)el.focus();},60);}
 function renderManufacturers(){
+  ensureManufDB();
+  const tabBar=`<div class="tabs" style="margin-bottom:14px">
+    <div class="tab ${manufTab==='manage'?'active':''}" onclick="setManufTab('manage')">🗂️ 등록 관리</div>
+    <div class="tab ${manufTab==='maru'?'active':''}" onclick="setManufTab('maru')">🔎 정보마루 조회</div>
+  </div>`;
+  return tabBar+(manufTab==='maru'?renderManufMaru():renderManufManage());
+}
+function renderManufManage(){
   ensureManufDB();
   const list=DB.manufacturers.slice().sort((a,b)=>{
     const da=daysBetween(a.expiry),db=daysBetween(b.expiry);
@@ -1380,7 +1390,7 @@ function renderManufacturers(){
     <div class="flex-between">
       <h3>🏭 해외제조업소 등록 관리 (${DB.manufacturers.length}건)</h3>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-purple btn-sm" onclick="showMaruManufSearch()">🔎 정보마루 실시간 조회</button>
+        <button class="btn btn-purple btn-sm" onclick="setManufTab('maru')">🔎 정보마루 조회</button>
         <button class="btn btn-primary btn-sm" onclick="showManufModal()">➕ 업소 등록</button>
       </div>
     </div>
@@ -1631,51 +1641,199 @@ async function maruFetch(qs){
   return j;
 }
 
-// --- 해외제조업소 실시간 조회 ---
-let MARU_MANUF_RESULTS=[];
-function showMaruManufSearch(){
-  showModal(`<h2>🔎 정보마루 해외제조업소 실시간 조회</h2>
-  <div class="alert-info">수입식품정보마루에서 실시간으로 등록정보를 가져옵니다. 결과에서 <strong>➕ 등록</strong>을 누르면 자동으로 입력됩니다.</div>
-  <div class="form-row">
-    <div class="fg"><label>제조업소명(영문)</label><input id="maru-mf-name" placeholder="예: TATURA MILK" onkeydown="if(event.key==='Enter')runMaruManufSearch()"></div>
-    <div class="fg"><label>제조업소코드</label><input id="maru-mf-code" placeholder="예: AU000000020" onkeydown="if(event.key==='Enter')runMaruManufSearch()"></div>
-  </div>
-  <button class="btn btn-primary btn-sm" onclick="runMaruManufSearch()">🔎 조회</button>
-  <div id="maru-mf-status" style="margin-top:10px;font-size:13px"></div>
-  <div id="maru-mf-results" style="margin-top:8px"></div>
-  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">닫기</button></div>`);
+// --- 해외제조업소 실시간 조회 (데스크톱 스타일: 검색+목록 / 상세표 + 인쇄·캡쳐·엑셀복사) ---
+let DMF_RESULTS=[], DMF_SEL=-1, DMF_NAME='', DMF_CODE='';
+
+const DMF_DETAIL_CSS=`
+.dmf-detail-tbl{border-collapse:collapse;table-layout:fixed;font-size:11px;font-family:'맑은 고딕','Malgun Gothic',sans-serif}
+.dmf-detail-tbl th,.dmf-detail-tbl td{border:1px solid #c8cdd6;padding:6px 5px;text-align:center;vertical-align:middle;word-wrap:break-word;word-break:break-all}
+.dmf-detail-tbl th{background:#eef1f6;font-weight:bold}
+.dmf-detail-tbl td.dmf-nm{color:#15489c;text-align:left;font-weight:bold}
+.dmf-detail-tbl td.dmf-addr{text-align:left}
+.dmf-cap{font-size:13px;font-weight:bold;color:#00529B;margin:4px 2px 8px}`;
+
+function dmfEsc(s){s=(s==null?'':String(s));return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function dmfAttr(s){return (s==null?'':String(s)).replace(/"/g,'&quot;');}
+
+function buildDetailHTML(it,no){
+  return `<div class="dmf-cap">해외제조업소 상세</div>
+  <table class="dmf-detail-tbl">
+    <tr>
+      <th rowspan="2" style="width:34px">번호</th>
+      <th rowspan="2" style="width:98px">업소코드</th>
+      <th rowspan="2" style="width:66px">등록시설번호</th>
+      <th rowspan="2" style="width:46px">국가</th>
+      <th style="width:210px">업소명</th>
+      <th rowspan="2" style="width:74px">등록일</th>
+      <th rowspan="2" style="width:74px">만료일</th>
+      <th rowspan="2" style="width:88px">영업종류</th>
+      <th rowspan="2" style="width:66px">식품종류</th>
+      <th rowspan="2" style="width:54px">비고</th>
+    </tr>
+    <tr><th>주소</th></tr>
+    <tr>
+      <td rowspan="2">${no}</td>
+      <td rowspan="2">${dmfEsc(it.code)}</td>
+      <td rowspan="2">${dmfEsc(it.est)}</td>
+      <td rowspan="2">${dmfEsc(it.country)}</td>
+      <td class="dmf-nm">${dmfEsc(it.name)}</td>
+      <td rowspan="2">${dmfEsc(it.regDate)}</td>
+      <td rowspan="2">${dmfEsc(it.expiry)}</td>
+      <td rowspan="2">${dmfEsc(it.bizKind)}</td>
+      <td rowspan="2">${dmfEsc(it.foodKind)}</td>
+      <td rowspan="2">${dmfEsc(it.remark)}</td>
+    </tr>
+    <tr><td class="dmf-addr">${dmfEsc(it.address)}</td></tr>
+  </table>`;
 }
-async function runMaruManufSearch(){
-  const name=(document.getElementById('maru-mf-name').value||'').trim();
-  const code=(document.getElementById('maru-mf-code').value||'').trim();
+
+function dmfListRowsHTML(){
+  if(!DMF_RESULTS.length)return `<tr><td colspan="5" style="text-align:center;color:#9aa3b5;padding:20px">검색 결과가 없습니다.</td></tr>`;
+  return DMF_RESULTS.map((m,i)=>{
+    const exp=daysBetween(m.expiry);
+    const ec=exp===null?'#64748b':exp<0?'#dc2626':exp<=60?'#d97706':'#15803d';
+    return `<tr class="${i===DMF_SEL?'sel':''}" onclick="dmfSelect(${i})">
+      <td title="${dmfAttr(m.name)}">${m.name||'—'}</td>
+      <td>${m.code||'—'}</td>
+      <td>${m.country||'—'}</td>
+      <td title="${dmfAttr(m.address)}">${m.address||'—'}</td>
+      <td style="color:${ec};font-weight:600">${m.expiry||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+function dmfDetailHTML(){
+  if(DMF_SEL<0||!DMF_RESULTS[DMF_SEL])return `<div style="color:#9aa3b5;text-align:center;padding-top:60px">왼쪽에서 업소를 선택하면 상세표가 표시됩니다.</div>`;
+  return `<div id="dmf-cap-target" style="background:#fff;padding:8px;display:inline-block;min-width:100%">${buildDetailHTML(DMF_RESULTS[DMF_SEL],DMF_SEL+1)}</div>`;
+}
+
+function renderManufMaru(){
+  const cnt=DMF_RESULTS.length?`검색 결과: ${DMF_RESULTS.length}건`:'제조업소명 또는 코드를 입력하세요.';
+  return `<style>
+    .dmf-wrap{display:flex;border:1px solid #b4c3dc;border-radius:8px;overflow:hidden;min-height:600px;background:#fff}
+    .dmf-left{width:450px;min-width:450px;display:flex;flex-direction:column;border-right:5px solid #b4c3dc}
+    .dmf-search{border:1px solid #cdd7e8;border-radius:6px;padding:12px;margin:12px}
+    .dmf-search .lb{font-size:11px;font-weight:700;color:#1e3a5f;margin:8px 0 3px}
+    .dmf-search input{width:100%;padding:7px 8px;border:1px solid #c3ccdb;border-radius:4px;font-size:13px;box-sizing:border-box}
+    .dmf-srch-btn{width:100%;margin-top:12px;background:#1e3a5f;color:#fff;border:none;padding:8px;border-radius:4px;font-weight:700;cursor:pointer;font-size:12px}
+    .dmf-srch-btn:hover{background:#16304e}
+    .dmf-cnt{font-size:12px;color:#5a6b82;margin:0 14px 6px}
+    .dmf-listwrap{flex:1;overflow:auto;margin:0 12px 12px}
+    .dmf-list{width:100%;border-collapse:collapse;font-size:11px}
+    .dmf-list th{position:sticky;top:0;background:#1e3a5f;color:#fff;padding:6px 6px;text-align:left;font-weight:600;white-space:nowrap;z-index:1}
+    .dmf-list td{padding:5px 6px;border-bottom:1px solid #eef1f5;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+    .dmf-list tr.sel td{background:#1c3d6e;color:#fff !important}
+    .dmf-list tr:hover:not(.sel) td{background:#eef4ff}
+    .dmf-right{flex:1;display:flex;flex-direction:column;background:#ebf0fa;min-width:0}
+    .dmf-toolbar{background:#e1e8f5;padding:6px 8px;display:flex;gap:8px;align-items:center}
+    .dmf-tb{color:#fff;border:none;padding:6px 14px;border-radius:3px;font-weight:700;cursor:pointer;font-size:12px}
+    .dmf-tb:hover{filter:brightness(0.93)}
+    .dmf-detail{flex:1;padding:12px;overflow:auto}
+    ${DMF_DETAIL_CSS}
+  </style>
+  <div class="alert-info" style="margin-bottom:10px">🌐 수입식품정보마루 <strong>실시간</strong> 조회입니다. 왼쪽에서 검색 → 목록 행을 클릭하면 오른쪽에 상세표가 뜨고, <strong>[인쇄] · [캡쳐] · [엑셀복사]</strong> 를 쓸 수 있습니다.</div>
+  <div class="dmf-wrap">
+    <div class="dmf-left">
+      <div class="dmf-search">
+        <div style="font-weight:700;color:#1e3a5f;font-size:12px;margin-bottom:4px">검색</div>
+        <div class="lb">제조업소명(영문)</div>
+        <input id="dmf-name" value="${dmfAttr(DMF_NAME)}" placeholder="예: TATURA MILK" onkeydown="if(event.key==='Enter')dmfSearch()">
+        <div class="lb">제조업소코드</div>
+        <input id="dmf-code" value="${dmfAttr(DMF_CODE)}" placeholder="예: AU000000020" onkeydown="if(event.key==='Enter')dmfSearch()">
+        <button class="dmf-srch-btn" onclick="dmfSearch()">[검색] 조회 (Enter)</button>
+      </div>
+      <div class="dmf-cnt" id="dmf-cnt">${cnt}</div>
+      <div class="dmf-listwrap">
+        <table class="dmf-list">
+          <thead><tr><th>업소명</th><th>업소코드</th><th>국가</th><th>주소</th><th>만료일</th></tr></thead>
+          <tbody id="dmf-list-body">${DMF_RESULTS.length?dmfListRowsHTML():''}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dmf-right">
+      <div class="dmf-toolbar">
+        <button class="dmf-tb" style="background:#2e9e5b" onclick="dmfPrint()">[인쇄]</button>
+        <button class="dmf-tb" style="background:#2f6fd0" onclick="dmfCapture()">[캡쳐]</button>
+        <button class="dmf-tb" style="background:#e08a2e" onclick="dmfExcel()">[엑셀복사]</button>
+        <button class="dmf-tb" style="background:#7c3aed;margin-left:auto" onclick="dmfAddToList()">➕ 내 목록 등록</button>
+      </div>
+      <div class="dmf-detail" id="dmf-detail">${dmfDetailHTML()}</div>
+    </div>
+  </div>`;
+}
+
+async function dmfSearch(){
+  const name=(document.getElementById('dmf-name').value||'').trim();
+  const code=(document.getElementById('dmf-code').value||'').trim();
+  DMF_NAME=name;DMF_CODE=code;
   if(!name&&!code){alert('제조업소명 또는 코드를 입력하세요.');return;}
-  const st=document.getElementById('maru-mf-status');
-  st.innerHTML='<span style="color:#3b82f6">⏳ 정보마루 조회 중...</span>';
-  document.getElementById('maru-mf-results').innerHTML='';
+  const cnt=document.getElementById('dmf-cnt');cnt.textContent='조회 중...';cnt.style.color='#d97706';
   try{
     const j=await maruFetch('proxy=manufacturer&q='+encodeURIComponent(name)+'&code='+encodeURIComponent(code));
-    if(!j)return;
-    MARU_MANUF_RESULTS=j.rows||[];
-    st.innerHTML=`<span style="color:#16a34a">✅ ${j.count}건 조회됨</span>`;
-    const res=document.getElementById('maru-mf-results');
-    if(!MARU_MANUF_RESULTS.length){res.innerHTML='<div class="empty">검색 결과가 없습니다.</div>';return;}
-    res.innerHTML=`<div style="overflow-x:auto;max-height:340px;overflow-y:auto"><table>
-      <tr><th>업소명</th><th>국가</th><th>등록일</th><th>만료일</th><th></th></tr>
-      ${MARU_MANUF_RESULTS.map((m,i)=>{
-        const exp=daysBetween(m.expiry);
-        const ec=exp===null?'#94a3b8':exp<0?'#dc2626':exp<=60?'#d97706':'#16a34a';
-        return`<tr>
-          <td><strong style="font-size:12px">${m.name||'—'}</strong><div style="font-size:10px;color:#94a3b8">${m.code||''} · ${m.bizKind||''}</div><div style="font-size:10px;color:#94a3b8">${m.address||''}</div></td>
-          <td style="font-size:11px">${m.country||'—'}</td>
-          <td style="font-size:11px">${m.regDate||'—'}</td>
-          <td style="font-size:11px;color:${ec};font-weight:600">${m.expiry||'—'}</td>
-          <td><button class="btn btn-success btn-sm" onclick="importMaruManuf(${i})">➕ 등록</button></td>
-        </tr>`;}).join('')}
-    </table></div>`;
-  }catch(e){st.innerHTML=`<div class="alert-warn">❌ 조회 실패: ${e.message}</div>`;}
+    if(!j){cnt.textContent='제조업소명 또는 코드를 입력하세요.';cnt.style.color='#5a6b82';return;}
+    DMF_RESULTS=j.rows||[];DMF_SEL=DMF_RESULTS.length?0:-1;
+    cnt.textContent='검색 결과: '+j.count+'건';cnt.style.color='#15803d';
+    document.getElementById('dmf-list-body').innerHTML=dmfListRowsHTML();
+    document.getElementById('dmf-detail').innerHTML=dmfDetailHTML();
+  }catch(e){cnt.textContent='연결 실패: '+e.message;cnt.style.color='#dc2626';}
+}
+function dmfSelect(i){
+  DMF_SEL=i;
+  document.getElementById('dmf-list-body').innerHTML=dmfListRowsHTML();
+  document.getElementById('dmf-detail').innerHTML=dmfDetailHTML();
+}
+function dmfExcel(){
+  if(DMF_SEL<0){alert('먼저 업소를 선택하세요.');return;}
+  const it=DMF_RESULTS[DMF_SEL];
+  const txt='업소명\t'+(it.name||'')+'/주소\t'+(it.address||'')+'\r\n[업소코드\t'+(it.code||'')+'/만료일\t'+(it.expiry||'')+']';
+  const done=()=>alert('엑셀복사 완료 (클립보드에 복사되었습니다)');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>dmfCopyFallback(txt,done));
+  }else{dmfCopyFallback(txt,done);}
+}
+function dmfCopyFallback(txt,done){
+  const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){alert('복사 실패');}ta.remove();
+}
+function dmfPrint(){
+  if(DMF_SEL<0){alert('먼저 업소를 선택하세요.');return;}
+  const html=buildDetailHTML(DMF_RESULTS[DMF_SEL],DMF_SEL+1);
+  const w=window.open('','_blank','width=1000,height=600');
+  if(!w){alert('팝업이 차단되었습니다. 브라우저 팝업 허용 후 다시 시도하세요.');return;}
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>해외제조업소 상세</title><style>body{margin:12px}'+DMF_DETAIL_CSS+'</style></head><body>'+html+'<'+'script>window.onload=function(){window.print();}<'+'/script></body></html>');
+  w.document.close();
+}
+async function dmfCapture(){
+  if(DMF_SEL<0){alert('먼저 업소를 선택하세요.');return;}
+  const el=document.getElementById('dmf-cap-target');if(!el)return;
+  try{
+    await loadHtml2Canvas();
+    const canvas=await html2canvas(el,{scale:2,backgroundColor:'#ffffff'});
+    canvas.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='해외제조업소_'+(DMF_RESULTS[DMF_SEL].code||'상세')+'.png';a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      if(navigator.clipboard&&window.ClipboardItem){try{navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);}catch(e){}}
+      alert('캡쳐 완료 (PNG 저장 + 클립보드 복사)');
+    });
+  }catch(e){
+    if(confirm('캡쳐 기능(인터넷 필요)을 불러오지 못했습니다.\n대신 [인쇄] 창을 열까요? (인쇄 창에서 "PDF로 저장" 선택 가능)'))dmfPrint();
+  }
+}
+function loadHtml2Canvas(){
+  return new Promise((res,rej)=>{
+    if(window.html2canvas)return res();
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=()=>res();s.onerror=()=>rej(new Error('load fail'));
+    document.head.appendChild(s);
+  });
+}
+function dmfAddToList(){
+  if(DMF_SEL<0){alert('먼저 업소를 선택하세요.');return;}
+  importMaruManuf(DMF_SEL);
 }
 function importMaruManuf(i){
-  const m=MARU_MANUF_RESULTS[i];if(!m)return;
+  const m=DMF_RESULTS[i];if(!m)return;
   const noteParts=[];
   if(m.bizKind)noteParts.push('영업종류:'+m.bizKind);
   if(m.foodKind)noteParts.push('식품종류:'+m.foodKind);
