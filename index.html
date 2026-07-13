@@ -682,7 +682,11 @@ function showBulkUpdate(){
   </div>
   <div class="form-row">
     <div class="fg"><label>3단계 라벨</label><select id="bu-lb"><option value="">변경 안 함</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div class="fg"><label>라벨 세부단계</label><select id="bu-lbr"><option value="">변경 안 함</option>${LABEL_REVIEW_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+  </div>
+  <div class="form-row">
     <div class="fg"><label>4단계 수입신고</label><select id="bu-id"><option value="">변경 안 함</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div></div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal()">취소</button>
@@ -695,8 +699,9 @@ function doBulkUpdate(){
   const pi=document.getElementById('bu-pi').value;
   const pr=document.getElementById('bu-pr').value;
   const lb=document.getElementById('bu-lb').value;
+  const lbr=document.getElementById('bu-lbr').value;
   const idv=document.getElementById('bu-id').value;
-  if(!imp&&!status&&!pi&&!pr&&!lb&&!idv){alert('수정할 항목을 하나 이상 선택하세요.');return;}
+  if(!imp&&!status&&!pi&&!pr&&!lb&&!lbr&&!idv){alert('수정할 항목을 하나 이상 선택하세요.');return;}
   const idsStr=(document.getElementById('bu-ids').value||'').trim();
   const targetIds=idsStr?idsStr.split(',').filter(Boolean):null;
   const targets=targetIds?DB.products.filter(p=>targetIds.includes(p.id)):DB.products;
@@ -707,6 +712,7 @@ function doBulkUpdate(){
     if(pi)p.preInspect=pi;
     if(pr)p.preInspectReflect=pr;
     if(lb)p.labelStatus=lb;
+    if(lbr)p.labelReview=lbr;
     if(idv)p.importDecl=idv;
   });
   saveData(DB);closeModal();renderPage();
@@ -939,6 +945,12 @@ function confirmFinalReview(id){
   p.finalConfirmedBy=currentUser.id;
   p.finalConfirmedAt=nowStr();
   DB.history.push({id:uid(),productId:id,from:'최종검토 대기',to:'최종확인 완료',by:currentUser.id,at:nowStr(),note:`최종 확인: ${currentUser.name}`});
+  // 1단계가 '검토중'이면 최종확인 시 자동으로 '보완요청'으로 변경
+  if(p.status==='검토중'){
+    p.status='보완요청';
+    DB.history.push({id:uid(),productId:id,from:'검토중',to:'보완요청',by:currentUser.id,at:nowStr(),note:'최종확인 → 보완요청 자동전환'});
+    Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 최종확인 → 보완요청`,id);});
+  }
   saveData(DB);renderPage();
 }
 function forceUnlock(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
