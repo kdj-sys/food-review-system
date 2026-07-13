@@ -243,6 +243,7 @@ const USERS={
 };
 
 let currentUser=USERS.u1, currentPage='dashboard', currentProductId=null, currentTab='기본정보';
+let selectedProductIds=new Set(); // 제품목록 체크 선택 유지(동기화 재렌더 시에도 보존)
 let syncInterval=null;
 
 // ============================================================
@@ -591,7 +592,7 @@ function inlineChangeStatus(id,s){
 function renderProductRows(prods){
   if(!prods.length)return`<tr><td colspan="10" class="empty">검색 결과가 없습니다.</td></tr>`;
   return prods.map(p=>`<tr>
-    <td><input type="checkbox" class="row-chk" value="${p.id}"></td>
+    <td><input type="checkbox" class="row-chk" value="${p.id}" ${selectedProductIds.has(p.id)?'checked':''} onchange="toggleRowCheck('${p.id}',this.checked)"></td>
     <td style="font-size:11px;color:#64748b;white-space:nowrap">${p.itemNo||'—'}</td>
     <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#94a3b8">${p.importer||''}</div></td>
     <td>${inlineStatusSelect(p)}</td>
@@ -609,7 +610,8 @@ function renderProductRows(prods){
     </td>
   </tr>`).join('');
 }
-function toggleAllCheck(checked){document.querySelectorAll('.row-chk').forEach(c=>c.checked=checked);}
+function toggleRowCheck(id,checked){if(checked)selectedProductIds.add(id);else selectedProductIds.delete(id);}
+function toggleAllCheck(checked){document.querySelectorAll('.row-chk').forEach(c=>{c.checked=checked;if(checked)selectedProductIds.add(c.value);else selectedProductIds.delete(c.value);});}
 function getCheckedIds(){return [...document.querySelectorAll('.row-chk:checked')].map(c=>c.value);}
 function filterList(){
   const name=(document.getElementById('fl-name')||{}).value?.toLowerCase()||'';
@@ -1297,16 +1299,10 @@ function manufExpiryInfo(m){
 }
 function manufBadge(m){const i=manufExpiryInfo(m);return`<span class="badge" style="background:${i.color}22;color:${i.color}">${i.label}</span>`;}
 
-let manufTab='manage';
-function setManufTab(t){manufTab=t;renderPage();if(t==='maru')setTimeout(()=>{const el=document.getElementById('dmf-name');if(el)el.focus();},60);}
 function renderManufacturers(){
-  ensureManufDB();
-  const tabBar=`<div class="tabs" style="margin-bottom:14px">
-    <div class="tab ${manufTab==='manage'?'active':''}" onclick="setManufTab('manage')">🗂️ 등록 관리</div>
-    <div class="tab ${manufTab==='maru'?'active':''}" onclick="setManufTab('maru')">🔎 정보마루 조회</div>
-  </div>`;
-  return tabBar+(manufTab==='maru'?renderManufMaru():renderManufManage());
+  return renderManufMaru();
 }
+// (등록 관리 화면은 사용 안 함 — 정보마루 실시간 조회만 제공)
 function renderManufManage(){
   ensureManufDB();
   const list=DB.manufacturers.slice().sort((a,b)=>{
@@ -1718,7 +1714,6 @@ function renderManufMaru(){
         <button class="dmf-tb" style="background:#2e9e5b" onclick="dmfPrint()">[인쇄]</button>
         <button class="dmf-tb" style="background:#2f6fd0" onclick="dmfCapture()">[캡쳐]</button>
         <button class="dmf-tb" style="background:#e08a2e" onclick="dmfExcel()">[엑셀복사]</button>
-        <button class="dmf-tb" style="background:#7c3aed;margin-left:auto" onclick="dmfAddToList()">➕ 내 목록 등록</button>
       </div>
       <div class="dmf-detail" id="dmf-detail">${dmfDetailHTML()}</div>
     </div>
