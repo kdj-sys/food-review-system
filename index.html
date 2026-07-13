@@ -175,6 +175,8 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <a onclick="go('register')" data-page="register"><span class="icon">➕</span>제품 등록</a>
     <a onclick="go('search')" data-page="search"><span class="icon">🔍</span>검색</a>
     <div class="section-title">업무관리</div>
+    <a onclick="go('finalReview')" data-page="finalReview" id="nav-final"><span class="icon">✅</span>최종검토 대기</a>
+    <a onclick="go('completed')" data-page="completed"><span class="icon">🏁</span>완료 제품</a>
     <a onclick="go('notifications')" data-page="notifications" id="nav-notif"><span class="icon">🔔</span>알림</a>
     <div class="section-title">조회 · 기준</div>
     <a onclick="go('manufacturers')" data-page="manufacturers"><span class="icon">🏭</span>해외제조업소</a>
@@ -223,9 +225,9 @@ const PI_STATUSES=['-','진행예정','진행중','진행완료','해당없음']
 const PI_COLORS={'-':'#94a3b8','진행예정':'#0369a1','진행중':'#1d4ed8','진행완료':'#15803d','해당없음':'#94a3b8'};
 const PR_STATUSES=['검토파일미반영','반영완료'];
 const PR_COLORS={'검토파일미반영':'#dc2626','반영완료':'#15803d'};
-// 3단계 라벨
-const LABEL_STATUSES=['-','라벨요청','라벨작성중','라벨작성완료','라벨 발송 전','라벨 발송'];
-const LABEL_COLORS={'-':'#94a3b8','라벨요청':'#0369a1','라벨작성중':'#7c3aed','라벨작성완료':'#15803d','라벨 발송 전':'#d97706','라벨 발송':'#065f46'};
+// 3단계 라벨 (요청/작성중/작성완료만) — 발송 단계는 아래 세부단계에서 관리
+const LABEL_STATUSES=['-','라벨요청','라벨작성중','라벨작성완료'];
+const LABEL_COLORS={'-':'#94a3b8','라벨요청':'#0369a1','라벨작성중':'#7c3aed','라벨작성완료':'#15803d'};
 // 3단계 라벨 검토단계 (사전검사 반영여부처럼 세부)
 const LABEL_REVIEW_STATUSES=['-','라벨검토중','라벨발송전','라벨발송'];
 const LABEL_REVIEW_COLORS={'-':'#94a3b8','라벨검토중':'#7c3aed','라벨발송전':'#d97706','라벨발송':'#065f46'};
@@ -397,7 +399,7 @@ function go(page,arg){
 }
 function renderPage(){
   document.getElementById('topbarDate').textContent=nowStr();
-  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',manufacturers:'해외제조업소',ingredients:'성분코드조회'};
+  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',manufacturers:'해외제조업소',ingredients:'성분코드조회',finalReview:'최종검토 대기',completed:'완료 제품'};
   document.getElementById('pageTitle').textContent=titles[currentPage]||'';
   const c=document.getElementById('content');
   if(currentPage==='dashboard')c.innerHTML=renderDashboard();
@@ -407,11 +409,24 @@ function renderPage(){
   else if(currentPage==='search')c.innerHTML=renderSearch();
   else if(currentPage==='notifications')c.innerHTML=renderNotifications();
   else if(currentPage==='manufacturers')c.innerHTML=renderManufacturers();
+  else if(currentPage==='finalReview')c.innerHTML=renderFinalReview();
+  else if(currentPage==='completed')c.innerHTML=renderCompleted();
   else if(currentPage==='ingredients'){c.innerHTML=renderIngredients();initIngredientPage();}
   updateNotifBadge();
+  updateFinalBadge();
 }
 function switchUser(id){currentUser=USERS[id];renderPage();}
 function goProductsFilter(status){go('products');setTimeout(()=>{const el=document.getElementById('fl-status');if(el){el.value=status;filterList();}},30);}
+
+// 최종검토 대기 / 완료 제품 판정
+function pendingFinalProducts(){return DB.products.map(ensureFields).filter(p=>p.finalReviewPending);}
+function completedProducts(){return DB.products.map(ensureFields).filter(p=>p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송');}
+function updateFinalBadge(){
+  const el=document.getElementById('nav-final');if(!el)return;
+  const ex=el.querySelector('.notif-count');if(ex)ex.remove();
+  const cnt=pendingFinalProducts().length;
+  if(cnt>0){const s=document.createElement('span');s.className='notif-count';s.style.marginLeft='auto';s.textContent=cnt;el.appendChild(s);}
+}
 
 // ============================================================
 // DASHBOARD
@@ -428,6 +443,21 @@ function renderDashboard(){
   const statusCounts={};STATUSES.forEach(s=>statusCounts[s]=0);
   prods.forEach(p=>statusCounts[p.status]=(statusCounts[p.status]||0)+1);
   const recentH=[...DB.history].sort((a,b)=>b.at.localeCompare(a.at)).slice(0,5);
+  const pendingFinal=pendingFinalProducts();
+  const finalBanner=pendingFinal.length?`
+  <div class="card" style="border:2px solid #f59e0b;background:#fffbeb;margin-bottom:14px">
+    <h3 style="color:#b45309">🔔 최종 확인 대기 <span class="notif-count" style="font-size:13px">${pendingFinal.length}</span> <span style="font-weight:400;color:#92400e;font-size:11px">— 검토자가 검토를 마쳤습니다. 최종 검토자가 확인해 주세요.</span></h3>
+    <table><tr><th>No.</th><th>제품명</th><th>검토자</th><th>검토 종료 시각</th><th style="width:180px">최종 확인</th></tr>
+    ${pendingFinal.map(p=>`<tr style="background:#fffdf5">
+      <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
+      <td><strong style="cursor:pointer;color:#b45309" onclick="go('product','${p.id}')">${p.name}</strong></td>
+      <td style="font-size:12px">${p.reviewSubmittedBy?username(p.reviewSubmittedBy):'—'}</td>
+      <td style="font-size:11px;color:#64748b">${p.reviewSubmittedAt||'—'}</td>
+      <td><button class="btn btn-success btn-sm" onclick="confirmFinalReview('${p.id}')">✅ 최종 확인</button>
+          <button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td>
+    </tr>`).join('')}
+    </table>
+  </div>`:'';
 
   // 칸반 보드 (상태별 카드)
   const kanbanHTML=STATUSES.map(s=>{
@@ -463,6 +493,7 @@ function renderDashboard(){
   </div>
 
   <div id="dash-stat">
+  ${finalBanner}
   <div class="card" style="margin-bottom:14px">
     <h3>📋 검토 상태 현황 <span style="font-weight:400;color:#64748b;font-size:11px">— 카드를 클릭하면 해당 상태 목록으로 이동합니다</span></h3>
     <div class="stat-grid" style="margin-bottom:0;grid-template-columns:repeat(5,1fr)">
@@ -556,7 +587,7 @@ function pipelineBar(p){
   const steps=[
     {label:'검토',val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료'},
     {label:'사전검사',val:p.preInspect,colors:PI_COLORS,done:p.preInspect==='진행완료'||p.preInspect==='해당없음'},
-    {label:'라벨',val:p.labelStatus,colors:LABEL_COLORS,done:p.labelStatus==='라벨 발송'},
+    {label:'라벨',val:p.labelStatus,colors:LABEL_COLORS,done:p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송'},
     {label:'수입신고',val:p.importDecl,colors:ID_COLORS,done:p.importDecl==='신고완료'},
   ];
   return`<div class="pipeline">${steps.map((s,i)=>{
@@ -889,13 +920,32 @@ function changeLabelReview(id,s){
   DB.history.push({id:uid(),productId:id,from:`라벨검토:${old}`,to:`라벨검토:${s}`,by:currentUser.id,at:nowStr(),note:''});
   saveData(DB);renderPage();
 }
-function endReview(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
+function endReview(id){submitFinalReview(id);}
+// 검토자가 검토를 마치고 잠금 종료 → 최종검토 대기로 표시 (최종 검토자가 확인해야 지워짐)
+function submitFinalReview(id){
+  const p=getProduct(id);if(!p)return;
+  p.lockedBy=null;p.lockTime=null;
+  p.finalReviewPending=true;
+  p.reviewSubmittedBy=currentUser.id;
+  p.reviewSubmittedAt=nowStr();
+  DB.history.push({id:uid(),productId:id,from:'검토중',to:'최종검토 요청',by:currentUser.id,at:nowStr(),note:'검토 종료 → 최종검토 대기'});
+  Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 검토 종료 — 최종 확인 요청`,id);});
+  saveData(DB);renderPage();
+}
+// 최종 검토자가 확인 → 대기 목록에서 제거
+function confirmFinalReview(id){
+  const p=getProduct(id);if(!p)return;
+  p.finalReviewPending=false;
+  p.finalConfirmedBy=currentUser.id;
+  p.finalConfirmedAt=nowStr();
+  DB.history.push({id:uid(),productId:id,from:'최종검토 대기',to:'최종확인 완료',by:currentUser.id,at:nowStr(),note:`최종 확인: ${currentUser.name}`});
+  saveData(DB);renderPage();
+}
 function forceUnlock(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
 function toggleLockFromList(id){
   const p=getProduct(id);if(!p)return;
   if(p.lockedBy===currentUser.id){
-    p.lockedBy=null;p.lockTime=null;
-    saveData(DB);renderPage();
+    submitFinalReview(id);
   } else if(!p.lockedBy){
     p.lockedBy=currentUser.id;p.lockTime=nowStr();
     p.reviewedBy=currentUser.id;
@@ -1119,6 +1169,56 @@ function doSearch(){
   if(pi)prods=prods.filter(p=>p.preInspect===pi);
   if(idv)prods=prods.filter(p=>p.importDecl===idv);
   const el=document.getElementById('search-results');if(el)el.innerHTML=renderSearchRows(prods);
+}
+
+// ============================================================
+// 최종검토 대기 / 완료 제품
+// ============================================================
+function renderFinalReview(){
+  const list=pendingFinalProducts().sort((a,b)=>(b.reviewSubmittedAt||'').localeCompare(a.reviewSubmittedAt||''));
+  return`
+  <div class="alert-info">검토자가 <strong>검토 종료(잠금 해제)</strong>한 제품이 여기에 모입니다. 최종 검토자가 내용을 확인한 뒤 <strong>[✅ 최종 확인]</strong>을 누르면 목록에서 사라집니다.</div>
+  <div class="card">
+    <h3>✅ 최종검토 대기 ${list.length>0?`<span class="notif-count">${list.length}</span>`:''}</h3>
+    ${list.length===0?'<div class="empty">최종 확인 대기 중인 제품이 없습니다.</div>':`
+    <table>
+      <tr><th>No.</th><th>제품명</th><th>1단계</th><th>라벨</th><th>검토자</th><th>검토 종료 시각</th><th style="width:200px">작업</th></tr>
+      ${list.map(p=>`<tr style="background:#fffdf5">
+        <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
+        <td><strong style="cursor:pointer;color:#b45309" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#94a3b8">${p.importer||''}</div></td>
+        <td>${sBadge(p.status)}</td>
+        <td>${labelBadge(p.labelStatus)}${p.labelReview&&p.labelReview!=='-'?` <span style="font-size:10px;color:#64748b">/ ${p.labelReview}</span>`:''}</td>
+        <td style="font-size:12px">${p.reviewSubmittedBy?username(p.reviewSubmittedBy):'—'}</td>
+        <td style="font-size:11px;color:#64748b">${p.reviewSubmittedAt||'—'}</td>
+        <td style="display:flex;gap:4px">
+          <button class="btn btn-success btn-sm" onclick="confirmFinalReview('${p.id}')">✅ 최종 확인</button>
+          <button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button>
+        </td>
+      </tr>`).join('')}
+    </table>`}
+  </div>`;
+}
+function renderCompleted(){
+  const list=completedProducts().sort((a,b)=>(b.registeredAt||'').localeCompare(a.registeredAt||''));
+  return`
+  <div class="alert-success">🏁 <strong>라벨작성완료</strong>이고 세부단계가 <strong>라벨발송</strong>까지 끝난 제품입니다. (완전 완료)</div>
+  <div class="card">
+    <h3>🏁 완료 제품 (${list.length}건)</h3>
+    ${list.length===0?'<div class="empty">완료된 제품이 없습니다.</div>':`
+    <table>
+      <tr><th>No.</th><th>제품명</th><th>수입사</th><th>1단계</th><th>라벨</th><th>세부단계</th><th>수입신고</th><th></th></tr>
+      ${list.map(p=>`<tr>
+        <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
+        <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
+        <td style="font-size:11px">${p.importer||''}</td>
+        <td>${sBadge(p.status)}</td>
+        <td>${labelBadge(p.labelStatus)}</td>
+        <td><span class="badge" style="background:#065f4622;color:#065f46">${p.labelReview}</span></td>
+        <td>${idBadge(p.importDecl)}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td>
+      </tr>`).join('')}
+    </table>`}
+  </div>`;
 }
 
 // ============================================================
