@@ -577,10 +577,11 @@ function renderProductList(){
       <select id="fl-pi" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">사전검사 전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
       <select id="fl-lb" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">라벨 전체</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
       <select id="fl-id" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">수입신고 전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:6px 10px;cursor:pointer"><input type="checkbox" id="fl-flag" onchange="filterList()"> 🚩 검토필요만</label>
     </div>
     ${dashPreset&&DASH_PRESETS[dashPreset]?`<div style="margin-bottom:10px"><span class="chip" style="background:#e0e7ff;color:#3730a3">필터: ${DASH_PRESETS[dashPreset].label} <span style="cursor:pointer;font-weight:700;margin-left:4px" onclick="clearDashPreset()">✕</span></span></div>`:''}
     <table>
-      <tr><th><input type="checkbox" id="chk-all" onchange="toggleAllCheck(this.checked)" title="전체선택"></th><th>No.</th><th>제품명</th><th>1단계 검토상태</th><th>진행 파이프라인 (2~4단계)</th><th>잠금</th><th>작업</th></tr>
+      <tr><th><input type="checkbox" id="chk-all" onchange="toggleAllCheck(this.checked)" title="전체선택"></th><th>No.</th><th>제품명</th><th>1단계 검토상태</th><th>진행 파이프라인 (2~4단계)</th><th title="검토 필요 표시">🚩</th><th>잠금</th><th>작업</th></tr>
       <tbody id="product-tbody">${renderProductRows(dashPreset&&DASH_PRESETS[dashPreset]?base.filter(DASH_PRESETS[dashPreset].test):base)}</tbody>
     </table>
   </div>`;
@@ -630,6 +631,7 @@ function renderProductRows(prods){
     <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#94a3b8">${p.importer||''}</div></td>
     <td>${inlineStatusSelect(p)}</td>
     <td>${pipelineBar(p)}</td>
+    <td style="text-align:center"><span onclick="toggleFlag('${p.id}')" style="cursor:pointer;font-size:16px;user-select:none" title="${p.flagged?'검토 필요 해제':'검토 필요 표시'}">${p.flagged?'🚩':'<span style=\"opacity:.2\">🚩</span>'}</span></td>
     <td style="white-space:nowrap">
       ${p.lockedBy&&p.lockedBy!==currentUser.id
         ?`<span class="chip lock-chip" style="font-size:10px">🔒 ${username(p.lockedBy)}</span>`
@@ -643,6 +645,7 @@ function renderProductRows(prods){
     </td>
   </tr>`).join('');
 }
+function toggleFlag(id){const p=getProduct(id);if(!p)return;p.flagged=!p.flagged;saveData(DB);filterList();}
 function toggleRowCheck(id,checked){if(checked)selectedProductIds.add(id);else selectedProductIds.delete(id);}
 function toggleAllCheck(checked){document.querySelectorAll('.row-chk').forEach(c=>{c.checked=checked;if(checked)selectedProductIds.add(c.value);else selectedProductIds.delete(c.value);});}
 function getCheckedIds(){return [...document.querySelectorAll('.row-chk:checked')].map(c=>c.value);}
@@ -653,8 +656,10 @@ function filterList(){
   const pi=(document.getElementById('fl-pi')||{}).value||'';
   const lb=(document.getElementById('fl-lb')||{}).value||'';
   const idv=(document.getElementById('fl-id')||{}).value||'';
+  const flagOnly=(document.getElementById('fl-flag')||{}).checked||false;
   let prods=activeProducts();
   if(dashPreset&&DASH_PRESETS[dashPreset])prods=prods.filter(DASH_PRESETS[dashPreset].test);
+  if(flagOnly)prods=prods.filter(p=>p.flagged);
   if(name)prods=prods.filter(p=>(p.itemNo||'').toLowerCase().includes(name)||(p.name||'').toLowerCase().includes(name)||(p.importer||'').toLowerCase().includes(name));
   if(status)prods=prods.filter(p=>p.status===status);
   if(lockFilter==='none')prods=prods.filter(p=>!p.lockedBy);
