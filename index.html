@@ -422,7 +422,10 @@ function idBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:1
 // ============================================================
 // ROUTER
 // ============================================================
+let _presetNav=false;
 function go(page,arg){
+  if(!_presetNav)dashPreset=null; // 프리셋 이동이 아니면 대시보드 필터 해제
+  _presetNav=false;
   currentPage=page;currentProductId=arg||null;
   if(page!=='product')currentTab='기본정보';
   renderPage();
@@ -447,11 +450,25 @@ function renderPage(){
   updateFinalBadge();
 }
 function switchUser(id){currentUser=USERS[id];renderPage();}
-function goProductsFilter(status){go('products');setTimeout(()=>{const el=document.getElementById('fl-status');if(el){el.value=status;filterList();}},30);}
+function goProductsFilter(status){dashPreset=null;go('products');setTimeout(()=>{const el=document.getElementById('fl-status');if(el){el.value=status;filterList();}},30);}
+
+// 대시보드 아랫줄(단계) 카드 → 제품목록 프리셋 필터
+const DASH_PRESETS={
+  'pi-inprog':{label:'사전검사 진행중', test:p=>p.preInspect==='진행중'},
+  'pi-notrefl':{label:'사전검사 완료 · 검토파일 미반영', test:p=>p.preInspect==='진행완료'&&p.preInspectReflect==='검토파일미반영'},
+  'label-inprog':{label:'라벨 진행중', test:p=>['라벨요청','라벨작성중'].includes(p.labelStatus)},
+  'id-prep':{label:'수입신고 준비중', test:p=>p.importDecl==='수입신고준비중'},
+  'id-done':{label:'수입신고 완료', test:p=>p.importDecl==='신고완료'},
+};
+let dashPreset=null;
+function goDashPreset(key){dashPreset=key;_presetNav=true;go('products');setTimeout(()=>filterList(),30);}
+function clearDashPreset(){dashPreset=null;renderPage();}
 
 // 최종검토 대기 / 완료 제품 판정
+function isCompleted(p){return p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송';}
+function activeProducts(){return DB.products.map(ensureFields).filter(p=>!isCompleted(p));}
 function pendingFinalProducts(){return DB.products.map(ensureFields).filter(p=>p.finalReviewPending);}
-function completedProducts(){return DB.products.map(ensureFields).filter(p=>p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송');}
+function completedProducts(){return DB.products.map(ensureFields).filter(isCompleted);}
 function updateFinalBadge(){
   const el=document.getElementById('nav-final');if(!el)return;
   const ex=el.querySelector('.notif-count');if(ex)ex.remove();
@@ -490,40 +507,11 @@ function renderDashboard(){
     </table>
   </div>`:'';
 
-  // 칸반 보드 (상태별 카드)
-  const kanbanHTML=STATUSES.map(s=>{
-    const col=prods.filter(p=>p.status===s);
-    const bcolor=STATUS_COLORS[s]||'#94a3b8';
-    return`<div class="kanban-col">
-      <div class="kanban-col-header">
-        <span style="color:${bcolor}">${s}</span>
-        <span style="background:${bcolor}22;color:${bcolor};border-radius:10px;padding:1px 7px;font-size:11px">${col.length}</span>
-      </div>
-      ${col.length===0?`<div style="font-size:11px;color:#cbd5e1;text-align:center;padding:10px 0">없음</div>`:
-        col.map(p=>`<div class="kanban-card" onclick="go('product','${p.id}')" style="border-left-color:${bcolor}">
-          <div class="kc-name">${p.itemNo?`[${p.itemNo}] `:''}${p.name}</div>
-          <div class="kc-meta">${p.importer||''}</div>
-          <div class="kc-pipe">
-            ${[
-              {c:PI_COLORS[p.preInspect]||'#e2e8f0',t:`사전검사: ${p.preInspect||'-'}`},
-              {c:LABEL_COLORS[p.labelStatus]||'#e2e8f0',t:`라벨: ${p.labelStatus||'-'}`},
-              {c:ID_COLORS[p.importDecl]||'#e2e8f0',t:`수입신고: ${p.importDecl||'-'}`},
-            ].map(d=>`<div class="kc-dot" style="background:${d.c}" title="${d.t}"></div>`).join('')}
-          </div>
-        </div>`).join('')}
-    </div>`;
-  }).join('');
-
   return`
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-outline btn-sm" id="view-stat" onclick="setDashView('stat')" style="font-weight:600">📊 현황</button>
-      <button class="btn btn-outline btn-sm" id="view-kanban" onclick="setDashView('kanban')">🗂️ 칸반</button>
-    </div>
+  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px">
     <span class="text-sm">전체 ${total}건</span>
   </div>
 
-  <div id="dash-stat">
   ${finalBanner}
   <div class="card" style="margin-bottom:14px">
     <h3>📋 검토 상태 현황 <span style="font-weight:400;color:#64748b;font-size:11px">— 카드를 클릭하면 해당 상태 목록으로 이동합니다</span></h3>
@@ -537,11 +525,11 @@ function renderDashboard(){
   </div>
 
   <div class="stat-grid">
-    <div class="stat-card" style="border-color:#3b82f6"><div class="val" style="color:#1d4ed8">${piInProg}</div><div class="lbl">🧪 사전검사 진행중</div></div>
-    <div class="stat-card" style="border-color:#ef4444"><div class="val" style="color:#dc2626">${piNotRefl}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
-    <div class="stat-card" style="border-color:#7c3aed"><div class="val" style="color:#6d28d9">${labelInProg}</div><div class="lbl">🏷️ 라벨 진행중</div></div>
-    <div class="stat-card" style="border-color:#f59e0b"><div class="val" style="color:#d97706">${idInProg}</div><div class="lbl">🚢 수입신고 준비중</div></div>
-    <div class="stat-card" style="border-color:#10b981"><div class="val" style="color:#059669">${idDone}</div><div class="lbl">✅ 신고 완료</div></div>
+    <div class="stat-card" style="border-color:#3b82f6" onclick="goDashPreset('pi-inprog')"><div class="val" style="color:#1d4ed8">${piInProg}</div><div class="lbl">🧪 사전검사 진행중</div></div>
+    <div class="stat-card" style="border-color:#ef4444" onclick="goDashPreset('pi-notrefl')"><div class="val" style="color:#dc2626">${piNotRefl}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
+    <div class="stat-card" style="border-color:#7c3aed" onclick="goDashPreset('label-inprog')"><div class="val" style="color:#6d28d9">${labelInProg}</div><div class="lbl">🏷️ 라벨 진행중</div></div>
+    <div class="stat-card" style="border-color:#f59e0b" onclick="goDashPreset('id-prep')"><div class="val" style="color:#d97706">${idInProg}</div><div class="lbl">🚢 수입신고 준비중</div></div>
+    <div class="stat-card" style="border-color:#10b981" onclick="goDashPreset('id-done')"><div class="val" style="color:#059669">${idDone}</div><div class="lbl">✅ 신고 완료</div></div>
   </div>
 
   <div class="card">
@@ -566,25 +554,6 @@ function renderDashboard(){
   <div class="card"><div class="flex-between"><h3>최근 활동</h3></div>
     ${recentH.length===0?'<div class="empty">활동 내역이 없습니다.</div>':recentH.map(h=>{const p=getProduct(h.productId);return`<div class="history-item"><div class="dot"></div><div><div class="meta">${h.at} · ${username(h.by)}</div><div style="font-size:13px;margin-top:3px">${p?p.name:'?'} — ${h.from||'등록'} → <strong>${h.to}</strong></div></div></div>`;}).join('')}
   </div>
-  </div>
-
-  <div id="dash-kanban" style="display:none">
-    <div class="kanban">${kanbanHTML}</div>
-  </div>
-
-  <script>
-  (function(){
-    const stored=sessionStorage.getItem('dashView')||'stat';
-    setDashView(stored,true);
-  })();
-  function setDashView(v,silent){
-    sessionStorage.setItem('dashView',v);
-    document.getElementById('dash-stat').style.display=v==='stat'?'block':'none';
-    document.getElementById('dash-kanban').style.display=v==='kanban'?'block':'none';
-    document.getElementById('view-stat').style.fontWeight=v==='stat'?'700':'400';
-    document.getElementById('view-kanban').style.fontWeight=v==='kanban'?'700':'400';
-  }
-  <\/script>
   `;
 }
 
@@ -592,8 +561,9 @@ function renderDashboard(){
 // PRODUCT LIST
 // ============================================================
 function renderProductList(){
+  const base=activeProducts();
   return`<div class="card">
-    <div class="flex-between"><h3>전체 제품 (${DB.products.length}건)</h3>
+    <div class="flex-between"><h3>진행중인 제품 (${base.length}건) <span style="font-weight:400;color:#94a3b8;font-size:11px">완료 제품은 [🏁 완료 제품] 메뉴에서 확인</span></h3>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary btn-sm" onclick="go('register')">➕ 제품 등록</button>
         <button class="btn btn-purple btn-sm" onclick="showImportModal()">📥 구글시트 이관</button>
@@ -608,9 +578,10 @@ function renderProductList(){
       <select id="fl-lb" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">라벨 전체</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
       <select id="fl-id" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">수입신고 전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
     </div>
+    ${dashPreset&&DASH_PRESETS[dashPreset]?`<div style="margin-bottom:10px"><span class="chip" style="background:#e0e7ff;color:#3730a3">필터: ${DASH_PRESETS[dashPreset].label} <span style="cursor:pointer;font-weight:700;margin-left:4px" onclick="clearDashPreset()">✕</span></span></div>`:''}
     <table>
       <tr><th><input type="checkbox" id="chk-all" onchange="toggleAllCheck(this.checked)" title="전체선택"></th><th>No.</th><th>제품명</th><th>1단계 검토상태</th><th>진행 파이프라인 (2~4단계)</th><th>잠금</th><th>작업</th></tr>
-      <tbody id="product-tbody">${renderProductRows(DB.products.map(ensureFields))}</tbody>
+      <tbody id="product-tbody">${renderProductRows(dashPreset&&DASH_PRESETS[dashPreset]?base.filter(DASH_PRESETS[dashPreset].test):base)}</tbody>
     </table>
   </div>`;
 }
@@ -682,7 +653,8 @@ function filterList(){
   const pi=(document.getElementById('fl-pi')||{}).value||'';
   const lb=(document.getElementById('fl-lb')||{}).value||'';
   const idv=(document.getElementById('fl-id')||{}).value||'';
-  let prods=DB.products.map(ensureFields);
+  let prods=activeProducts();
+  if(dashPreset&&DASH_PRESETS[dashPreset])prods=prods.filter(DASH_PRESETS[dashPreset].test);
   if(name)prods=prods.filter(p=>(p.itemNo||'').toLowerCase().includes(name)||(p.name||'').toLowerCase().includes(name)||(p.importer||'').toLowerCase().includes(name));
   if(status)prods=prods.filter(p=>p.status===status);
   if(lockFilter==='none')prods=prods.filter(p=>!p.lockedBy);
