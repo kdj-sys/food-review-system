@@ -197,7 +197,6 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <a onclick="go('register')" data-page="register"><span class="icon">➕</span>제품 등록</a>
     <a onclick="go('search')" data-page="search"><span class="icon">🔍</span>검색</a>
     <div class="section-title">업무관리</div>
-    <a onclick="go('finalReview')" data-page="finalReview" id="nav-final"><span class="icon">✅</span>최종검토 대기</a>
     <a onclick="go('completed')" data-page="completed"><span class="icon">🏁</span>완료 제품</a>
     <a onclick="go('notifications')" data-page="notifications" id="nav-notif"><span class="icon">🔔</span>알림</a>
     <div class="section-title">조회 · 기준</div>
@@ -433,7 +432,7 @@ function go(page,arg){
 }
 function renderPage(){
   document.getElementById('topbarDate').textContent=nowStr();
-  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',manufacturers:'해외제조업소',ingredients:'성분코드조회',finalReview:'최종검토 대기',completed:'완료 제품'};
+  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',manufacturers:'해외제조업소',ingredients:'성분코드조회',completed:'완료 제품'};
   document.getElementById('pageTitle').textContent=titles[currentPage]||'';
   const c=document.getElementById('content');
   if(currentPage==='dashboard')c.innerHTML=renderDashboard();
@@ -443,7 +442,6 @@ function renderPage(){
   else if(currentPage==='search')c.innerHTML=renderSearch();
   else if(currentPage==='notifications')c.innerHTML=renderNotifications();
   else if(currentPage==='manufacturers')c.innerHTML=renderManufacturers();
-  else if(currentPage==='finalReview')c.innerHTML=renderFinalReview();
   else if(currentPage==='completed')c.innerHTML=renderCompleted();
   else if(currentPage==='ingredients'){c.innerHTML=renderIngredients();initIngredientPage();}
   updateNotifBadge();
