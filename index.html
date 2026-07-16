@@ -53,7 +53,7 @@ body{font-family:'Malgun Gothic',sans-serif;background:#f1f5f9;color:#1e293b;dis
 .lb-라벨요청{background:#e0f2fe;color:#0369a1;}
 .lb-라벨작성중{background:#f3e8ff;color:#7e22ce;}
 .lb-라벨작성완료{background:#dcfce7;color:#15803d;}
-.lb-라벨발송전{background:#fef3c7;color:#d97706;}
+.lb-라벨보완중{background:#fef3c7;color:#d97706;}
 .lb-라벨발송{background:#d1fae5;color:#065f46;}
 /* 4단계 수입신고 */
 .id-수입신고준비중{background:#e0f2fe;color:#0369a1;}
@@ -248,8 +248,8 @@ const PR_COLORS={'검토파일미반영':'#dc2626','반영완료':'#15803d'};
 const LABEL_STATUSES=['-','라벨요청','라벨작성중','라벨작성완료'];
 const LABEL_COLORS={'-':'#94a3b8','라벨요청':'#0369a1','라벨작성중':'#7c3aed','라벨작성완료':'#15803d'};
 // 3단계 라벨 검토단계 (사전검사 반영여부처럼 세부)
-const LABEL_REVIEW_STATUSES=['-','라벨검토중','라벨발송전','라벨발송'];
-const LABEL_REVIEW_COLORS={'-':'#94a3b8','라벨검토중':'#7c3aed','라벨발송전':'#d97706','라벨발송':'#065f46'};
+const LABEL_REVIEW_STATUSES=['-','라벨검토중','라벨보완중','라벨발송'];
+const LABEL_REVIEW_COLORS={'-':'#94a3b8','라벨검토중':'#7c3aed','라벨보완중':'#d97706','라벨발송':'#065f46'};
 // 4단계 수입신고
 const ID_STATUSES=['-','수입신고준비중','신고완료'];
 const ID_COLORS={'-':'#94a3b8','수입신고준비중':'#0369a1','신고완료':'#065f46'};
