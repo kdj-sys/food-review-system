@@ -967,10 +967,11 @@ function confirmFinalReview(id){
   // 1단계가 '검토중'이면 최종확인 시 자동으로 '보완요청'으로 변경
   if(p.status==='검토중'){
     p.status='보완요청';
-    p.reviseRequestDate=todayStr();
     DB.history.push({id:uid(),productId:id,from:'검토중',to:'보완요청',by:currentUser.id,at:nowStr(),note:'최종확인 → 보완요청 자동전환'});
     Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 최종확인 → 보완요청`,id);});
   }
+  // 최종확인 시점에 상태가 '보완요청'이면(방금 전환됐든 이미 그 상태였든) 보완요청일을 오늘로 갱신
+  if(p.status==='보완요청')p.reviseRequestDate=todayStr();
   saveData(DB);renderPage();
 }
 function forceUnlock(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
