@@ -585,10 +585,12 @@ function renderProductList(){
   </div>`;
 }
 function pipelineBar(p){
+  // 라벨작성완료 후에는 세부단계(라벨검토중/라벨보완중/라벨발송)를 그대로 노출
+  const labelHasSub=p.labelStatus==='라벨작성완료'&&p.labelReview&&p.labelReview!=='-';
   const steps=[
     {label:'검토',val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료'},
     {label:'사전검사',val:p.preInspect,colors:PI_COLORS,done:p.preInspect==='진행완료'||p.preInspect==='해당없음'},
-    {label:'라벨',val:p.labelStatus,colors:LABEL_COLORS,done:p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송'},
+    {label:labelHasSub?p.labelReview:'라벨',val:labelHasSub?p.labelReview:p.labelStatus,colors:labelHasSub?LABEL_REVIEW_COLORS:LABEL_COLORS,done:p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송',title:labelHasSub?`라벨작성완료 · ${p.labelReview}`:`라벨: ${p.labelStatus||'-'}`},
     {label:'수입신고',val:p.importDecl,colors:ID_COLORS,done:p.importDecl==='신고완료'},
   ];
   return`<div class="pipeline">${steps.map((s,i)=>{
@@ -596,7 +598,7 @@ function pipelineBar(p){
     const bg=s.done?color:s.val&&s.val!=='-'?color+'33':'#f1f5f9';
     const fc=s.done?'#fff':s.val&&s.val!=='-'?color:'#94a3b8';
     return(i>0?`<span class="pipe-arrow">›</span>`:'')+
-      `<div class="pipe-step" style="background:${bg};color:${fc}" title="${s.val||'미진행'}">${s.label}</div>`;
+      `<div class="pipe-step" style="background:${bg};color:${fc}" title="${s.title||s.val||'미진행'}">${s.label}</div>`;
   }).join('')}</div>`;
 }
 
