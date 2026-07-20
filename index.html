@@ -1360,12 +1360,13 @@ function showCSVPreview(parsed){
     else if(hl.includes('메모')||hl.includes('비고'))autoMap[i]='note';
   });
   document.getElementById('csv-preview-area').innerHTML=`<hr>
+  ${rows.length===0?`<div class="alert-warn">⚠️ <strong>가져올 데이터 행이 없습니다.</strong> 붙여넣은 <strong>첫 번째 줄은 컬럼명(헤더)</strong>으로 처리됩니다. 지금은 첫 줄에 실제 제품 데이터만 있어서, 그 줄이 헤더로 소비되고 남은 데이터가 없습니다.<br>맨 위에 <strong>"아이템번호 / 제품명 / 수입사 ..." 같은 컬럼명 한 줄</strong>을 추가해서 다시 붙여넣어 주세요.</div>`:''}
   <div style="font-size:13px;font-weight:600;margin-bottom:8px">미리보기 (처음 3행)</div>
   <div class="csv-preview"><table><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
   ${rows.slice(0,3).map(r=>`<tr>${r.map(c=>`<td>${c||''}</td>`).join('')}</tr>`).join('')}</table></div>
   <div style="font-size:13px;font-weight:600;margin:10px 0 8px">컬럼 매핑</div>
   <div class="col-map">${headers.map((h,i)=>`<div class="fg"><label>${h}</label><select id="col-map-${i}">${fieldOpts}</select></div>`).join('')}</div>
-  <div class="text-sm">전체 ${rows.length}행</div>`;
+  <div class="text-sm" style="${rows.length===0?'color:#dc2626;font-weight:600':''}">전체 ${rows.length}행</div>`;
   headers.forEach((h,i)=>{const sel=document.getElementById(`col-map-${i}`);if(sel&&autoMap[i])sel.value=autoMap[i];});
 }
 function doImport(){
@@ -1374,6 +1375,7 @@ function doImport(){
   const mapping={};
   headers.forEach((h,i)=>{const sel=document.getElementById(`col-map-${i}`);if(sel&&sel.value)mapping[sel.value]=i;});
   if(!mapping.name){alert('제품명 컬럼을 지정하세요.');return;}
+  if(rows.length===0){alert('⚠️ 가져올 데이터가 없습니다.\n붙여넣은 첫 번째 줄이 컬럼명(헤더)으로 사용되어, 실제 데이터 행이 남지 않았습니다.\n맨 위에 컬럼명(아이템번호/제품명/수입사 등) 한 줄을 추가해서 다시 붙여넣어 주세요.');return;}
   let added=0,skipped=0;
   const existingNames=new Set(DB.products.map(p=>p.name.toLowerCase()));
   rows.forEach(row=>{
