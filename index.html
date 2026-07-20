@@ -618,7 +618,7 @@ function inlineChangeStatus(id,s){
   if(p.lockedBy&&p.lockedBy!==currentUser.id){alert(`${username(p.lockedBy)}님이 검토중입니다.`);return;}
   const old=p.status;if(old===s)return;
   p.status=s;
-  if(s==='보완요청')p.reviseRequestDate=todayStr();
+  if(s==='보완요청'){p.reviseRequestDate=todayStr();p.reviseNote='';}
   DB.history.push({id:uid(),productId:id,from:old,to:s,by:currentUser.id,at:nowStr(),note:'목록 인라인 변경'});
   if(s==='검토완료'){p.lockedBy=null;p.lockTime=null;}
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→${s}`,id);});
@@ -832,9 +832,10 @@ function renderBasicInfo(p){
     <div class="status-btns">
       ${STATUSES.map(s=>`<button style="background:${s===p.status?STATUS_COLORS[s]:'#f1f5f9'};color:${s===p.status?'#fff':'#374151'};border-color:${s===p.status?STATUS_COLORS[s]:'transparent'}" onclick="changeStatus('${p.id}','${s}')">${s}</button>`).join('')}
     </div>
-    ${p.status==='보완요청'||p.reviseRequestDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-      <div style="font-size:11px;color:#c2410c;font-weight:600">📌 보완요청일</div>
+    ${p.status==='보완요청'||p.reviseRequestDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+      <div style="font-size:11px;color:#c2410c;font-weight:600;white-space:nowrap">📌 보완요청일</div>
       <input type="date" id="reviseDateInput" value="${p.reviseRequestDate||''}" onchange="saveReviseDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
+      <input type="text" id="reviseNoteInput" value="${escAttr(p.reviseNote)}" onchange="saveReviseNote('${p.id}',this.value)" placeholder="보완 내용 메모 (예: 트랜스지방 표시 누락)" style="flex:1;min-width:220px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">
     </div>`:''}
   </div>
 
@@ -889,7 +890,7 @@ function changeStatus(id,s){
   if(p.lockedBy&&p.lockedBy!==currentUser.id){alert(`${username(p.lockedBy)}님이 검토중입니다.`);return;}
   const old=p.status;if(old===s)return;
   p.status=s;
-  if(s==='보완요청')p.reviseRequestDate=todayStr();
+  if(s==='보완요청'){p.reviseRequestDate=todayStr();p.reviseNote='';}
   DB.history.push({id:uid(),productId:id,from:old,to:s,by:currentUser.id,at:nowStr(),note:''});
   if(s==='검토완료'){p.lockedBy=null;p.lockTime=null;}
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→${s}`,id);});
@@ -928,6 +929,11 @@ function saveReviseDate(id,val){
   const p=getProduct(id);if(!p)return;
   p.reviseRequestDate=val;saveData(DB);
 }
+function saveReviseNote(id,val){
+  const p=getProduct(id);if(!p)return;
+  p.reviseNote=val;saveData(DB);
+}
+function escAttr(s){return(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
 function startReview(id){
   const p=getProduct(id);if(!p)return;
   if(p.lockedBy){alert(`${username(p.lockedBy)}님이 검토중입니다.`);return;}
@@ -964,13 +970,14 @@ function confirmFinalReview(id){
   p.finalConfirmedBy=currentUser.id;
   p.finalConfirmedAt=nowStr();
   DB.history.push({id:uid(),productId:id,from:'최종검토 대기',to:'최종확인 완료',by:currentUser.id,at:nowStr(),note:`최종 확인: ${currentUser.name}`});
-  // 1단계가 '검토중'이면 최종확인 시 자동으로 '보완요청'으로 변경
+  // 1단계가 '검토중'이면 최종확인 시 자동으로 '보완요청'으로 변경 (새 보완요청 발생 → 메모 초기화)
   if(p.status==='검토중'){
     p.status='보완요청';
+    p.reviseNote='';
     DB.history.push({id:uid(),productId:id,from:'검토중',to:'보완요청',by:currentUser.id,at:nowStr(),note:'최종확인 → 보완요청 자동전환'});
     Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 최종확인 → 보완요청`,id);});
   }
-  // 최종확인 시점에 상태가 '보완요청'이면(방금 전환됐든 이미 그 상태였든) 보완요청일을 오늘로 갱신
+  // 최종확인 시점에 상태가 '보완요청'이면(방금 전환됐든 이미 그 상태였든) 보완요청일을 오늘로 갱신 (메모는 유지)
   if(p.status==='보완요청')p.reviseRequestDate=todayStr();
   saveData(DB);renderPage();
 }
