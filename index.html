@@ -276,7 +276,7 @@ const AUTH_KEY='frs_auth';
 
 let currentUser=USERS.u1, currentPage='dashboard', currentProductId=null, currentTab='기본정보';
 let selectedProductIds=new Set(); // 제품목록 체크 선택 유지(동기화 재렌더 시에도 보존)
-let floatingChatOpen=false; // 제품 상세: 어느 탭에서든 뜨는 채팅 위젯 열림 상태
+let floatingChatOpen=true; // 제품 상세: 어느 탭에서든 뜨는 채팅 위젯 — 기본값 항상 열림
 let syncInterval=null;
 
 // ============================================================
@@ -897,7 +897,12 @@ function renderBasicInfo(p){
     <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">라벨 검토단계</div>
     <div class="status-btns">
       ${LABEL_REVIEW_STATUSES.map(s=>`<button style="background:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'#f1f5f9'};color:${s===p.labelReview?'#fff':'#374151'};border-color:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'transparent'}" onclick="changeLabelReview('${p.id}','${s}')">${s==='-'?'—':s}</button>`).join('')}
-    </div>`:''}
+    </div>
+    ${p.labelReview==='라벨보완중'||p.labelReviseDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+      <div style="font-size:11px;color:#c2410c;font-weight:600;white-space:nowrap">📌 라벨보완요청일</div>
+      <input type="date" id="labelReviseDateInput" value="${p.labelReviseDate||''}" onchange="saveLabelReviseDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
+      <input type="text" id="labelReviseNoteInput" value="${escAttr(p.labelReviseNote)}" onchange="saveLabelReviseNote('${p.id}',this.value)" placeholder="보완 내용 메모 (예: 폰트 크기 오류)" style="flex:1;min-width:220px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">
+    </div>`:''}`:''}
   </div>
 
   <div class="status-section">
@@ -978,8 +983,17 @@ function startReview(id){
 function changeLabelReview(id,s){
   const p=getProduct(id);if(!p)return;
   const old=p.labelReview;p.labelReview=s;
+  if(s==='라벨보완중'&&old!==s){p.labelReviseDate=todayStr();p.labelReviseNote='';}
   DB.history.push({id:uid(),productId:id,from:`라벨검토:${old}`,to:`라벨검토:${s}`,by:currentUser.id,at:nowStr(),note:''});
   saveData(DB);renderPage();
+}
+function saveLabelReviseDate(id,val){
+  const p=getProduct(id);if(!p)return;
+  p.labelReviseDate=val;saveData(DB);
+}
+function saveLabelReviseNote(id,val){
+  const p=getProduct(id);if(!p)return;
+  p.labelReviseNote=val;saveData(DB);
 }
 function endReview(id){submitFinalReview(id);}
 // 검토자가 검토를 마치고 잠금 종료 → 최종검토 대기로 표시 (최종 검토자가 확인해야 지워짐)
@@ -1009,6 +1023,8 @@ function confirmFinalReview(id){
   }
   // 최종확인 시점에 상태가 '보완요청'이면(방금 전환됐든 이미 그 상태였든) 보완요청일을 오늘로 갱신 (메모는 유지)
   if(p.status==='보완요청')p.reviseRequestDate=todayStr();
+  // 라벨 검토단계가 '라벨보완중'이면 동일하게 라벨보완요청일을 오늘로 갱신 (메모는 유지)
+  if(p.labelReview==='라벨보완중')p.labelReviseDate=todayStr();
   saveData(DB);renderPage();
 }
 function forceUnlock(id){const p=getProduct(id);if(!p)return;p.lockedBy=null;p.lockTime=null;saveData(DB);renderPage();}
@@ -1045,11 +1061,22 @@ function renderChatTab(productId,compact){
   </div>
   <div id="chatImgPreview"></div>
   <div class="chat-input-row">
-    <input id="chatInput" placeholder="메시지 입력... (Enter)" onkeydown="if(event.key==='Enter')sendChat('${productId}')">
+    <input id="chatInput" placeholder="메시지 입력... (Enter, 사진은 Ctrl+V로 붙여넣기 가능)" onkeydown="if(event.key==='Enter')sendChat('${productId}')" onpaste="handleChatPaste(event,'${productId}')">
     <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="sendChatImage('${productId}',this.files[0]);this.value='';">
     <button class="btn btn-outline" onclick="document.getElementById('chatImgInput').click()" title="사진 보내기">📷</button>
     <button class="btn btn-primary" onclick="sendChat('${productId}')">전송</button>
   </div>`;
+}
+// 채팅 입력창에 이미지 붙여넣기(Ctrl+V) 지원
+function handleChatPaste(e,productId){
+  const items=(e.clipboardData&&e.clipboardData.items)||[];
+  for(let i=0;i<items.length;i++){
+    if(items[i].type&&items[i].type.startsWith('image/')){
+      const blob=items[i].getAsFile();
+      if(blob){e.preventDefault();sendChatImageBlob(productId,blob);}
+      return;
+    }
+  }
 }
 function sendChat(productId){
   const inp=document.getElementById('chatInput');
@@ -1060,9 +1087,10 @@ function sendChat(productId){
   refreshChatViews(productId);
 }
 // 사진 전송: 브라우저에서 축소·압축(JPEG) 후 base64로 저장 — 클라우드 시트 용량 보호를 위해 큰 이미지는 거절
-function sendChatImage(productId,file){
-  if(!file)return;
-  if(!file.type||!file.type.startsWith('image/')){alert('이미지 파일만 보낼 수 있습니다.');return;}
+function sendChatImage(productId,file){sendChatImageBlob(productId,file);}
+function sendChatImageBlob(productId,blob){
+  if(!blob)return;
+  if(!blob.type||!blob.type.startsWith('image/')){alert('이미지 파일만 보낼 수 있습니다.');return;}
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();
@@ -1084,7 +1112,7 @@ function sendChatImage(productId,file){
     img.onerror=()=>alert('이미지를 불러오지 못했습니다.');
     img.src=e.target.result;
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(blob);
 }
 function refreshChatViews(productId){
   document.getElementById('content').innerHTML=renderProductDetail(productId);
