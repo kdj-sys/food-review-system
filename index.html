@@ -276,6 +276,7 @@ const AUTH_KEY='frs_auth';
 
 let currentUser=USERS.u1, currentPage='dashboard', currentProductId=null, currentTab='기본정보';
 let selectedProductIds=new Set(); // 제품목록 체크 선택 유지(동기화 재렌더 시에도 보존)
+let floatingChatOpen=false; // 제품 상세: 어느 탭에서든 뜨는 채팅 위젯 열림 상태
 let syncInterval=null;
 
 // ============================================================
@@ -758,9 +759,38 @@ function renderProductDetail(id){
     ${p.lockedBy===currentUser.id?`<span class="chip lock-chip">🔒 내가 검토중</span>`:''}
   </div>
   ${lockBanner}
-  <div class="card" style="padding-bottom:0">${tabHTML}<div style="padding-bottom:20px">${tabContent}</div></div>`;
+  <div class="card" style="padding-bottom:0">${tabHTML}<div style="padding-bottom:20px">${tabContent}</div></div>
+  ${renderFloatingChat(p)}`;
 }
-function switchTab(tab){currentTab=tab;renderPage();}
+function switchTab(tab){currentTab=tab;if(tab==='채팅방'&&currentProductId)markChatRead(currentProductId);renderPage();}
+
+// 어느 탭을 보고 있든(채팅방 탭 제외) 오른쪽 아래에 채팅을 띄워서 바로 대화할 수 있게 함
+function renderFloatingChat(p){
+  if(currentTab==='채팅방')return''; // 이미 채팅방 탭을 보고 있으면 중복이므로 생략
+  const unread=DB.chats.filter(c=>c.productId===p.id&&c.userId!==currentUser.id&&(!c.readBy||!c.readBy.includes(currentUser.id))).length;
+  return`
+  <div onclick="toggleFloatingChat('${p.id}')" style="position:fixed;right:24px;bottom:24px;width:54px;height:54px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;z-index:900">
+    💬${unread>0?`<span class="notif-count" style="position:absolute;top:-2px;right:-2px">${unread}</span>`:''}
+  </div>
+  ${floatingChatOpen?`<div style="position:fixed;right:24px;bottom:88px;width:340px;max-width:88vw;height:440px;max-height:70vh;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:900">
+    <div style="background:#3b82f6;color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;flex-shrink:0">
+      <span>💬 ${p.name}</span>
+      <span style="cursor:pointer;font-size:16px" onclick="toggleFloatingChat('${p.id}')">✕</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:10px">${renderChatTab(p.id,true)}</div>
+  </div>`:''}`;
+}
+function toggleFloatingChat(productId){
+  floatingChatOpen=!floatingChatOpen;
+  if(floatingChatOpen)markChatRead(productId); // 배지가 갱신된 상태로 렌더되도록 먼저 읽음 처리
+  renderPage();
+  if(floatingChatOpen)setTimeout(()=>{const cb=document.getElementById('chatBox');if(cb)cb.scrollTop=cb.scrollHeight;},50);
+}
+function markChatRead(productId){
+  let changed=false;
+  DB.chats.forEach(c=>{if(c.productId===productId&&c.userId!==currentUser.id){if(!c.readBy)c.readBy=[];if(!c.readBy.includes(currentUser.id)){c.readBy.push(currentUser.id);changed=true;}}});
+  if(changed)saveData(DB);
+}
 
 function renderBasicInfo(p){
   const showReflect=p.preInspect==='진행완료';
@@ -999,20 +1029,25 @@ function toggleLockFromList(id){
 }
 
 // CHAT
-function renderChatTab(productId){
+function renderChatTab(productId,compact){
   const msgs=DB.chats.filter(c=>c.productId===productId).sort((a,b)=>a.at.localeCompare(b.at));
   const colors=['#3b82f6','#10b981'];
-  return`<div class="chat-box" id="chatBox">
+  return`<div class="chat-box" id="chatBox" style="${compact?'flex:1;min-height:0;height:auto':''}">
     ${msgs.length===0?'<div class="empty">아직 메시지가 없습니다.</div>':msgs.map(m=>{
       const mine=m.userId===currentUser.id;
       const ci=Object.keys(USERS).indexOf(m.userId);
+      const imgHtml=m.img?`<img src="${m.img}" onclick="window.open('${m.img}','_blank')" style="max-width:200px;max-height:200px;border-radius:8px;display:block;cursor:zoom-in">`:'';
+      const textHtml=m.msg?`<div class="text" style="${m.img?'margin-top:4px':''}">${m.msg}</div>`:'';
       return`<div class="chat-msg ${mine?'mine':''}">
         <div class="avatar" style="background:${colors[ci%2]}">${m.userName.charAt(0)}</div>
-        <div><div class="name">${m.userName}</div><div class="bubble"><div class="text">${m.msg}</div></div><div class="time">${m.at}</div></div>
+        <div><div class="name">${m.userName}</div><div class="bubble">${imgHtml}${textHtml}</div><div class="time">${m.at}</div></div>
       </div>`;}).join('')}
   </div>
+  <div id="chatImgPreview"></div>
   <div class="chat-input-row">
     <input id="chatInput" placeholder="메시지 입력... (Enter)" onkeydown="if(event.key==='Enter')sendChat('${productId}')">
+    <input type="file" id="chatImgInput" accept="image/*" style="display:none" onchange="sendChatImage('${productId}',this.files[0]);this.value='';">
+    <button class="btn btn-outline" onclick="document.getElementById('chatImgInput').click()" title="사진 보내기">📷</button>
     <button class="btn btn-primary" onclick="sendChat('${productId}')">전송</button>
   </div>`;
 }
@@ -1022,6 +1057,36 @@ function sendChat(productId){
   DB.chats.push({id:uid(),productId,userId:currentUser.id,userName:currentUser.name,msg,at:nowStr()});
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'chat',`${currentUser.name}: ${msg.substring(0,25)}`,productId);});
   saveData(DB);inp.value='';
+  refreshChatViews(productId);
+}
+// 사진 전송: 브라우저에서 축소·압축(JPEG) 후 base64로 저장 — 클라우드 시트 용량 보호를 위해 큰 이미지는 거절
+function sendChatImage(productId,file){
+  if(!file)return;
+  if(!file.type||!file.type.startsWith('image/')){alert('이미지 파일만 보낼 수 있습니다.');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX_W=480;
+      const scale=Math.min(1,MAX_W/img.width);
+      const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl=canvas.toDataURL('image/jpeg',0.6);
+      if(dataUrl.length>200000){alert('⚠️ 이미지 용량이 너무 큽니다. 더 작은 사진으로 다시 시도해주세요.');return;}
+      const capInp=document.getElementById('chatInput');
+      const caption=(capInp&&capInp.value||'').trim();
+      DB.chats.push({id:uid(),productId,userId:currentUser.id,userName:currentUser.name,msg:caption,img:dataUrl,at:nowStr()});
+      Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'chat',`${currentUser.name}: 📷 사진`,productId);});
+      saveData(DB);if(capInp)capInp.value='';
+      refreshChatViews(productId);
+    };
+    img.onerror=()=>alert('이미지를 불러오지 못했습니다.');
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function refreshChatViews(productId){
   document.getElementById('content').innerHTML=renderProductDetail(productId);
   setTimeout(()=>{const cb=document.getElementById('chatBox');if(cb)cb.scrollTop=cb.scrollHeight;},50);
 }
