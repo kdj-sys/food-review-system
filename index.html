@@ -321,8 +321,16 @@ async function cloudSave(data){
   isSaving=true;
   try{
     setSyncStatus('syncing');
-    await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({data,ts:Date.now()})});
-    setSyncStatus('ok');
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({data,ts:Date.now()})});
+    let j=null;try{j=await res.json();}catch(e){}
+    if(j&&j.status==='error'){
+      setSyncStatus('err');
+      // 서버 저장이 실제로는 실패했는데 화면엔 표시 안 되던 문제 방지: 명확히 알림
+      // (자주 발생하면 구글시트 한 칸 용량 한도(약 5만자) 초과일 가능성이 큼 — 사진 등 큰 데이터 확인)
+      alert('⚠️ 클라우드 저장 실패!\n'+(j.msg||'')+'\n\n방금 한 변경이 다음 자동 동기화 때 사라질 수 있습니다. (용량 한도 초과 가능성 — 사진 등 큰 데이터를 확인해주세요)');
+    }else{
+      setSyncStatus('ok');
+    }
   }catch(e){setSyncStatus('err');}
   finally{isSaving=false;}
 }
@@ -1045,6 +1053,16 @@ function toggleLockFromList(id){
 }
 
 // CHAT
+// data: URL은 브라우저가 새 탭 직접 열기를 보안상 차단하므로, 화면 안에서 확대해서 보여줌
+function showImageLightbox(src){
+  const old=document.getElementById('imgLightbox');if(old)old.remove();
+  const div=document.createElement('div');
+  div.id='imgLightbox';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:6000;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+  div.innerHTML=`<img src="${src}" style="max-width:92vw;max-height:92vh;border-radius:8px;box-shadow:0 10px 50px rgba(0,0,0,.6)">`;
+  div.onclick=()=>div.remove();
+  document.body.appendChild(div);
+}
 function renderChatTab(productId,compact){
   const msgs=DB.chats.filter(c=>c.productId===productId).sort((a,b)=>a.at.localeCompare(b.at));
   const colors=['#3b82f6','#10b981'];
@@ -1052,7 +1070,7 @@ function renderChatTab(productId,compact){
     ${msgs.length===0?'<div class="empty">아직 메시지가 없습니다.</div>':msgs.map(m=>{
       const mine=m.userId===currentUser.id;
       const ci=Object.keys(USERS).indexOf(m.userId);
-      const imgHtml=m.img?`<img src="${m.img}" onclick="window.open('${m.img}','_blank')" style="max-width:200px;max-height:200px;border-radius:8px;display:block;cursor:zoom-in">`:'';
+      const imgHtml=m.img?`<img src="${m.img}" onclick="showImageLightbox(this.src)" style="max-width:200px;max-height:200px;border-radius:8px;display:block;cursor:zoom-in">`:'';
       const textHtml=m.msg?`<div class="text" style="${m.img?'margin-top:4px':''}">${m.msg}</div>`:'';
       return`<div class="chat-msg ${mine?'mine':''}">
         <div class="avatar" style="background:${colors[ci%2]}">${m.userName.charAt(0)}</div>
@@ -1086,6 +1104,21 @@ function sendChat(productId){
   saveData(DB);inp.value='';
   refreshChatViews(productId);
 }
+// 클라우드 동기화가 데이터 전체를 구글시트 "한 칸"에 저장하므로(약 5만자 한도), 사진 포함 시 이 한도를 넘으면
+// 서버 저장이 조용히 실패하고 다음 자동동기화 때 사진이 사라져 보이는 문제가 생김 → 보내기 전에 미리 계산해서 방지
+const SHEET_CELL_SAFE_LIMIT=45000;
+function compressImageToFit(img,budget){
+  const attempts=[[480,0.6],[360,0.5],[280,0.4],[200,0.35],[140,0.3]];
+  for(const[w,q]of attempts){
+    const scale=Math.min(1,w/img.width);
+    const cw=Math.max(1,Math.round(img.width*scale)),ch=Math.max(1,Math.round(img.height*scale));
+    const canvas=document.createElement('canvas');canvas.width=cw;canvas.height=ch;
+    canvas.getContext('2d').drawImage(img,0,0,cw,ch);
+    const dataUrl=canvas.toDataURL('image/jpeg',q);
+    if(dataUrl.length<=budget)return dataUrl;
+  }
+  return null;
+}
 // 사진 전송: 브라우저에서 축소·압축(JPEG) 후 base64로 저장 — 클라우드 시트 용량 보호를 위해 큰 이미지는 거절
 function sendChatImage(productId,file){sendChatImageBlob(productId,file);}
 function sendChatImageBlob(productId,blob){
@@ -1095,13 +1128,13 @@ function sendChatImageBlob(productId,blob){
   reader.onload=e=>{
     const img=new Image();
     img.onload=()=>{
-      const MAX_W=480;
-      const scale=Math.min(1,MAX_W/img.width);
-      const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
-      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const dataUrl=canvas.toDataURL('image/jpeg',0.6);
-      if(dataUrl.length>200000){alert('⚠️ 이미지 용량이 너무 큽니다. 더 작은 사진으로 다시 시도해주세요.');return;}
+      const currentSize=JSON.stringify(DB).length;
+      const budget=SHEET_CELL_SAFE_LIMIT-currentSize-300; // 메시지 필드 오버헤드 여유분
+      const dataUrl=budget>1000?compressImageToFit(img,budget):null;
+      if(!dataUrl){
+        alert('⚠️ 사진을 저장할 공간이 부족합니다.\n(전체 데이터가 구글시트 한 칸의 용량 한도(약 5만자)에 가까워졌습니다)\n채팅의 오래된 사진을 정리하거나, 더 작은 사진으로 다시 시도해주세요.');
+        return;
+      }
       const capInp=document.getElementById('chatInput');
       const caption=(capInp&&capInp.value||'').trim();
       DB.chats.push({id:uid(),productId,userId:currentUser.id,userName:currentUser.name,msg:caption,img:dataUrl,at:nowStr()});
