@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수입식품 검토시스템 - The Only Bean Crunchy Roasted Edamame</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1b1f24; --sub:#5f6b7a; --line:#e3e6ea;
+  --blue:#2563eb; --blue-soft:#eaf1ff;
+  --green:#178a4c; --green-soft:#e8f7ee;
+  --amber:#b6650b; --amber-soft:#fff3e0;
+  --red:#c62828; --red-soft:#fdeaea;
+  --gray-soft:#eef0f2;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:"Pretendard","Malgun Gothic",-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px;}
+header{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+header h1{margin:0 0 4px;font-size:21px;letter-spacing:-.2px;}
+.subtitle{color:var(--sub);font-size:13px;margin-bottom:12px;}
+.subtitle b{color:var(--ink);}
+.pill{display:inline-block;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;background:var(--amber-soft);color:var(--amber);border:1px solid #f3d9ad;}
+.hdr-actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12.5px;padding:7px 14px;border-radius:9px;cursor:pointer;}
+.btn:hover{background:var(--gray-soft);}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn.primary:hover{background:#1d4fd1;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+.card>summary{list-style:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px;user-select:none;}
+.card>summary::-webkit-details-marker{display:none;}
+.card>summary .ico{font-size:16px;}
+.card>summary .ttl{flex:1;}
+.card>summary .right{font-size:12px;color:var(--sub);font-weight:500;}
+.card>summary:after{content:"›";display:inline-block;transform:rotate(90deg);transition:.15s;color:var(--sub);font-size:16px;}
+.card[open]>summary:after{transform:rotate(-90deg);}
+.card .body{padding:0 20px 20px;border-top:1px solid var(--line);padding-top:14px;font-size:13px;}
+
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0 14px;}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top;}
+th{background:var(--gray-soft);font-weight:600;white-space:nowrap;}
+td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.indent1{padding-left:20px;}
+.indent2{padding-left:34px;}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;}
+.tag.ok{background:var(--green-soft);color:var(--green);}
+.tag.warn{background:var(--amber-soft);color:var(--amber);}
+.tag.need{background:var(--red-soft);color:var(--red);}
+.tag.na{background:var(--gray-soft);color:var(--sub);}
+
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 4px;}
+@media(max-width:640px){.mgrid{grid-template-columns:repeat(2,1fr);}}
+.mbox{border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:11.5px;}
+.mbox b{display:block;font-size:12.5px;margin-bottom:3px;}
+.progwrap{background:var(--gray-soft);border-radius:8px;height:10px;overflow:hidden;margin:8px 0;}
+.progbar{height:100%;background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.counts{display:flex;gap:14px;font-size:12.5px;margin-bottom:8px;}
+.counts span b{font-size:15px;}
+
+.flavorbar{display:flex;gap:8px;margin-bottom:14px;}
+.fbtn{flex:1;text-align:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;}
+.fbtn.active{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);}
+
+.remark{color:var(--sub);font-size:11.5px;}
+.warnrow{background:#fffaf0;}
+ul.opin{margin:0;padding-left:18px;}
+ul.opin li{margin-bottom:7px;}
+
+.subtabs{display:flex;gap:6px;margin-bottom:10px;}
+.subtab{padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--sub);}
+.subtab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.subpane{display:none;}
+.subpane.active{display:block;}
+.gukmin-box{white-space:pre-wrap;background:var(--gray-soft);border-radius:10px;padding:16px;font-size:12.5px;line-height:1.7;}
+.copybtn{margin-bottom:8px;}
+.pending-note{background:var(--red-soft);color:var(--red);border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:10px;}
+
+.hist-item{border-left:3px solid var(--line);padding:6px 0 6px 14px;margin-bottom:8px;font-size:12.5px;}
+.hist-item.cur{border-left-color:var(--blue);}
+.hist-item b{display:block;font-size:12px;color:var(--sub);}
+
+.law-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.law-item a{color:var(--blue);font-size:12px;text-decoration:none;}
+.law-item a:hover{text-decoration:underline;}
+
+@media print{
+  body{background:#fff;}
+  .hdr-actions{display:none;}
+  .card{break-inside:avoid;box-shadow:none;}
+  details:not([open]) summary{background:#f0f0f0;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>수입식품 검토시스템</h1>
+    <div class="subtitle">
+      <b>The Only Bean · Crunchy Roasted Edamame</b> (Sea Salt / Wasabi Soy Sauce) ·
+      제조사: SUZHOU YOUI FOODS CO.,LTD.(중국) · 검토일: 2026-07-21 ·
+      본 시스템은 SMTING/IFACS 커넥터 조회 결과를 기반으로 자동 생성되었습니다.
+    </div>
+    <span class="pill">종합판정: 🟡 조건부 적합 (보완 필요)</span>
+    <div class="hdr-actions">
+      <button class="btn primary" onclick="setAll(true)">모두 펼치기</button>
+      <button class="btn" onclick="setAll(false)">모두 접기</button>
+      <button class="btn" onclick="window.print()">🖨 PDF</button>
+    </div>
+  </header>
+
+  <div id="cards"></div>
+</div>
+
+<script>
+const COMMON = {
+  product: {
+    nameKo: "볶은 풋콩 스낵 (The Only Bean · Crunchy Roasted Edamame)",
+    nameEn: "The Only Bean - Crunchy Roasted Edamame",
+    flavors: ["Sea Salt","Wasabi Soysauce"],
+    flavorKo: {"Sea Salt":"천일염","Wasabi Soysauce":"와사비간장"},
+    manufacturer: "SUZHOU YOUI FOODS CO.,LTD.",
+    mfgAddr: "NO.15 DONGYUAN ROAD, JINTING TOWN, SUZHOU, JIANGSU, CHINA",
+    mfgCode: "CN000000631",
+    mfgValid: "2025-02-28 ~ 2027-02-27",
+    origin: "중국(CHINA)",
+    reviewDate: "2026-07-21",
+    netWt: "0.75oz(21g)/개 · 28개입 트레이(595g)",
+    itemDept: "Item # / Dept # : 미확정(Need)",
+    shelfLife: "미수령 (못받음)"
+  },
+
+  modules: [
+    {id:"M1", name:"사전정보(제조업소)", status:"warn", note:"제조업소 MFDS 등록 확인 OK, 단 HACCP/BRC 인증 자기기재-DB 불일치·주소 표기 상이"},
+    {id:"M2", name:"제조공정 분석", status:"need", note:"Compliance Packet 내 공정도는 플레이스홀더뿐 — 실제 미제출"},
+    {id:"M3", name:"성분 분석", status:"warn", note:"대부분 코드 확정, 4건(HVP·발효간장 세부·카라멜색소 유형·Spice) 확인필요"},
+    {id:"M4", name:"HS CODE", status:"warn", note:"UNIPASS 조회 결과 정확 매칭 없음 — 확인필요 (별도 카드 없음, 종합의견·식품유형에 표기)"},
+    {id:"M5", name:"식품유형 판정", status:"warn", note:"HS CODE 미확정과 연동 — 최종 판정 보류"},
+    {id:"M6", name:"표시사항", status:"warn", note:"자동생성 가능하나 GMO 확인서 등 근거서류 일부 미비"},
+    {id:"M7", name:"수입요건·서류", status:"warn", note:"공정도·제품사진·GMO확인서·인증서 원본 등 다수 보완/미제출"},
+    {id:"M8", name:"종합판정", status:"warn", note:"🟡 조건부 적합 — 6개 항목 보완 후 재검토 필요"}
+  ],
+
+  docs: [
+    {name:"제조업소 MFDS 등록", status:"ok", note:"CN000000631 · 정상 등록(2025-02-28~2027-02-27)"},
+    {name:"HACCP/BRC 인증서 원본", status:"warn", note:"자기기재(Registration Form)만 있고 SMTING DB엔 인증 미등록 — 원본 제출요청"},
+    {name:"유통기한(소비기한) 자료", status:"need", note:"미수령"},
+    {name:"성분표(제품명·Item#·Dept# 확정)", status:"warn", note:"두 맛 모두 Item#/Dept# 미확정"},
+    {name:"제조공정도", status:"need", note:"공정도 별도파일로 요청드립니다"},
+    {name:"영양성분(100g당 trans fat)", status:"warn", note:"표 내 공란 — 단, Compliance Packet 별도문구엔 0g로 기재되어 있어 대조 확인요청"},
+    {name:"제품사진(원본, 성분표 확인 가능한 면)", status:"need", note:"아트워크 목업은 확보, 실촬영 사진 별도 요청"},
+    {name:"포장재질확인서", status:"ok", note:"PET12/VMPET12/PE50, PVC·PET-G 없음"},
+    {name:"GMO(비유전자변형) 확인서", status:"warn", note:"대두(Edamame) 94~97% 함유로 표시대상 — Non-GMO Project Verified 표방하나 인증서 원본 미제출"},
+    {name:"HS CODE 확정", status:"warn", note:"UNIPASS 조회 매칭 없음 — 관세평가분류원 사전심사 또는 국민신문고 질의 필요"}
+  ],
+
+  process: {
+    submitted: false,
+    note: "Compliance Packet에 \"INSERT PROCESS FLOW CHART HERE\" 플레이스홀더만 존재 — 실제 공정도 미제출. SMTING 분석 대상 없음(미제출 시 이 카드에는 미제출 상태만 표시)."
+  },
+
+  ingredients: {
+    "Sea Salt": [
+      {no:"1", raw:"Edamame", ko:"풋콩", pct:"96.62", cls:"원재료(1위)", code:"A1002010000000", use:"사용가능", allergy:"대두", note:"Glycine max"},
+      {no:"2", raw:"Sea Salt", ko:"천일염", pct:"1.93", cls:"식품유형", code:"P0129120100000", use:"사용가능", allergy:"-", note:"solar salt(천일염) 여부 확인 및 성분표 작성바랍니다"},
+      {no:"3", raw:"Avocado Oil", ko:"아보카도오일", pct:"1.45", cls:"원재료", code:"A1001360230020", use:"사용가능", allergy:"-", note:"라벨에 정제/압착 미표기 → 일반 아보카도오일 코드 적용"}
+    ],
+    "Wasabi Soysauce": [
+      {no:"1", raw:"Edamame", ko:"풋콩", pct:"94.21", cls:"원재료(1위)", code:"A1002010000000", use:"사용가능", allergy:"대두", note:"Glycine max"},
+      {no:"2", raw:"Soysauce Seasoning", ko:"간장시즈닝", pct:"3.77", cls:"복합원료", code:"-", use:"-", allergy:"-", note:"하위성분 전개↓"},
+      {no:"2-1", raw:"Fermented soysauce", ko:"발효간장", pct:"", cls:"확인필요", code:"확인필요", use:"-", allergy:"-", note:"세부성분(원료 구성비) 확인 및 성분표 작성바랍니다", indent:1, warn:true},
+      {no:"2-2", raw:"Acid hydrolyzed vegetable protein", ko:"산분해식물성단백질(HVP)", pct:"", cls:"확인필요", code:"확인필요", use:"-", allergy:"확인필요", note:"세부성분 확인 및 성분표 작성바랍니다(임의 나열 금지)", indent:1, warn:true},
+      {no:"2-3", raw:"Maltodextrin", ko:"말토덱스트린", pct:"", cls:"식품유형", code:"P1000004000000", use:"사용가능", allergy:"-", note:"OK", indent:1},
+      {no:"2-4", raw:"Salt", ko:"정제소금", pct:"", cls:"식품유형", code:"P0129120400000", use:"사용가능", allergy:"-", note:"OK", indent:1},
+      {no:"2-5", raw:"Sugar", ko:"설탕", pct:"", cls:"식품유형", code:"P0105000000000", use:"사용가능", allergy:"-", note:"OK", indent:1},
+      {no:"2-6", raw:"Caramel color", ko:"카라멜색소", pct:"", cls:"첨가물(착색료)", code:"확인필요(Ⅰ~Ⅳ)", use:"확인필요", allergy:"-", note:"유형 라벨 미기재(임의 유형 지정 금지) · 사용기준 원문 미확인(품질규격만 확인됨) → 확인요청", indent:1, warn:true},
+      {no:"2-7", raw:"Disodium 5'-ribonucleotide (E635)", ko:"5'-리보뉴클레오티드이나트륨", pct:"", cls:"첨가물(향미증진제)", code:"B1000050000000", use:"확인필요", allergy:"-", note:"사용기준(사용량 한도) 원문 미확인 — 품질규격만 조회됨(납1.0ppm↓·함량97~102%). 벤더 신고량 50mg/kg 적정성 확인요청", indent:1, warn:true},
+      {no:"2-8", raw:"Yeast Extract", ko:"효모추출물", pct:"", cls:"원재료", code:"B2000100000000", use:"사용가능", allergy:"-", note:"OK (식품공전 별표1 등재 식품원료 — 첨가물 아님에 유의)", indent:1},
+      {no:"2-9", raw:"Onion Powder", ko:"양파분말", pct:"", cls:"원재료", code:"A1001431000001", use:"사용가능", allergy:"-", note:"OK", indent:1},
+      {no:"2-10", raw:"Spice", ko:"향신료", pct:"", cls:"확인필요", code:"확인필요", use:"-", allergy:"-", note:"라벨 'SPICE'로만 표기 — 구체적 향신료명 확인 및 성분표 작성바랍니다(기존 'Garlic' 추정 기재는 근거자료 없어 삭제)", indent:1, warn:true},
+      {no:"2-11", raw:"Ginger Powder", ko:"생강가루", pct:"", cls:"원재료", code:"A1001184000001", use:"사용가능", allergy:"-", note:"OK", indent:1},
+      {no:"3", raw:"Avocado Oil", ko:"아보카도오일", pct:"1.88", cls:"원재료", code:"A1001360230020", use:"사용가능", allergy:"-", note:""},
+      {no:"4", raw:"Wasabi Powder", ko:"고추냉이분말", pct:"0.14", cls:"원재료", code:"A1000357000001", use:"사용가능", allergy:"-", note:""}
+    ]
+  },
+
+  nutrition: {
+    "Sea Salt": {cal:"416 kcal", fat:"18.0 g", sat:"3.0 g", trans:"공란(요청)", chol:"0 mg", carb:"28.2 g", sugar:"5.3 g", sodium:"761 mg", protein:"45.4 g",
+      note:"trans fat 표(공란) 대조 — Compliance Packet 내 'Saturated and Trans Fat Statement'엔 100g당 0g으로 별도 기재됨. 두 문서 수치 통일 확인요청"},
+    "Wasabi Soysauce": {cal:"424 kcal", fat:"19.5 g", sat:"3.0 g", trans:"공란(요청)", chol:"0 mg", carb:"28.4 g", sugar:"5.0 g", sodium:"387 mg", protein:"43.1 g",
+      note:"trans fat 표(공란) 대조 — Compliance Packet 내 'Saturated and Trans Fat Statement'엔 100g당 0g으로 별도 기재됨. 두 문서 수치 통일 확인요청"}
+  },
+
+  label: {
+    productName: "미입력 ⚠ (한글 제품명 확정 필요)",
+    foodType: "미입력 ⚠ (M5 식품유형 판정 보류 — HS CODE 확인 후 확정)",
+    ingredientsStatement: [
+      "① Sea Salt: 풋콩(중국산) 96.62%, 천일염(중국산, solar salt 여부 확인요청) 1.93%, 아보카도오일(스페인/케냐산) 1.45%",
+      "② Wasabi Soysauce: 풋콩(중국산) 94.21%, 간장시즈닝[발효간장(확인필요), 산분해식물성단백질(확인필요), 말토덱스트린, 정제소금, 설탕, 카라멜색소(확인필요), 5'-리보뉴클레오티드이나트륨, 효모추출물, 양파분말, 향신료(확인필요), 생강가루] 3.77%, 아보카도오일(스페인/케냐산) 1.88%, 고추냉이분말(중국산) 0.14%"
+    ],
+    netContent: "0.75oz(21g) · 28개입(595g)",
+    origin: "중국(CHINA)",
+    storage: "서늘하고 건조한 곳에 보관, 개봉 후 재밀봉",
+    shelfLife: "미입력 ⚠ (유통기한 자료 미수령)",
+    allergy: "대두 함유 · 땅콩·견과류 취급 시설에서 제조(교차오염 주의)",
+    gmo: "미입력 ⚠ (Non-GMO 확인서 제출 후 표시 문구 확정)",
+    importer: "미입력 ⚠ (수입원 정보 확인 필요)"
+  },
+
+  opinions: [
+    "제조업소(SUZHOU YOUI FOODS CO.,LTD., CN000000631)는 MFDS 정상 등록 상태이나, Registration Form.pdf 자기기재(HACCP 체크+BRC 인증 주장)와 SMTING DB(FOOD_SAFE_MNG_SYS_CERT_YN=N, 등록 인증 없음)가 불일치 — 자기기재만으로 인증 보유를 인정할 수 없어 원본 제출을 요청함.",
+    "제조사 주소 표기가 자료마다 상이함(Compliance Packet: Wuzhong / Registration Form·SMTING DB: Jinting Town) — 통일 확인 필요.",
+    "Wasabi Soysauce 맛의 카라멜색소는 라벨에 유형(Ⅰ~Ⅳ) 표기가 없어 임의로 유형을 지정하지 않았음 — 유형 확인 필요.",
+    "E635(5'-리보뉴클레오티드이나트륨)는 SMTING 조회로 품질규격만 확인되고 사용기준(사용량 한도) 원문은 이번 조회에서 확인되지 않음 — 벤더 신고량 50mg/kg의 적정성은 별도 확인이 필요함.",
+    "HVP(산분해식물성단백질)·발효간장·Spice 하위성분은 제출자료에 세부 구성이 없어 임의로 나열하지 않았고 각각 확인필요로 표기함.",
+    "HS CODE는 UNIPASS 품목분류 조회(EDAMAME/대두/채소조제품 등 다수 키워드)에서 정확히 매칭되는 세번을 찾지 못함 — 볶은 통대두 스낵류의 관세 분류가 확정되지 않아 M5 식품유형 판정도 함께 보류함. 관세평가분류원 사전심사 또는 국민신문고 질의를 권고함.",
+    "주원료 Edamame(대두)가 94~97%로 GMO 표시대상(3% 초과)에 해당하나 Non-GMO 인증서 원본이 폴더에 없어 비유전자변형 확인서 제출을 요청함.",
+    "제조공정도는 Compliance Packet에 플레이스홀더만 있어 실제 미제출 상태 — M2 공정분석을 진행할 수 없음."
+  ],
+
+  gukmin: {
+    ready: false,
+    pendingNote: "⚠ 공정도가 실제로 제출되지 않아(플레이스홀더만 존재) 9단계 구조의 ④ 공정 설명을 작성할 수 없습니다. 지침 원칙(공정도에 없는 공정 서술 금지)에 따라 아래는 공정 설명을 제외한 부분 초안이며, 공정도 확보 후 완성해 발송해야 합니다.",
+    draft: `안녕하세요.
+볶은 풋콩(에다마메) 스낵 제품의 관세 품목분류(HS CODE) 및 식품유형과 관련하여 질의드립니다.
+
+① 제품 개요
+본 제품은 중국 소재 제조사(SUZHOU YOUI FOODS CO.,LTD.)에서 제조하는 볶은 풋콩(에다마메)을 주원료로 한 스낵류로, 천일염(Sea Salt) 맛과 와사비간장(Wasabi Soysauce) 맛 2종으로 구성되어 있습니다.
+
+② 주요 원재료
+- Sea Salt 맛: 풋콩(Edamame) 96.62%, 천일염(Sea Salt) 1.93%, 아보카도오일(Avocado Oil) 1.45%
+- Wasabi Soysauce 맛: 풋콩(Edamame) 94.21%, 간장시즈닝(Soysauce Seasoning) 3.77%(발효간장·산분해식물성단백질·말토덱스트린·정제소금·설탕·카라멜색소·5'-리보뉴클레오티드이나트륨·효모추출물·양파분말·향신료·생강가루 포함), 아보카도오일 1.88%, 고추냉이분말(Wasabi Powder) 0.14%
+
+③ 첨부자료
+성분표(Ingredient Composition Ratio & Country of Origin Statement), 영양성분분석표, 제품 라벨 아트워크(전면·후면)를 첨부합니다. 제조공정도는 현재 제조사로부터 확보 중이며 추후 보완 제출 예정입니다.
+
+④ 공정 설명
+(제조공정도 미확보로 이번 질의에서는 기재하지 않음 — 공정도 확보 후 보완 예정)
+
+⑤ 제품 특성 설명
+(공정도·수분활성도 등 제조사 자료가 확보되는 대로 보완 예정)
+
+⑥ 질의 배경
+다만, 본 제품은 볶은 통대두(에다마메)를 주원료로 하는 스낵류로서 국내 유사 사례를 찾기 어려워 식품유형 및 관세 품목분류 판단이 어려워 질의드립니다.
+
+⑦ 핵심 질의
+특히, 본 제품과 같이 볶은 통대두(에다마메)를 주원료로 하여 조미료·향신료 등으로 조미한 스낵 형태의 제품이 「식품의 기준 및 규격」상 어느 식품유형에 해당하는지, 그리고 관세 품목분류상 어느 세번에 해당하는지 확인을 요청드립니다.
+
+⑧ 추가 확인사항
+또한, 원료(에다마메) 형태 유지 여부, 제조공정(볶음 등 가열처리 여부), 제품 성상, 제품명, 포장형태, 소비자 오인 가능성 등 판단기준이 되는 요소가 있다면 함께 안내해 주시기 바랍니다.
+
+⑨ 마무리
+따라서 본 제품의 식품유형 및 관세 품목분류에 대해 검토를 요청드립니다.
+감사합니다.`
+  },
+
+  foodType: {
+    rows: [
+      {item:"HS CODE", value:"확인필요", note:"UNIPASS 품목분류 조회 매칭 없음 — 관세평가분류원 사전심사 또는 국민신문고 질의 권고 (M4, 별도 카드 없음)"},
+      {item:"식품군(대분류)", value:"확인필요", note:"과자류/기타 가공식품 중 HS CODE·식품유형 확정 후 결정"},
+      {item:"식품유형(소분류)", value:"확인필요", note:"볶은 통대두 스낵 — 국내 등재 유형과 직접 매칭되는 사례 없음, 국민신문고 질의 권고"}
+    ]
+  },
+
+  laws: [
+    {name:"수입식품안전관리 특별법 / 시행령 / 시행규칙", url:"https://www.law.go.kr/법령/수입식품안전관리특별법"},
+    {name:"식품위생법", url:"https://www.law.go.kr/법령/식품위생법"},
+    {name:"식품의 기준 및 규격(식품공전)", url:"https://www.law.go.kr/행정규칙/식품의기준및규격"},
+    {name:"식품첨가물의 기준 및 규격", url:"https://www.law.go.kr/행정규칙/식품첨가물의기준및규격"},
+    {name:"식품등의 표시기준", url:"https://www.law.go.kr/행정규칙/식품등의표시기준"},
+    {name:"기구 및 용기·포장의 기준 및 규격", url:"https://www.law.go.kr/행정규칙/기구및용기포장의기준및규격"},
+    {name:"농수산물의 원산지 표시 등에 관한 법률", url:"https://www.law.go.kr/법령/농수산물의원산지표시등에관한법률"}
+  ],
+
+  history: [
+    {date:"2026-07-21", desc:"SMTING 커넥터 재조회 반영 1회차 — 제조업소 인증 불일치, Caramel color 유형, E635 사용기준, Spice/Garlic 근거 오류, HS CODE 미확정, GMO 확인서 필요 등 6건 신규 확인. 종합판정 🟡 조건부 적합으로 갱신.", cur:true},
+    {date:"2026-07-10", desc:"최초 Costco Pre-Test 검토 — 제조업소 등록 확인, 성분코드 대부분 확정, 공정도·유통기한·제품사진 등 서류 보완요청."}
+  ]
+};
+
+let curFlavor = COMMON.product.flavors[0];
+
+function tag(status){
+  const m = {ok:["ok","확보/OK"], warn:["warn","보완"], need:["need","미제출"], na:["na","해당없음"]};
+  const [c,l] = m[status] || ["na", status];
+  return `<span class="tag ${c}">${l}</span>`;
+}
+
+function card(id, ico, title, right, body, open){
+  return `<details class="card" id="c_${id}" ${open?"open":""}>
+    <summary><span class="ico">${ico}</span><span class="ttl">${title}</span><span class="right">${right||""}</span></summary>
+    <div class="body">${body}</div>
+  </details>`;
+}
+
+function progBody(){
+  const total = COMMON.docs.length;
+  const okCnt = COMMON.docs.filter(d=>d.status==="ok").length;
+  const warnCnt = COMMON.docs.filter(d=>d.status==="warn").length;
+  const needCnt = COMMON.docs.filter(d=>d.status==="need").length;
+  const pct = Math.round(((okCnt*1 + warnCnt*0.5) / total) * 100);
+  const grid = COMMON.modules.map(m=>`
+    <div class="mbox"><b>${m.id} ${tag(m.status)}</b>${m.name}<br><span class="remark">${m.note}</span></div>
+  `).join("");
+  return `
+    <div class="counts"><span>확보 <b>${okCnt}</b></span><span>보완 <b>${warnCnt}</b></span><span>미제출 <b>${needCnt}</b></span><span>전체 <b>${pct}%</b></span></div>
+    <div class="progwrap"><div class="progbar" style="width:${pct}%"></div></div>
+    <div class="mgrid">${grid}</div>
+  `;
+}
+
+function infoBody(){
+  const p = COMMON.product;
+  return `
+    <table>
+      <tr><th>제품명</th><td>${p.nameKo}</td></tr>
+      <tr><th>맛(SKU)</th><td>${p.flavors.join(" / ")}</td></tr>
+      <tr><th>원산지</th><td>${p.origin}</td></tr>
+      <tr><th>내용량</th><td>${p.netWt}</td></tr>
+      <tr><th>Item#/Dept#</th><td>${p.itemDept}</td></tr>
+      <tr><th>유통기한</th><td>${p.shelfLife}</td></tr>
+    </table>
+    <table>
+      <tr><th>제조업소(M1)</th><td>${p.manufacturer}</td></tr>
+      <tr><th>주소</th><td>${p.mfgAddr} <span class="remark">(Compliance Packet엔 "Wuzhong"으로 상이 기재 — 통일 확인요청)</span></td></tr>
+      <tr><th>업소코드</th><td>${p.mfgCode}</td></tr>
+      <tr><th>등록 유효기간</th><td>${p.mfgValid} · ${tag("ok")}</td></tr>
+      <tr><th>HACCP/BRC 인증</th><td>자기기재(Registration Form) 주장 있으나 SMTING DB 미등록 ${tag("warn")}</td></tr>
+    </table>
+  `;
+}
+
+function docsBody(){
+  const rows = COMMON.docs.map(d=>`<tr><td>${d.name}</td><td>${tag(d.status)}</td><td class="remark">${d.note}</td></tr>`).join("");
+  return `<table><tr><th>서류</th><th>상태</th><th>비고</th></tr>${rows}</table>`;
+}
+
+function flavorBarHtml(){
+  return `<div class="flavorbar">${COMMON.product.flavors.map(f=>
+    `<div class="fbtn ${f===curFlavor?"active":""}" onclick="selFlavor('${f}')">${f} (${COMMON.product.flavorKo[f]})</div>`
+  ).join("")}</div>`;
+}
+
+function procBody(){
+  if(!COMMON.process.submitted){
+    return `<p>${tag("need")} ${COMMON.process.note}</p>`;
+  }
+  return `<p>공정 플로우 및 CCP 표시 영역</p>`;
+}
+
+function ingBody(f){
+  const rows = COMMON.ingredients[f].map(r=>{
+    const indentCls = r.indent ? "indent1" : "";
+    const rowCls = r.warn ? "warnrow" : "";
+    return `<tr class="${rowCls}">
+      <td>${r.no}</td><td class="${indentCls}">${r.raw}</td><td>${r.ko}</td>
+      <td class="num">${r.pct}</td><td>${r.cls}</td><td>${r.code}</td>
+      <td>${r.use}</td><td>${r.allergy}</td><td class="remark">${r.note}</td>
+    </tr>`;
+  }).join("");
+  return `
+    <table>
+      <tr><th>#</th><th>성분표 원문</th><th>한국 라벨명</th><th>함량(%)</th><th>분류</th><th>성분코드</th><th>사용가능</th><th>알레르기</th><th>비고</th></tr>
+      ${rows}
+    </table>
+  `;
+}
+
+function nutBody(f){
+  const n = COMMON.nutrition[f];
+  return `
+    <table>
+      <tr><th>열량</th><td>${n.cal}</td><th>탄수화물</th><td>${n.carb}</td></tr>
+      <tr><th>지방</th><td>${n.fat}</td><th>당류</th><td>${n.sugar}</td></tr>
+      <tr><th>포화지방</th><td>${n.sat}</td><th>나트륨</th><td>${n.sodium}</td></tr>
+      <tr><th>트랜스지방</th><td>${n.trans}</td><th>단백질</th><td>${n.protein}</td></tr>
+      <tr><th>콜레스테롤</th><td>${n.chol}</td><td></td><td></td></tr>
+    </table>
+    <p class="remark">⚠ ${n.note}</p>
+  `;
+}
+
+function labelBody(){
+  const l = COMMON.label;
+  const req = (v) => v.includes("⚠") ? `<span style="color:var(--red)">${v}</span>` : v;
+  return `
+    <table>
+      <tr><th>제품명</th><td>${req(l.productName)}</td></tr>
+      <tr><th>식품유형</th><td>${req(l.foodType)}</td></tr>
+      <tr><th>원재료명</th><td>${l.ingredientsStatement.join("<br>")}</td></tr>
+      <tr><th>내용량</th><td>${l.netContent}</td></tr>
+      <tr><th>원산지</th><td>${l.origin}</td></tr>
+      <tr><th>보관방법</th><td>${l.storage}</td></tr>
+      <tr><th>소비기한</th><td>${req(l.shelfLife)}</td></tr>
+      <tr><th>알레르기</th><td>${l.allergy}</td></tr>
+      <tr><th>GMO 표시</th><td>${req(l.gmo)}</td></tr>
+      <tr><th>수입원</th><td>${req(l.importer)}</td></tr>
+    </table>
+  `;
+}
+
+function opBody(){
+  return `<ul class="opin">${COMMON.opinions.map(o=>`<li>${o}</li>`).join("")}</ul>`;
+}
+
+function reqBody(){
+  const list = COMMON.docs.filter(d=>d.status!=="ok").map(d=>`<li><b>${d.name}</b> — ${d.note}</li>`).join("");
+  return `
+    <div class="subtabs">
+      <div class="subtab active" id="tab-req" onclick="showSub('req')">보완요청 목록</div>
+      <div class="subtab" id="tab-guk" onclick="showSub('guk')">국민신문고 질의</div>
+    </div>
+    <div class="subpane active" id="pane-req"><ul class="opin">${list}</ul></div>
+    <div class="subpane" id="pane-guk">
+      ${!COMMON.gukmin.ready ? `<div class="pending-note">${COMMON.gukmin.pendingNote}</div>` : ""}
+      <button class="btn copybtn" onclick="copyGukmin()">📋 질의문 복사</button>
+      <div class="gukmin-box" id="gukminText">${COMMON.gukmin.draft}</div>
+    </div>
+  `;
+}
+
+function showSub(which){
+  document.getElementById("tab-req").classList.toggle("active", which==="req");
+  document.getElementById("tab-guk").classList.toggle("active", which==="guk");
+  document.getElementById("pane-req").classList.toggle("active", which==="req");
+  document.getElementById("pane-guk").classList.toggle("active", which==="guk");
+}
+
+function copyGukmin(){
+  navigator.clipboard.writeText(COMMON.gukmin.draft).then(()=>alert("질의문이 복사되었습니다."));
+}
+
+function ftBody(){
+  const rows = COMMON.foodType.rows.map(r=>`<tr><td>${r.item}</td><td>${r.value}</td><td class="remark">${r.note}</td></tr>`).join("");
+  return `<table><tr><th>항목</th><th>값</th><th>비고</th></tr>${rows}</table>`;
+}
+
+function lawBody(){
+  return COMMON.laws.map(l=>`<div class="law-item">${l.name} — <a href="${l.url}" target="_blank" rel="noopener">국가법령정보센터 원문 보기 ↗</a></div>`).join("");
+}
+
+function histBody(){
+  return COMMON.history.map(h=>`<div class="hist-item ${h.cur?"cur":""}"><b>${h.date}</b>${h.desc}</div>`).join("");
+}
+
+function render(){
+  const P = [];
+  P.push(card("prog","📊","검토 진행률 · M1~M8","", progBody(), true));
+  P.push(card("info","🏭","제품 정보 · 제조업소(M1)","", infoBody(), false));
+  P.push(card("docs","📋","필수서류 체크리스트","", docsBody(), false));
+  if(COMMON.product.flavors.length>1){
+    P.push(`<div id="flavorbar">${flavorBarHtml()}</div>`);
+  }
+  P.push(card("proc","⚙️","제조공정 분석(M2)","", procBody(), false));
+  P.push(`<div id="c_ing_wrap">${card("ing","🧪","성분 분석(M3)","", ingBody(curFlavor), false)}</div>`);
+  P.push(`<div id="c_nut_wrap">${card("nut","🍎","영양성분(100g당)","", nutBody(curFlavor), false)}</div>`);
+  P.push(card("label","🏷️","한글표시사항(M6)","", labelBody(), false));
+  P.push(card("op","💬","종합의견(SMTING 생성)","", opBody(), true));
+  P.push(card("req","📮","보완요청 · 국민신문고","", reqBody(), false));
+  P.push(card("ft","📦","식품유형(M5)","", ftBody(), false));
+  P.push(card("law","⚖️","근거 법규(M7)","", lawBody(), false));
+  P.push(card("hist","🕓","검토 이력 · 변경이력","", histBody(), false));
+  document.getElementById("cards").innerHTML = P.join("");
+}
+
+function selFlavor(f){
+  curFlavor = f;
+  document.getElementById("c_ing_wrap").innerHTML = card("ing","🧪","성분 분석(M3)","", ingBody(curFlavor), true);
+  document.getElementById("c_nut_wrap").innerHTML = card("nut","🍎","영양성분(100g당)","", nutBody(curFlavor), true);
+  document.getElementById("flavorbar").innerHTML = flavorBarHtml();
+}
+
+function setAll(open){
+  document.querySelectorAll(".card").forEach(c => open ? c.setAttribute("open","") : c.removeAttribute("open"));
+}
+
+render();
+</script>
+</body>
+</html>
