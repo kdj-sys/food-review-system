@@ -199,6 +199,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <div class="section-title">업무관리</div>
     <a onclick="go('completed')" data-page="completed"><span class="icon">🏁</span>완료 제품</a>
     <a onclick="go('notifications')" data-page="notifications" id="nav-notif"><span class="icon">🔔</span>알림</a>
+    <a onclick="showBackupModal()"><span class="icon">💾</span>데이터 백업</a>
     <div class="section-title">조회 · 기준</div>
     <a onclick="go('manufacturers')" data-page="manufacturers"><span class="icon">🏭</span>해외제조업소</a>
     <a onclick="go('ingredients')" data-page="ingredients"><span class="icon">🧪</span>성분코드조회</a>
@@ -285,11 +286,11 @@ let syncInterval=null;
 function loadData(){try{const r=localStorage.getItem(STORE_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function saveData(d){enforceDbSizeBudget(d);localStorage.setItem(STORE_KEY,JSON.stringify(d));cloudSave(d);}
 
-let DB=loadData()||initDB();
-if(DB&&!DB.manufacturers)DB.manufacturers=[];
 // 구글시트 셀 용량(약 5만자)을 넘으면 저장이 조용히 실패하고 "연결 오류"가 뜸.
 // 예전 채팅 사진(base64)뿐 아니라, 계속 쌓이기만 하는 이력(history)·알림(notifications)·채팅(chats)도
 // 시간이 지나면 같은 문제를 일으킬 수 있어 "사진 제거"에서 "전체 용량 한도 강제"로 강화함.
+// (주의: saveData()가 initDB()→saveData() 경로로 최초 로드 시점에 즉시 호출될 수 있으므로,
+//  DB_SIZE_BUDGET과 관련 함수들은 반드시 `let DB=loadData()||initDB();` 보다 먼저 선언되어야 함 — TDZ 오류 방지)
 const DB_SIZE_BUDGET=42000; // 5만자 한도 대비 여유를 둔 안전 기준
 function stripLegacyChatImages(db){
   if(!db||!Array.isArray(db.chats))return false;
@@ -313,6 +314,9 @@ function enforceDbSizeBudget(db){
   for(const cap of[300,150,80,30,10]){if(size()<=DB_SIZE_BUDGET)break;if(trimTo(db.chats,cap))changed=true;}
   return changed;
 }
+
+let DB=loadData()||initDB();
+if(DB&&!DB.manufacturers)DB.manufacturers=[];
 if(enforceDbSizeBudget(DB))saveData(DB);
 
 function initDB(){
@@ -415,6 +419,63 @@ function clearApiUrl(){
   if(!confirm('연결을 해제하시겠습니까?'))return;
   API_URL='';localStorage.removeItem(API_KEY_STORE);
   if(syncInterval)clearInterval(syncInterval);setSyncStatus('none');closeModal();
+}
+
+// ============================================================
+// 데이터 백업 / 복원
+// ============================================================
+function showBackupModal(){
+  const size=JSON.stringify(DB).length;
+  showModal(`<h2>💾 데이터 백업</h2>
+  <div class="alert-info">
+    전체 데이터(제품·이력·채팅·알림 등)를 파일로 저장하거나, 저장해둔 파일로 복원할 수 있습니다.<br>
+    <strong>정기적으로(예: 매주) 다운로드해서 보관</strong>해두시면 만약의 사고에도 안전합니다.
+  </div>
+  <div class="text-sm" style="margin-bottom:14px">현재 데이터: 제품 <strong>${DB.products.length}건</strong> · 전체 용량 약 <strong>${size.toLocaleString()}자</strong></div>
+  <div class="fg">
+    <button class="btn btn-primary" style="width:100%" onclick="exportBackup()">📥 지금 백업 다운로드</button>
+  </div>
+  <hr>
+  <div class="fg">
+    <label>백업 파일로 복원</label>
+    <input type="file" id="restoreFileInput" accept="application/json,.json" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:7px;font-size:12px">
+  </div>
+  <div class="alert-warn">⚠️ 복원하면 <strong>현재 데이터가 파일 내용으로 완전히 대체</strong>됩니다. 되돌릴 수 없으니 신중하게 선택하세요.</div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal()">닫기</button>
+    <button class="btn btn-danger" onclick="importBackup(document.getElementById('restoreFileInput').files[0])">📤 복원 실행</button>
+  </div>`);
+}
+function exportBackup(){
+  const payload=JSON.stringify(DB,null,2);
+  const blob=new Blob([payload],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const ts=nowStr().replace(/[: ]/g,'-');
+  a.href=url;a.download=`식품표시_백업_${ts}.json`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importBackup(file){
+  if(!file){alert('복원할 백업 파일을 먼저 선택하세요.');return;}
+  if(!confirm('⚠️ 백업 파일로 복원하면 현재 데이터가 이 파일의 내용으로 완전히 대체됩니다.\n계속하시겠습니까?'))return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let parsed;
+    try{parsed=JSON.parse(e.target.result);}catch(err){alert('❌ 올바른 백업 파일이 아닙니다. (JSON 형식 오류)');return;}
+    if(!parsed||!Array.isArray(parsed.products)){alert('❌ 올바른 백업 파일 형식이 아닙니다. (제품 목록 데이터가 없습니다)');return;}
+    if(!parsed.manufacturers)parsed.manufacturers=[];
+    if(!parsed.history)parsed.history=[];
+    if(!parsed.chats)parsed.chats=[];
+    if(!parsed.files)parsed.files=[];
+    if(!parsed.notifications)parsed.notifications=[];
+    DB=parsed;
+    saveData(DB);
+    closeModal();
+    alert(`✅ 복원 완료! 제품 ${DB.products.length}건을 불러왔습니다.`);
+    go('dashboard');
+  };
+  reader.onerror=()=>alert('파일을 읽지 못했습니다.');
+  reader.readAsText(file,'utf-8');
 }
 
 // ============================================================
