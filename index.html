@@ -688,18 +688,29 @@ function renderProductList(){
 function pipelineBar(p){
   // 라벨작성완료 후에는 세부단계(라벨검토중/라벨보완중/라벨발송)를 그대로 노출
   const labelHasSub=p.labelStatus==='라벨작성완료'&&p.labelReview&&p.labelReview!=='-';
+  // 보완요청일·메모가 있으면 커서를 올렸을 때만 보이도록 title에 덧붙임
+  const reviseSuffix=(date,note)=>(date||note)?`\n📌 보완요청일: ${date||'-'}${note?`\n메모: ${note}`:''}`:'';
   const steps=[
-    {label:'검토',val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료'},
-    {label:'사전검사',val:p.preInspect,colors:PI_COLORS,done:p.preInspect==='진행완료'||p.preInspect==='해당없음'},
-    {label:labelHasSub?p.labelReview:'라벨',val:labelHasSub?p.labelReview:p.labelStatus,colors:labelHasSub?LABEL_REVIEW_COLORS:LABEL_COLORS,done:p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송',title:labelHasSub?`라벨작성완료 · ${p.labelReview}`:`라벨: ${p.labelStatus||'-'}`},
-    {label:'수입신고',val:p.importDecl,colors:ID_COLORS,done:p.importDecl==='신고완료'},
+    {val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료',options:STATUSES,onchange:`changeStatus('${p.id}',this.value)`,
+      title:`검토: ${p.status}`+(p.status==='보완요청'?reviseSuffix(p.reviseRequestDate,p.reviseNote):'')},
+    {val:p.preInspect,colors:PI_COLORS,done:p.preInspect==='진행완료'||p.preInspect==='해당없음',options:PI_STATUSES,onchange:`changePI('${p.id}',this.value)`,
+      title:`사전검사: ${p.preInspect||'-'}`},
+    labelHasSub
+      ?{val:p.labelReview,colors:LABEL_REVIEW_COLORS,done:p.labelReview==='라벨발송',options:LABEL_REVIEW_STATUSES,onchange:`changeLabelReview('${p.id}',this.value)`,
+          title:`라벨: 라벨작성완료 · ${p.labelReview}`+(p.labelReview==='라벨보완중'?reviseSuffix(p.labelReviseDate,p.labelReviseNote):'')}
+      :{val:p.labelStatus,colors:LABEL_COLORS,done:false,options:LABEL_STATUSES,onchange:`changeLabel('${p.id}',this.value)`,
+          title:`라벨: ${p.labelStatus||'-'}`},
+    {val:p.importDecl,colors:ID_COLORS,done:p.importDecl==='신고완료',options:ID_STATUSES,onchange:`changeID('${p.id}',this.value)`,
+      title:`수입신고: ${p.importDecl||'-'}`},
   ];
   return`<div class="pipeline">${steps.map((s,i)=>{
     const color=s.colors[s.val]||'#94a3b8';
     const bg=s.done?color:s.val&&s.val!=='-'?color+'33':'#f1f5f9';
     const fc=s.done?'#fff':s.val&&s.val!=='-'?color:'#94a3b8';
     return(i>0?`<span class="pipe-arrow">›</span>`:'')+
-      `<div class="pipe-step" style="background:${bg};color:${fc}" title="${s.title||s.val||'미진행'}">${s.label}</div>`;
+      `<select class="pipe-step" style="background:${bg};color:${fc};border:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer" title="${escAttr(s.title)}" onclick="event.stopPropagation()" onchange="${s.onchange}">
+        ${s.options.map(o=>`<option value="${o}" ${o===s.val?'selected':''}>${o==='-'?'—':o}</option>`).join('')}
+      </select>`;
   }).join('')}</div>`;
 }
 
@@ -839,17 +850,15 @@ function deleteProduct(id){
 function renderProductDetail(id){
   const p=ensureFields(getProduct(id)||{});
   if(!p.id)return`<div class="card"><p>제품을 찾을 수 없습니다.</p></div>`;
-  const tabs=['기본정보','채팅방','파일관리','검토이력','AI검토보고서'];
+  const tabs=['기본정보','파일관리','검토이력'];
   const tabHTML=`<div class="tabs">${tabs.map(t=>`<div class="tab ${t===currentTab?'active':''}" onclick="switchTab('${t}')">${t}</div>`).join('')}</div>`;
   let lockBanner='';
   if(p.lockedBy&&p.lockedBy!==currentUser.id)
     lockBanner=`<div class="lock-banner"><span>🔒</span><div><strong>${username(p.lockedBy)}</strong>님이 검토중입니다. (${p.lockTime})</div><button class="btn btn-warning btn-sm" style="margin-left:auto" onclick="forceUnlock('${id}')">강제 해제</button></div>`;
   let tabContent='';
   if(currentTab==='기본정보')tabContent=renderBasicInfo(p);
-  else if(currentTab==='채팅방')tabContent=renderChatTab(p.id);
   else if(currentTab==='파일관리')tabContent=renderFilesTab(p.id);
   else if(currentTab==='검토이력')tabContent=renderHistoryTab(p.id);
-  else if(currentTab==='AI검토보고서')tabContent=renderAIReport(p);
   return`
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
     <button class="btn btn-outline btn-sm" onclick="go('products')">← 목록</button>
@@ -861,11 +870,11 @@ function renderProductDetail(id){
   <div class="card" style="padding-bottom:0">${tabHTML}<div style="padding-bottom:20px">${tabContent}</div></div>
   ${renderFloatingChat(p)}`;
 }
-function switchTab(tab){currentTab=tab;if(tab==='채팅방'&&currentProductId)markChatRead(currentProductId);renderPage();}
+function switchTab(tab){currentTab=tab;renderPage();}
 
-// 어느 탭을 보고 있든(채팅방 탭 제외) 오른쪽 아래에 채팅을 띄워서 바로 대화할 수 있게 함
+// 어느 탭을 보고 있든 오른쪽 아래에 채팅을 띄워서 바로 대화할 수 있게 함 (유일한 채팅 접점)
 function renderFloatingChat(p){
-  if(currentTab==='채팅방')return''; // 이미 채팅방 탭을 보고 있으면 중복이므로 생략
+  if(floatingChatOpen)markChatRead(p.id); // 위젯이 열려있으면 보고 있는 것이므로 읽음 처리
   const unread=DB.chats.filter(c=>c.productId===p.id&&c.userId!==currentUser.id&&(!c.readBy||!c.readBy.includes(currentUser.id))).length;
   return`
   <div onclick="toggleFloatingChat('${p.id}')" style="position:fixed;right:24px;bottom:24px;width:54px;height:54px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;z-index:900">
@@ -881,8 +890,7 @@ function renderFloatingChat(p){
 }
 function toggleFloatingChat(productId){
   floatingChatOpen=!floatingChatOpen;
-  if(floatingChatOpen)markChatRead(productId); // 배지가 갱신된 상태로 렌더되도록 먼저 읽음 처리
-  renderPage();
+  renderPage(); // 열림 상태면 renderFloatingChat이 자동으로 읽음 처리함
   if(floatingChatOpen)setTimeout(()=>{const cb=document.getElementById('chatBox');if(cb)cb.scrollTop=cb.scrollHeight;},50);
 }
 function markChatRead(productId){
@@ -1221,29 +1229,6 @@ function renderHistoryTab(productId){
     <div class="meta">${h.at} · <strong>${username(h.by)}</strong></div>
     <div style="font-size:13px;margin-top:3px">${h.from||'등록'} → <strong>${h.to}</strong>${h.note?` — ${h.note}`:''}</div>
   </div></div>`).join('');
-}
-
-// AI REPORT
-function renderAIReport(p){
-  const files=DB.files.filter(f=>f.productId===p.id);
-  if(!files.length)return`<div style="text-align:center;padding:40px"><div style="font-size:42px">🤖</div><div style="font-size:14px;font-weight:600;margin-top:10px">파일을 먼저 업로드하세요</div><button class="btn btn-primary" style="margin-top:14px" onclick="switchTab('파일관리')">파일 업로드</button></div>`;
-  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div><strong>🤖 AI 자동 검토 결과</strong> <span class="text-sm">— ${nowStr()}</span></div>
-    <button class="btn btn-success btn-sm" onclick="exportReport('${p.id}')">📄 보고서 다운로드</button>
-  </div>
-  <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px"><h4 style="font-size:13px;font-weight:700;margin-bottom:8px">📋 식품유형 검토</h4><div style="font-size:13px">✅ 신고 식품유형: <strong>${p.foodType}</strong> — 적합</div></div>
-  <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px"><h4 style="font-size:13px;font-weight:700;margin-bottom:8px">⚠️ 알레르기 표시 검토</h4><div style="font-size:13px;color:#d97706">⚠️ 교차오염 주의문구 확인 필요</div></div>
-  <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:12px"><h4 style="font-size:13px;font-weight:700;margin-bottom:8px;color:#dc2626">📝 보완 요청사항</h4>
-    <div style="font-size:13px;color:#dc2626">❌ [필수] 트랜스지방 표시 추가</div>
-    <div style="font-size:13px;color:#d97706;margin-top:4px">⚠️ [권장] GMO 관련 시험성적서 제출</div>
-  </div>`;
-}
-function exportReport(id){
-  const p=getProduct(id);
-  const txt=`식품표시사항 검토보고서\n${'='.repeat(40)}\n제품명: ${p.name}\n아이템번호: ${p.itemNo||'—'}\n수입사: ${p.importer}\n식품유형: ${p.foodType}\n검토일: ${nowStr()}\n검토자: ${currentUser.name}\n\n[진행현황]\n1단계 검토: ${p.status}\n2단계 사전검사: ${p.preInspect} / 반영: ${p.preInspectReflect}\n3단계 라벨: ${p.labelStatus}\n4단계 수입신고: ${p.importDecl}\n\n[보완 요청사항]\n1. 트랜스지방 표시 추가 (필수)\n2. GMO 시험성적서 제출`;
-  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`검토보고서_${p.name}_${new Date().toISOString().slice(0,10)}.txt`;a.click();URL.revokeObjectURL(url);
 }
 
 // ============================================================
