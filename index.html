@@ -1721,6 +1721,35 @@ const INGREDIENT_CSV_URL='chunil_ingredient_db.csv';
 let INGREDIENT_DB=null;      // 파싱된 성분 배열
 let INGREDIENT_STATE='idle'; // idle | loading | ready | error
 
+// 식약처 고시 "품목별 사용기준" (INS No./CAS No./사용기준/주용도) 공식 데이터
+const OFFICIAL_STANDARD_URL='usage_standard_official.json';
+let OFFICIAL_STANDARD_DB=null;
+let OFFICIAL_BY_KO=null, OFFICIAL_BY_EN=null;
+function normStdKey(s){return(s||'').toUpperCase().replace(/[\s\-\(\)\[\],.'’‘"]/g,'');}
+async function loadOfficialStandards(){
+  if(OFFICIAL_STANDARD_DB)return;
+  try{
+    const resp=await fetch(OFFICIAL_STANDARD_URL+'?v=1');
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const arr=await resp.json();
+    OFFICIAL_STANDARD_DB=arr;
+    OFFICIAL_BY_KO={};OFFICIAL_BY_EN={};
+    arr.forEach(r=>{
+      const ko=normStdKey(r.korean);if(ko&&!OFFICIAL_BY_KO[ko])OFFICIAL_BY_KO[ko]=r;
+      (r.extraKorean||[]).forEach(ek=>{const k=normStdKey(ek);if(k&&!OFFICIAL_BY_KO[k])OFFICIAL_BY_KO[k]=r;});
+      const en=normStdKey(r.english);if(en&&!OFFICIAL_BY_EN[en])OFFICIAL_BY_EN[en]=r;
+    });
+  }catch(e){
+    OFFICIAL_STANDARD_DB=null;OFFICIAL_BY_KO=null;OFFICIAL_BY_EN=null;
+  }
+}
+function findOfficialStandard(x){
+  if(!OFFICIAL_BY_KO||!OFFICIAL_BY_EN)return null;
+  const ko=normStdKey(x.ko),ch=normStdKey(x.ch),en=normStdKey(x.en);
+  return(ko&&OFFICIAL_BY_KO[ko])||(ch&&OFFICIAL_BY_KO[ch])||(en&&OFFICIAL_BY_EN[en])||null;
+}
+function isUnknownStd(s){return!s||/못찾음|별도\s*확인\s*필요/.test(s);}
+
 function renderIngredients(){
   return`
   <div class="alert-info">
@@ -1736,7 +1765,7 @@ function renderIngredients(){
       <button class="btn btn-success btn-sm" onclick="filterIngredients()">🔎 chunil DB 검색</button>
       <button class="btn btn-primary btn-sm" onclick="runMaruIngredient()">🌐 정보마루 조회</button>
     </div>
-    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>: 사내 성분DB (오프라인·빠름, 사용가능 여부까지 표시) &nbsp;·&nbsp; <strong>🌐 정보마루 조회</strong>: 수입식품정보마루 실시간 성분코드 조회</div>
+    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>: 사내 성분DB (오프라인·빠름, 사용가능 여부까지 표시) &nbsp;·&nbsp; <strong>🌐 정보마루 조회</strong>: 수입식품정보마루 실시간 성분코드 조회 &nbsp;·&nbsp; <strong style="color:#0f766e">[고시]</strong>: 식약처 고시 INS No./CAS No./사용기준/주용도 자동 매칭 표시</div>
     <div id="ing-status"></div>
     <div id="ing-results"></div>
   </div>`;
@@ -1773,6 +1802,7 @@ function parseCSVRecords(text){
 
 async function initIngredientPage(){
   const statusEl=()=>document.getElementById('ing-status');
+  loadOfficialStandards().then(()=>{if(INGREDIENT_STATE==='ready')filterIngredients();});
   if(INGREDIENT_STATE==='ready'){populateIngredientFilters();filterIngredients();return;}
   if(INGREDIENT_STATE==='loading')return;
   INGREDIENT_STATE='loading';
@@ -1852,17 +1882,30 @@ function filterIngredients(){
   }
   if(!list.length){res.innerHTML=`<div class="empty">검색 결과가 없습니다.</div>`;return;}
   res.innerHTML=`<div style="overflow-x:auto"><table>
-    <tr><th>코드</th><th>성분명</th><th>분류</th><th>사용여부</th><th>사용기준</th><th>용도</th></tr>
-    ${shown.map(x=>`<tr>
+    <tr><th>코드</th><th>성분명</th><th>분류</th><th>사용여부</th><th>INS No./CAS No.</th><th>사용기준</th><th>용도</th></tr>
+    ${shown.map(x=>{
+      const off=findOfficialStandard(x);
+      const stdMain=x.std&&!isUnknownStd(x.std)?dmfEsc(x.std):'';
+      const stdSame=off&&off.usageStandard&&x.std&&off.usageStandard.replace(/\s+/g,'')===x.std.replace(/\s+/g,'');
+      const stdOff=off&&off.usageStandard&&!stdSame?`<div style="${stdMain?'margin-top:4px;padding-top:4px;border-top:1px dashed #e2e8f0;':''}color:#0f766e"><strong>[고시]</strong> ${dmfEsc(off.usageStandard)}</div>`:'';
+      const stdCell=stdMain||stdOff?stdMain+stdOff:'—';
+      const purMain=x.purpose?dmfEsc(x.purpose):'';
+      const purSame=off&&off.purpose&&x.purpose&&off.purpose.replace(/\s+/g,'')===x.purpose.replace(/\s+/g,'');
+      const purOff=off&&off.purpose&&!purSame?`<div style="${purMain?'margin-top:3px;':''}color:#0f766e">${dmfEsc(off.purpose)}</div>`:'';
+      const purCell=purMain||purOff?purMain+purOff:'—';
+      const insCas=off&&(off.ins||off.cas)?`${off.ins?`INS ${dmfEsc(off.ins)}`:''}${off.ins&&off.cas?'<br>':''}${off.cas?`CAS ${dmfEsc(off.cas)}`:''}`:'—';
+      return`<tr>
       <td style="font-size:11px;color:#64748b;white-space:nowrap;font-family:monospace">${x.code||'—'}</td>
       <td><strong style="font-size:12px">${x.ko||x.en||'—'}</strong>${x.en&&x.ko?`<div style="font-size:10px;color:#94a3b8">${x.en}</div>`:''}${x.ch?`<div style="font-size:10px;color:#7c3aed">천일:${x.ch}</div>`:''}</td>
       <td style="font-size:11px;white-space:nowrap">${x.cat||'—'}</td>
       <td>${availBadge(x.avail)}</td>
-      <td style="font-size:11px;color:#475569;max-width:280px">${x.std||'—'}</td>
-      <td style="font-size:11px;color:#64748b">${x.purpose||'—'}</td>
-    </tr>`).join('')}
+      <td style="font-size:10px;color:#7c3aed;white-space:nowrap;font-family:monospace">${insCas}</td>
+      <td style="font-size:11px;color:#475569;max-width:280px">${stdCell}</td>
+      <td style="font-size:11px;color:#64748b;max-width:160px">${purCell}</td>
+    </tr>`;}).join('')}
   </table></div>
-  ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}`;
+  ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}
+  ${OFFICIAL_STANDARD_DB?`<div class="text-sm" style="padding-top:8px;color:#94a3b8">[고시] 표시는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준 데이터입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`:''}`;
 }
 
 // ============================================================
