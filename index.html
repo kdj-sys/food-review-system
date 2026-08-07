@@ -203,6 +203,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <div class="section-title">조회 · 기준</div>
     <a onclick="go('manufacturers')" data-page="manufacturers"><span class="icon">🏭</span>해외제조업소</a>
     <a onclick="go('ingredients')" data-page="ingredients"><span class="icon">🧪</span>성분코드조회</a>
+    <a onclick="go('usagestd')" data-page="usagestd"><span class="icon">📜</span>사용기준조회</a>
     <a onclick="showImportModal()" data-page="import" style="display:none"><span class="icon">📥</span>구글시트 이관</a>
     <a onclick="showApiSettings()" data-page="api" style="display:none"><span class="icon">☁️</span>클라우드 설정</a>
   </nav>
@@ -533,7 +534,7 @@ function go(page,arg){
 }
 function renderPage(){
   document.getElementById('topbarDate').textContent=nowStr();
-  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',manufacturers:'해외제조업소',ingredients:'성분코드조회',completed:'완료 제품'};
+  const titles={dashboard:'대시보드',products:'제품 목록',register:currentProductId?'제품 수정':'제품 등록',search:'검색',notifications:'알림',product:'제품 상세',manufacturers:'해외제조업소',ingredients:'성분코드조회',usagestd:'사용기준조회',completed:'완료 제품'};
   document.getElementById('pageTitle').textContent=titles[currentPage]||'';
   const c=document.getElementById('content');
   if(currentPage==='dashboard')c.innerHTML=renderDashboard();
@@ -545,6 +546,7 @@ function renderPage(){
   else if(currentPage==='manufacturers')c.innerHTML=renderManufacturers();
   else if(currentPage==='completed')c.innerHTML=renderCompleted();
   else if(currentPage==='ingredients'){c.innerHTML=renderIngredients();initIngredientPage();}
+  else if(currentPage==='usagestd'){c.innerHTML=renderUsageStd();initUsageStdPage();}
   updateNotifBadge();
   updateFinalBadge();
 }
@@ -1906,6 +1908,83 @@ function filterIngredients(){
   </table></div>
   ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}
   ${OFFICIAL_STANDARD_DB?`<div class="text-sm" style="padding-top:8px;color:#94a3b8">[고시] 표시는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준 데이터입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`:''}`;
+}
+
+// ============================================================
+// 사용기준조회 (식약처 고시 「식품의 기준 및 규격」 III.품목별 사용기준 - INS No./CAS No./사용기준/주용도)
+// ============================================================
+function renderUsageStd(){
+  return`
+  <div class="alert-info">
+    식약처 고시 <strong>「식품의 기준 및 규격」 III. 품목별 사용기준</strong>에서 식품첨가물 품목명(한글/영문)으로
+    <strong>INS No./CAS No./사용기준/주용도</strong>를 조회합니다.
+  </div>
+  <div class="card">
+    <div class="flex-between"><h3>📜 사용기준조회</h3><span id="us-count" class="text-sm"></span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <input id="us-q" placeholder="🔍 품목명(한글/영문) 또는 이명 입력" oninput="filterUsageStd()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:240px;flex:1">
+      <button class="btn btn-success btn-sm" onclick="filterUsageStd()">🔎 조회</button>
+    </div>
+    <div id="us-status"></div>
+    <div id="us-results"></div>
+  </div>`;
+}
+async function initUsageStdPage(){
+  const s=document.getElementById('us-status');
+  if(!OFFICIAL_STANDARD_DB){
+    if(s)s.innerHTML='<div class="text-sm" style="padding:14px 0">⏳ 고시 데이터를 불러오는 중...</div>';
+    await loadOfficialStandards();
+  }
+  if(s)s.innerHTML='';
+  if(!OFFICIAL_STANDARD_DB){
+    if(s)s.innerHTML=`<div class="alert-warn">❌ 고시 데이터를 불러오지 못했습니다. (usage_standard_official.json)</div>`;
+    return;
+  }
+  filterUsageStd();
+}
+function filterUsageStd(){
+  if(!OFFICIAL_STANDARD_DB)return;
+  const q=(document.getElementById('us-q')||{}).value?.trim().toLowerCase()||'';
+  let list=OFFICIAL_STANDARD_DB;
+  if(q){
+    list=list.filter(r=>
+      r.korean.toLowerCase().includes(q)||
+      r.english.toLowerCase().includes(q)||
+      (r.extraKorean||[]).some(x=>x.toLowerCase().includes(q))||
+      (r.synonyms||[]).some(x=>x.toLowerCase().includes(q))
+    );
+  }
+  const CAP=200;
+  const shown=list.slice(0,CAP);
+  const countEl=document.getElementById('us-count');
+  if(countEl)countEl.textContent=`전체 ${OFFICIAL_STANDARD_DB.length.toLocaleString()}건 · 검색 ${list.length.toLocaleString()}건`;
+  const res=document.getElementById('us-results');if(!res)return;
+  if(!q){
+    res.innerHTML=`<div class="empty">🔍 품목명(한글/영문)을 입력해 조회하세요. (총 ${OFFICIAL_STANDARD_DB.length.toLocaleString()}건)</div>`;
+    return;
+  }
+  if(!list.length){res.innerHTML=`<div class="empty">검색 결과가 없습니다.</div>`;return;}
+  res.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">
+    ${shown.map(r=>`
+    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">
+      <div class="flex-between" style="align-items:flex-start">
+        <div>
+          <strong style="font-size:14px">${dmfEsc(r.korean)}${r.koreanFlag?`<span style="color:#94a3b8;font-size:11px"> ${dmfEsc(r.koreanFlag)}</span>`:''}</strong>
+          ${r.english?`<span style="font-size:12px;color:#64748b;margin-left:6px">${dmfEsc(r.english)}</span>`:''}
+          ${(r.extraKorean&&r.extraKorean.length)?`<div style="font-size:11px;color:#94a3b8">${r.extraKorean.map(dmfEsc).join(', ')}</div>`:''}
+          ${(r.synonyms&&r.synonyms.length)?`<div style="font-size:11px;color:#94a3b8">이명: ${r.synonyms.map(dmfEsc).join(', ')}</div>`:''}
+        </div>
+        <div style="text-align:right;white-space:nowrap;font-family:monospace;font-size:11px;color:#7c3aed">
+          ${r.ins?`INS ${dmfEsc(r.ins)}`:''}${r.ins&&r.cas?'<br>':''}${r.cas?`CAS ${dmfEsc(r.cas)}`:''}
+        </div>
+      </div>
+      ${r.definition?`<div class="text-sm" style="margin-top:8px;color:#64748b">${dmfEsc(r.definition)}</div>`:''}
+      <div style="margin-top:8px;font-size:12px;color:#334155"><strong>사용기준:</strong> ${dmfEsc(r.usageStandard)||'—'}</div>
+      ${r.purpose?`<div style="margin-top:4px"><span class="badge" style="background:#0f766e22;color:#0f766e">${dmfEsc(r.purpose)}</span></div>`:''}
+    </div>`).join('')}
+  </div>
+  ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}
+  <div class="text-sm" style="padding-top:8px;color:#94a3b8">본 데이터는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준을 기반으로 자동 정리한 참고용 자료입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`;
 }
 
 // ============================================================
