@@ -1922,7 +1922,7 @@ function renderUsageStd(){
   <div class="card">
     <div class="flex-between"><h3>📜 사용기준조회</h3><span id="us-count" class="text-sm"></span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <input id="us-q" placeholder="🔍 품목명(한글/영문) 또는 이명 입력" oninput="filterUsageStd()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:240px;flex:1">
+      <input id="us-q" placeholder="🔍 품목명(한글/영문) · 이명 · INS No. · CAS No. 입력" oninput="filterUsageStd()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:240px;flex:1">
       <button class="btn btn-success btn-sm" onclick="filterUsageStd()">🔎 조회</button>
     </div>
     <div id="us-status"></div>
@@ -1951,7 +1951,9 @@ function filterUsageStd(){
       r.korean.toLowerCase().includes(q)||
       r.english.toLowerCase().includes(q)||
       (r.extraKorean||[]).some(x=>x.toLowerCase().includes(q))||
-      (r.synonyms||[]).some(x=>x.toLowerCase().includes(q))
+      (r.synonyms||[]).some(x=>x.toLowerCase().includes(q))||
+      (r.ins||'').toLowerCase().includes(q)||
+      (r.cas||'').toLowerCase().includes(q)
     );
   }
   const CAP=200;
@@ -1960,7 +1962,7 @@ function filterUsageStd(){
   if(countEl)countEl.textContent=`전체 ${OFFICIAL_STANDARD_DB.length.toLocaleString()}건 · 검색 ${list.length.toLocaleString()}건`;
   const res=document.getElementById('us-results');if(!res)return;
   if(!q){
-    res.innerHTML=`<div class="empty">🔍 품목명(한글/영문)을 입력해 조회하세요. (총 ${OFFICIAL_STANDARD_DB.length.toLocaleString()}건)</div>`;
+    res.innerHTML=`<div class="empty">🔍 품목명(한글/영문), 이명, INS No. 또는 CAS No.를 입력해 조회하세요. (총 ${OFFICIAL_STANDARD_DB.length.toLocaleString()}건)</div>`;
     return;
   }
   if(!list.length){res.innerHTML=`<div class="empty">검색 결과가 없습니다.</div>`;return;}
