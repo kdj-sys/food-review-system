@@ -703,7 +703,7 @@ function pipelineBar(p){
       :{val:p.labelStatus,colors:LABEL_COLORS,done:false,options:LABEL_STATUSES,onchange:`changeLabel('${p.id}',this.value)`,
           title:`라벨: ${p.labelStatus||'-'}`},
     {val:p.importDecl,colors:ID_COLORS,done:p.importDecl==='신고완료',options:ID_STATUSES,onchange:`changeID('${p.id}',this.value)`,
-      title:`수입신고: ${p.importDecl||'-'}`},
+      title:`수입신고: ${p.importDecl||'-'}`+(p.importDeclDate?`\n📅 신고일: ${p.importDeclDate}`:'')},
   ];
   return`<div class="pipeline">${steps.map((s,i)=>{
     const color=s.colors[s.val]||'#94a3b8';
@@ -1019,6 +1019,10 @@ function renderBasicInfo(p){
     <div class="status-btns">
       ${ID_STATUSES.map(s=>`<button style="background:${s===p.importDecl?ID_COLORS[s]:'#f1f5f9'};color:${s===p.importDecl?'#fff':'#374151'};border-color:${s===p.importDecl?ID_COLORS[s]:'transparent'}" onclick="changeID('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
     </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+      <div style="font-size:11px;color:#475569;font-weight:600;white-space:nowrap">📅 수입신고일</div>
+      <input type="date" id="importDeclDateInput" value="${p.importDeclDate||''}" onchange="saveImportDeclDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
+    </div>
   </div>
 
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
@@ -1062,8 +1066,13 @@ function changeLabel(id,s){
 function changeID(id,s){
   const p=getProduct(id);if(!p)return;
   const old=p.importDecl;p.importDecl=s;
+  if(s==='신고완료'&&old!==s)p.importDeclDate=todayStr();
   DB.history.push({id:uid(),productId:id,from:`수입신고:${old}`,to:`수입신고:${s}`,by:currentUser.id,at:nowStr(),note:''});
   saveData(DB);renderPage();
+}
+function saveImportDeclDate(id,val){
+  const p=getProduct(id);if(!p)return;
+  p.importDeclDate=val;saveData(DB);
 }
 function savePreInspectDate(id,val){
   const p=getProduct(id);if(!p)return;
@@ -1405,7 +1414,11 @@ function renderCompletedRows(list){
         <td>${sBadge(p.status)}</td>
         <td>${labelBadge(p.labelStatus)}</td>
         <td><span class="badge" style="background:#065f4622;color:#065f46">${p.labelReview}</span></td>
-        <td>${idBadge(p.importDecl)}</td>
+        <td>
+          <select title="${escAttr(p.importDeclDate?`📅 신고일: ${p.importDeclDate}`:'')}" style="padding:4px 8px;border-radius:6px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#94a3b8'}22;color:${ID_COLORS[p.importDecl]||'#94a3b8'}" onchange="changeID('${p.id}',this.value)">
+            ${ID_STATUSES.map(s=>`<option value="${s}" ${s===p.importDecl?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
+          </select>
+        </td>
         <td><button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td>
       </tr>`).join('');
 }
