@@ -1375,14 +1375,30 @@ function renderFinalReview(){
 }
 function renderCompleted(){
   const list=completedProducts().sort((a,b)=>(b.registeredAt||'').localeCompare(a.registeredAt||''));
+  const idPrep=list.filter(p=>p.importDecl==='수입신고준비중').length;
+  const idDone=list.filter(p=>p.importDecl==='신고완료').length;
+  const idNone=list.length-idPrep-idDone;
   return`
   <div class="alert-success">🏁 <strong>라벨작성완료</strong>이고 세부단계가 <strong>라벨발송</strong>까지 끝난 제품입니다. (완전 완료)</div>
   <div class="card">
-    <h3>🏁 완료 제품 (${list.length}건)</h3>
+    <div class="flex-between"><h3>🏁 완료 제품 (<span id="cpl-count">${list.length}</span>건)</h3>
+      <span class="text-sm">📦 수입신고준비중 ${idPrep}건 · ✅ 신고완료 ${idDone}건${idNone?` · — 미지정 ${idNone}건`:''}</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <select id="cpl-id" onchange="filterCompleted()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px">
+        <option value="">수입신고 전체</option>
+        ${ID_STATUSES.map(s=>`<option value="${s}">${s==='-'?'—(미지정)':s}</option>`).join('')}
+      </select>
+    </div>
     ${list.length===0?'<div class="empty">완료된 제품이 없습니다.</div>':`
     <table>
       <tr><th>No.</th><th>제품명</th><th>수입사</th><th>1단계</th><th>라벨</th><th>세부단계</th><th>수입신고</th><th></th></tr>
-      ${list.map(p=>`<tr>
+      <tbody id="cpl-tbody">${renderCompletedRows(list)}</tbody>
+    </table>`}
+  </div>`;
+}
+function renderCompletedRows(list){
+  return list.map(p=>`<tr${p.importDecl!=='신고완료'?' style="background:#fffbeb"':''}>
         <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
         <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
         <td style="font-size:11px">${p.importer||''}</td>
@@ -1391,9 +1407,16 @@ function renderCompleted(){
         <td><span class="badge" style="background:#065f4622;color:#065f46">${p.labelReview}</span></td>
         <td>${idBadge(p.importDecl)}</td>
         <td><button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td>
-      </tr>`).join('')}
-    </table>`}
-  </div>`;
+      </tr>`).join('');
+}
+function filterCompleted(){
+  const idv=(document.getElementById('cpl-id')||{}).value||'';
+  let list=completedProducts().sort((a,b)=>(b.registeredAt||'').localeCompare(a.registeredAt||''));
+  if(idv)list=list.filter(p=>p.importDecl===idv);
+  const tbody=document.getElementById('cpl-tbody');
+  if(tbody)tbody.innerHTML=renderCompletedRows(list);
+  const cnt=document.getElementById('cpl-count');
+  if(cnt)cnt.textContent=list.length;
 }
 
 // ============================================================
