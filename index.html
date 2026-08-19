@@ -580,7 +580,22 @@ const DASH_PRESETS={
   'id-done':{label:'수입신고 완료', test:p=>p.importDecl==='신고완료'},
 };
 let dashPreset=null;
-function goDashPreset(key){dashPreset=key;_presetNav=true;go('products');setTimeout(()=>filterList(),30);}
+function goDashPreset(key){
+  const preset=DASH_PRESETS[key];
+  if(preset&&(key==='id-prep'||key==='id-done')){
+    // 수입신고 상태는 라벨발송까지 끝난 "완료 제품"에서만 표시되는 경우가 많음 —
+    // 진행중인 제품에 없고 완료 제품에만 있으면 완료 제품 화면으로 이동
+    const inActive=activeProducts().some(preset.test);
+    const inCompleted=completedProducts().some(preset.test);
+    if(!inActive&&inCompleted){
+      const idv=key==='id-prep'?'수입신고준비중':'신고완료';
+      go('completed');
+      setTimeout(()=>{const el=document.getElementById('cpl-id');if(el){el.value=idv;filterCompleted();}},30);
+      return;
+    }
+  }
+  dashPreset=key;_presetNav=true;go('products');setTimeout(()=>filterList(),30);
+}
 function clearDashPreset(){dashPreset=null;renderPage();}
 
 // 최종검토 대기 / 완료 제품 판정
