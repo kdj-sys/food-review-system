@@ -4,184 +4,191 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>식품표시사항 검토 협업 시스템</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Malgun Gothic',sans-serif;background:#f1f5f9;color:#1e293b;display:flex;height:100vh;overflow:hidden;}
-#sidebar{width:220px;min-width:220px;background:#1e293b;color:#94a3b8;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
-#sidebar .logo{padding:20px 16px;border-bottom:1px solid #334155;}
-#sidebar .logo h2{color:#fff;font-size:13px;line-height:1.5;}
-#sidebar .logo p{font-size:11px;color:#64748b;margin-top:2px;}
-#sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;text-decoration:none;color:#94a3b8;transition:all .2s;}
-#sidebar nav a:hover,#sidebar nav a.active{background:#334155;color:#fff;}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#F6F7F5;color:#141716;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+#masthead{height:6px;flex-shrink:0;background:#1F4B43;}
+#appRow{flex:1;display:flex;overflow:hidden;min-height:0;}
+#sidebar{width:236px;min-width:236px;background:#FBFBFA;color:#565D5A;display:flex;flex-direction:column;height:100%;overflow-y:auto;border-right:1px solid #E3E5E3;}
+#sidebar .logo{padding:22px 20px 18px;border-bottom:1px solid #E3E5E3;}
+#sidebar .logo h2{color:#141716;font-size:14px;font-weight:800;line-height:1.5;}
+#sidebar .logo p{font-size:10.5px;color:#9AA09D;margin-top:3px;letter-spacing:.3px;}
+#sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:0 8px 2px;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;color:#565D5A;border-radius:5px;transition:all .15s;}
+#sidebar nav a:hover{background:#EFF1EF;}
+#sidebar nav a.active{background:#1F4B43;color:#FBFBFA;font-weight:700;}
 #sidebar nav a .icon{font-size:15px;width:18px;text-align:center;}
-#sidebar nav .section-title{padding:12px 16px 4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#475569;}
-#sidebar .user-area{padding:12px 16px;border-top:1px solid #334155;}
-#sidebar .user-area select{width:100%;background:#334155;color:#fff;border:none;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;}
-#sidebar .user-area .user-badge{font-size:11px;color:#64748b;margin-top:4px;}
-.sync-bar{background:#0f172a;padding:5px 16px;font-size:11px;display:flex;align-items:center;gap:6px;}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:#94a3b8;flex-shrink:0;}
-.sync-dot.ok{background:#22c55e;}
-.sync-dot.err{background:#ef4444;}
-.sync-dot.syncing{background:#f59e0b;animation:pulse .8s infinite;}
+#sidebar nav .section-title{padding:16px 22px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:#AEB3AF;}
+#sidebar .user-area{padding:14px 20px;border-top:1px solid #E3E5E3;}
+#sidebar .user-area select{width:100%;background:#EFF1EF;color:#141716;border:1px solid #E3E5E3;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;}
+#sidebar .user-area .user-badge{font-size:11px;color:#9AA09D;margin-top:4px;}
+.sync-bar{background:#EFF1EF;border-bottom:1px solid #E3E5E3;padding:5px 16px;font-size:11px;display:flex;align-items:center;gap:6px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#9AA09D;flex-shrink:0;}
+.sync-dot.ok{background:#1F6B44;}
+.sync-dot.err{background:#B8402C;}
+.sync-dot.syncing{background:#C99A1F;animation:pulse .8s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-#topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-#topbar h1{font-size:15px;font-weight:600;}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F6F7F5;}
+#topbar{background:#F6F7F5;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#topbar h1{font-size:22px;font-weight:800;letter-spacing:-.4px;}
 #topbar .tr{display:flex;align-items:center;gap:10px;}
-#content{flex:1;overflow-y:auto;padding:20px 24px;}
+#content{flex:1;overflow-y:auto;padding:8px 32px 32px;}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
-.stat-card{background:#fff;border-radius:10px;padding:14px 16px;border-left:4px solid #3b82f6;cursor:pointer;transition:.15s;}
-.stat-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);}
-.stat-card .val{font-size:26px;font-weight:700;}
-.stat-card .lbl{font-size:11px;color:#64748b;margin-top:2px;line-height:1.3;}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.stat-card{background:#ECEDEB;border-radius:4px;padding:16px 16px;cursor:pointer;transition:filter .12s ease,transform .12s ease;}
+.stat-card:hover{filter:brightness(.96);transform:translateY(-1px);}
+.stat-card .val{font-size:32px;font-weight:800;letter-spacing:-1px;}
+.stat-card .lbl{font-size:11px;font-weight:700;margin-top:8px;line-height:1.3;text-transform:uppercase;letter-spacing:.4px;}
+.badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;}
 /* 1단계 검토상태 */
-.s-검토예정{background:#f1f5f9;color:#64748b;}
-.s-검토중{background:#e0e7ff;color:#4338ca;}
-.s-보완요청{background:#ffedd5;color:#c2410c;}
-.s-보완회신대기{background:#fef9c3;color:#854d0e;}
-.s-검토완료{background:#dcfce7;color:#15803d;}
+.s-검토예정{background:#ECEDEB;color:#6B726F;}
+.s-검토중{background:#E6EBF3;color:#2C4A76;}
+.s-보완요청{background:#F5E6DA;color:#9C4F22;}
+.s-보완회신대기{background:#F3EBD3;color:#8A6E14;}
+.s-검토완료{background:#DCEAE6;color:#1F4B43;}
 /* 2단계 사전검사 */
-.pi-진행예정{background:#e0f2fe;color:#0369a1;}
-.pi-진행중{background:#dbeafe;color:#1d4ed8;}
-.pi-진행완료{background:#dcfce7;color:#15803d;}
-.pi-해당없음{background:#f1f5f9;color:#94a3b8;}
+.pi-진행예정{background:#DCEAF3;color:#1D5C82;}
+.pi-진행중{background:#E6EBF3;color:#2C4A76;}
+.pi-진행완료{background:#E1EFE6;color:#1F6B44;}
+.pi-해당없음{background:#ECEDEB;color:#6B726F;}
 /* 2단계 반영여부 */
-.pr-검토파일미반영{background:#fee2e2;color:#dc2626;}
-.pr-반영완료{background:#dcfce7;color:#15803d;}
+.pr-검토파일미반영{background:#FBEFEC;color:#B8402C;}
+.pr-반영완료{background:#E1EFE6;color:#1F6B44;}
 /* 3단계 라벨 */
-.lb-라벨요청{background:#e0f2fe;color:#0369a1;}
-.lb-라벨작성중{background:#f3e8ff;color:#7e22ce;}
-.lb-라벨작성완료{background:#dcfce7;color:#15803d;}
-.lb-라벨보완중{background:#fef3c7;color:#d97706;}
-.lb-라벨발송{background:#d1fae5;color:#065f46;}
+.lb-라벨요청{background:#DCEAF3;color:#1D5C82;}
+.lb-라벨작성중{background:#EDE6F0;color:#6B3F82;}
+.lb-라벨작성완료{background:#E1EFE6;color:#1F6B44;}
+.lb-라벨보완중{background:#F5E6DA;color:#9C4F22;}
+.lb-라벨발송{background:#E1EFE6;color:#1F6B44;}
 /* 4단계 수입신고 */
-.id-수입신고준비중{background:#e0f2fe;color:#0369a1;}
-.id-신고완료{background:#d1fae5;color:#065f46;}
-.ph{background:#fee2e2;color:#dc2626;}
-.pm{background:#fef9c3;color:#ca8a04;}
-.pl{background:#f0fdf4;color:#16a34a;}
-.card{background:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
-.card h3{font-size:14px;font-weight:600;margin-bottom:12px;}
+.id-수입신고준비중{background:#DCEAF3;color:#1D5C82;}
+.id-신고완료{background:#E1EFE6;color:#1F6B44;}
+.ph{background:#FBEFEC;color:#B8402C;}
+.pm{background:#F3EBD3;color:#8A6E14;}
+.pl{background:#E1EFE6;color:#1F6B44;}
+.card{background:#FEFEFD;border:1px solid #E3E5E3;border-radius:4px;padding:18px 20px;margin-bottom:14px;}
+.card h3{font-size:14px;font-weight:800;margin-bottom:12px;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
-th{background:#f8fafc;padding:8px 10px;text-align:left;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;white-space:nowrap;}
-td{padding:8px 10px;border-bottom:1px solid #f1f5f9;color:#334155;vertical-align:middle;}
-tr:hover td{background:#fafafa;}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:13px;cursor:pointer;border:none;font-weight:500;transition:.15s;}
-.btn-primary{background:#3b82f6;color:#fff;}.btn-primary:hover{background:#2563eb;}
-.btn-danger{background:#ef4444;color:#fff;}.btn-danger:hover{background:#dc2626;}
-.btn-success{background:#10b981;color:#fff;}.btn-success:hover{background:#059669;}
-.btn-outline{background:#fff;color:#374151;border:1px solid #d1d5db;}.btn-outline:hover{background:#f9fafb;}
-.btn-warning{background:#f59e0b;color:#fff;}
-.btn-purple{background:#7c3aed;color:#fff;}
+th{background:#F1F2F1;padding:8px 10px;text-align:left;font-weight:700;color:#565D5A;border-bottom:1px solid #E3E5E3;white-space:nowrap;}
+td{padding:8px 10px;border-bottom:1px solid #EEEFED;color:#3A3F3D;vertical-align:middle;}
+tr:hover td{background:#F9FAF9;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:5px;font-size:13px;cursor:pointer;border:none;font-weight:600;transition:.15s;}
+.btn-primary{background:#1F4B43;color:#fff;}.btn-primary:hover{background:#163A34;}
+.btn-danger{background:#B8402C;color:#fff;}.btn-danger:hover{background:#9C3423;}
+.btn-success{background:#1F6B44;color:#fff;}.btn-success:hover{background:#195939;}
+.btn-outline{background:#fff;color:#3A3F3D;border:1px solid #D8DAD5;}.btn-outline:hover{background:#F6F7F5;}
+.btn-warning{background:#C99A1F;color:#fff;}
+.btn-purple{background:#6B3F82;color:#fff;}
 .btn-sm{padding:4px 10px;font-size:11px;}
 .fg{margin-bottom:12px;}
-.fg label{display:block;font-size:11px;font-weight:600;color:#475569;margin-bottom:4px;}
-.fg input,.fg select,.fg textarea{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;color:#1e293b;background:#fff;}
-.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+.fg label{display:block;font-size:11px;font-weight:700;color:#565D5A;margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:7px 10px;border:1px solid #D8DAD5;border-radius:5px;font-size:13px;color:#141716;background:#fff;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#1F4B43;box-shadow:0 0 0 3px rgba(31,75,67,.12);}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.tabs{display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:18px;}
-.tab{padding:9px 16px;cursor:pointer;font-size:13px;color:#64748b;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:500;}
-.tab.active{color:#3b82f6;border-bottom-color:#3b82f6;}
-.chat-box{height:360px;overflow-y:auto;background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:10px;}
+.tabs{display:flex;border-bottom:2px solid #E3E5E3;margin-bottom:18px;}
+.tab{padding:9px 16px;cursor:pointer;font-size:13px;color:#9AA09D;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:600;}
+.tab.active{color:#1F4B43;border-bottom-color:#1F4B43;}
+.chat-box{height:360px;overflow-y:auto;background:#F1F2F1;border-radius:6px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:10px;}
 .chat-msg{display:flex;gap:10px;max-width:70%;}
 .chat-msg.mine{flex-direction:row-reverse;align-self:flex-end;}
-.chat-msg .avatar{width:30px;height:30px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
-.chat-msg .bubble{background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 1px 2px rgba(0,0,0,.08);}
-.chat-msg.mine .bubble{background:#3b82f6;color:#fff;}
-.chat-msg .name{font-size:11px;color:#64748b;margin-bottom:3px;}
+.chat-msg .avatar{width:30px;height:30px;border-radius:50%;background:#1F4B43;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.chat-msg .bubble{background:#fff;border:1px solid #E3E5E3;border-radius:8px;padding:8px 12px;}
+.chat-msg.mine .bubble{background:#1F4B43;border-color:#1F4B43;color:#fff;}
+.chat-msg .name{font-size:11px;color:#9AA09D;margin-bottom:3px;}
 .chat-msg.mine .name{text-align:right;}
 .chat-msg .text{font-size:13px;line-height:1.5;}
-.chat-msg .time{font-size:10px;color:#94a3b8;margin-top:3px;}
+.chat-msg .time{font-size:10px;color:#AEB3AF;margin-top:3px;}
 .chat-msg.mine .time{text-align:right;}
 .chat-input-row{display:flex;gap:8px;}
-.chat-input-row input{flex:1;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;}
-.lock-banner{background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;}
-.history-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9;}
-.history-item .dot{width:9px;height:9px;border-radius:50%;background:#3b82f6;margin-top:5px;flex-shrink:0;}
-.history-item .meta{font-size:11px;color:#64748b;}
+.chat-input-row input{flex:1;padding:9px 12px;border:1px solid #D8DAD5;border-radius:6px;font-size:13px;}
+.lock-banner{background:#FFFCF3;border:1px solid #F0D999;border-left:4px solid #C99A1F;border-radius:4px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;}
+.history-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #EEEFED;}
+.history-item .dot{width:9px;height:9px;border-radius:50%;background:#1F4B43;margin-top:5px;flex-shrink:0;}
+.history-item .meta{font-size:11px;color:#9AA09D;}
 .file-cat{margin-bottom:14px;}
-.file-cat h4{font-size:11px;font-weight:700;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
-.file-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px;}
-.fver{background:#e0e7ff;color:#4338ca;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;}
-.notif-item{display:flex;gap:12px;padding:11px;border-radius:8px;margin-bottom:6px;background:#fff;border:1px solid #e2e8f0;cursor:pointer;}
-.notif-item.unread{border-left:3px solid #3b82f6;background:#f0f7ff;}
-.notif-count{background:#ef4444;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;font-weight:700;}
-.status-section{background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:10px;}
-.status-section h4{font-size:11px;font-weight:700;color:#475569;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.file-cat h4{font-size:11px;font-weight:800;color:#565D5A;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F1F2F1;border-radius:5px;margin-bottom:4px;font-size:12px;}
+.fver{background:#E6EBF3;color:#2C4A76;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;}
+.notif-item{display:flex;gap:12px;padding:11px;border-radius:5px;margin-bottom:6px;background:#fff;border:1px solid #E3E5E3;cursor:pointer;}
+.notif-item.unread{border-left:3px solid #1F4B43;background:#F3F7F6;}
+.notif-count{background:#B8402C;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;font-weight:700;}
+.status-section{background:#F1F2F1;border-radius:5px;padding:14px;margin-bottom:10px;}
+.status-section h4{font-size:11px;font-weight:800;color:#565D5A;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
 .status-btns{display:flex;gap:6px;flex-wrap:wrap;}
-.status-btns button{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:2px solid transparent;font-weight:500;transition:.15s;}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;}
-.modal{background:#fff;border-radius:12px;padding:22px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;}
-.modal h2{font-size:15px;font-weight:700;margin-bottom:14px;}
+.status-btns button{padding:5px 12px;border-radius:5px;font-size:12px;cursor:pointer;border:2px solid transparent;font-weight:600;transition:.15s;}
+.modal-overlay{position:fixed;inset:0;background:rgba(20,23,22,.5);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:6px;padding:22px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal h2{font-size:16px;font-weight:800;margin-bottom:14px;}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
-.import-tab{padding:8px 16px;cursor:pointer;font-size:13px;color:#64748b;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;}
-.import-tab.active{color:#3b82f6;border-bottom-color:#3b82f6;}
-.csv-preview{font-size:11px;overflow-x:auto;background:#f8fafc;border-radius:6px;padding:10px;max-height:180px;overflow-y:auto;}
+.import-tab{padding:8px 16px;cursor:pointer;font-size:13px;color:#9AA09D;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:600;}
+.import-tab.active{color:#1F4B43;border-bottom-color:#1F4B43;}
+.csv-preview{font-size:11px;overflow-x:auto;background:#F1F2F1;border-radius:5px;padding:10px;max-height:180px;overflow-y:auto;}
 .csv-preview table{font-size:11px;}
-.csv-preview th{background:#e2e8f0;padding:4px 8px;}
-.csv-preview td{padding:3px 8px;border-bottom:1px solid #f1f5f9;}
+.csv-preview th{background:#E3E5E3;padding:4px 8px;}
+.csv-preview td{padding:3px 8px;border-bottom:1px solid #EEEFED;}
 .col-map{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.alert-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:12px;color:#1d4ed8;margin-bottom:12px;}
-.alert-warn{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:12px;}
-.alert-success{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;font-size:12px;color:#15803d;margin-bottom:12px;}
-.alert-red{background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:10px;}
-.empty{text-align:center;padding:36px;color:#94a3b8;font-size:13px;}
+.alert-info{background:#EEF3F8;border:1px solid #C7D9E8;border-left:4px solid #2C4A76;border-radius:4px;padding:10px 12px;font-size:12px;color:#1D3A5C;margin-bottom:12px;}
+.alert-warn{background:#FFFCF3;border:1px solid #F0D999;border-left:4px solid #C99A1F;border-radius:4px;padding:10px 12px;font-size:12px;color:#6B540F;margin-bottom:12px;}
+.alert-success{background:#EFF7F1;border:1px solid #CFE6D6;border-left:4px solid #1F6B44;border-radius:4px;padding:10px 12px;font-size:12px;color:#1F5C3D;margin-bottom:12px;}
+.alert-red{background:#FBEFEC;border:1px solid #F0C9BE;border-left:4px solid #B8402C;border-radius:4px;padding:10px 12px;font-size:12px;color:#8C3420;margin-bottom:10px;}
+.empty{text-align:center;padding:36px;color:#9AA09D;font-size:13px;}
 .flex-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;background:#e0e7ff;color:#3730a3;}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;background:#f1f5f9;color:#475569;}
-.lock-chip{background:#fef3c7;color:#92400e;}
-hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
-.text-sm{font-size:12px;color:#64748b;}
-.stage-label{font-size:10px;font-weight:700;color:#fff;background:#475569;border-radius:4px;padding:1px 6px;margin-right:4px;}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:600;background:#E6EBF3;color:#2C4A76;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;background:#ECEDEB;color:#565D5A;}
+.lock-chip{background:#FFFCF3;color:#6B540F;}
+hr{border:none;border-top:1px solid #E3E5E3;margin:14px 0;}
+.text-sm{font-size:12px;color:#9AA09D;}
+.stage-label{font-size:10px;font-weight:700;color:#fff;background:#565D5A;border-radius:4px;padding:1px 6px;margin-right:4px;}
 
 /* 인라인 상태 드롭다운 */
-.inline-select{border:none;background:transparent;font-size:11px;font-weight:600;cursor:pointer;border-radius:20px;padding:2px 6px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;padding-right:18px;}
-.inline-select:focus{outline:2px solid #3b82f6;outline-offset:1px;}
+.inline-select{border:none;background:transparent;font-size:11px;font-weight:700;cursor:pointer;border-radius:4px;padding:2px 6px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239AA09D'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;padding-right:18px;}
+.inline-select:focus{outline:2px solid #1F4B43;outline-offset:1px;}
 
 /* 4단계 파이프라인 미니바 */
 .pipeline{display:flex;align-items:center;gap:2px;min-width:220px;}
 .pipe-step{flex:1;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px;cursor:default;}
 .pipe-step.done{opacity:1;}
-.pipe-step.pending{background:#f1f5f9;color:#94a3b8;}
-.pipe-arrow{color:#cbd5e1;font-size:10px;flex-shrink:0;}
+.pipe-step.pending{background:#ECEDEB;color:#9AA09D;}
+.pipe-arrow{color:#D8DAD5;font-size:10px;flex-shrink:0;}
 
 /* 칸반 보드 */
 .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
 .kanban-col{background:#f8fafc;border-radius:10px;padding:10px;}
 .kanban-col-header{font-size:11px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-.kanban-card{background:#fff;border-radius:7px;padding:8px 10px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:.15s;border-left:3px solid #e2e8f0;}
+.kanban-card{background:#fff;border-radius:7px;padding:8px 10px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:.15s;border-left:3px solid #E3E5E3;}
 .kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px);}
-.kanban-card .kc-name{font-size:12px;font-weight:600;margin-bottom:4px;color:#1e293b;}
-.kanban-card .kc-meta{font-size:10px;color:#94a3b8;}
+.kanban-card .kc-name{font-size:12px;font-weight:600;margin-bottom:4px;color:#141716;}
+.kanban-card .kc-meta{font-size:10px;color:#9AA09D;}
 .kanban-card .kc-pipe{display:flex;gap:2px;margin-top:5px;}
 .kc-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 </style>
 </head>
 <body>
-<div id="loginOverlay" style="position:fixed;inset:0;z-index:5000;background:linear-gradient(135deg,#1e293b,#334155);display:none;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:14px;padding:32px 30px;width:340px;max-width:92vw;box-shadow:0 10px 40px rgba(0,0,0,.3)">
-    <div style="text-align:center;margin-bottom:22px">
+<div id="loginOverlay" style="position:fixed;inset:0;z-index:5000;background:linear-gradient(135deg,#14332C,#1F4B43);display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:8px;padding:34px 30px;width:340px;max-width:92vw;box-shadow:0 16px 48px rgba(0,0,0,.28)">
+    <div style="text-align:center;margin-bottom:24px">
       <div style="font-size:34px">🍱</div>
-      <h2 style="font-size:16px;font-weight:700;margin-top:8px;color:#1e293b">식품표시사항<br>검토 협업 시스템</h2>
-      <p style="font-size:12px;color:#64748b;margin-top:6px">로그인이 필요합니다</p>
+      <h2 style="font-size:17px;font-weight:800;margin-top:10px;color:#141716">식품표시사항<br>검토 협업 시스템</h2>
+      <p style="font-size:12px;color:#9AA09D;margin-top:6px">로그인이 필요합니다</p>
     </div>
     <div style="margin-bottom:12px">
-      <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">아이디</label>
-      <input id="login-id" autocomplete="username" placeholder="아이디" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box" onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()">
+      <label style="display:block;font-size:12px;font-weight:700;color:#565D5A;margin-bottom:4px">아이디</label>
+      <input id="login-id" autocomplete="username" placeholder="아이디" style="width:100%;padding:10px 12px;border:1px solid #D8DAD5;border-radius:5px;font-size:14px;box-sizing:border-box" onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()">
     </div>
     <div style="margin-bottom:8px">
-      <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:4px">비밀번호</label>
-      <input id="login-pw" type="password" autocomplete="current-password" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box" onkeydown="if(event.key==='Enter')attemptLogin()">
+      <label style="display:block;font-size:12px;font-weight:700;color:#565D5A;margin-bottom:4px">비밀번호</label>
+      <input id="login-pw" type="password" autocomplete="current-password" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid #D8DAD5;border-radius:5px;font-size:14px;box-sizing:border-box" onkeydown="if(event.key==='Enter')attemptLogin()">
     </div>
-    <div id="login-err" style="color:#dc2626;font-size:12px;min-height:16px;margin-bottom:8px"></div>
-    <button onclick="attemptLogin()" style="width:100%;background:#3b82f6;color:#fff;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">로그인</button>
-    <label style="display:flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;color:#64748b;cursor:pointer">
+    <div id="login-err" style="color:#B8402C;font-size:12px;min-height:16px;margin-bottom:8px"></div>
+    <button onclick="attemptLogin()" style="width:100%;background:#1F4B43;color:#fff;border:none;padding:11px;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer">로그인</button>
+    <label style="display:flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;color:#9AA09D;cursor:pointer">
       <input type="checkbox" id="login-remember" checked> 이 브라우저에서 로그인 유지
     </label>
   </div>
 </div>
+<div id="masthead"></div>
+<div id="appRow">
 <div id="sidebar">
   <div class="logo">
     <h2>🍱 식품표시사항<br>검토 협업 시스템</h2>
@@ -189,7 +196,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
   </div>
   <div class="sync-bar">
     <div class="sync-dot" id="syncDot"></div>
-    <span id="syncStatus" style="color:#64748b">연결 중...</span>
+    <span id="syncStatus" style="color:#9AA09D">연결 중...</span>
   </div>
   <nav id="nav">
     <a onclick="go('dashboard')" class="active" data-page="dashboard"><span class="icon">📊</span>대시보드</a>
@@ -208,9 +215,9 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     <a onclick="showApiSettings()" data-page="api" style="display:none"><span class="icon">☁️</span>클라우드 설정</a>
   </nav>
   <div class="user-area">
-    <div id="loginUserName" style="color:#fff;font-size:13px;font-weight:600">—</div>
+    <div id="loginUserName" style="color:#141716;font-size:13px;font-weight:700">—</div>
     <div class="user-badge">관리자 권한</div>
-    <button onclick="doLogout()" style="width:100%;margin-top:8px;background:#334155;color:#cbd5e1;border:none;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer">🚪 로그아웃</button>
+    <button onclick="doLogout()" style="width:100%;margin-top:8px;background:#F1F2F1;color:#565D5A;border:1px solid #E3E5E3;padding:6px 8px;border-radius:5px;font-size:12px;cursor:pointer">🚪 로그아웃</button>
   </div>
 </div>
 
@@ -223,6 +230,7 @@ hr{border:none;border-top:1px solid #e2e8f0;margin:14px 0;}
     </div>
   </div>
   <div id="content"></div>
+</div>
 </div>
 <div id="modalContainer"></div>
 
@@ -240,21 +248,31 @@ let API_URL=localStorage.getItem(API_KEY_STORE)||DEFAULT_API_URL;
 // ============================================================
 // 1단계
 const STATUSES=['검토예정','검토중','보완요청','보완회신대기','검토완료'];
-const STATUS_COLORS={'검토예정':'#94a3b8','검토중':'#6366f1','보완요청':'#f97316','보완회신대기':'#eab308','검토완료':'#22c55e'};
+const STATUS_COLORS={'검토예정':'#6B726F','검토중':'#2C4A76','보완요청':'#9C4F22','보완회신대기':'#8A6E14','검토완료':'#1F4B43'};
 // 2단계 사전검사
 const PI_STATUSES=['-','진행예정','진행중','진행완료','해당없음'];
-const PI_COLORS={'-':'#94a3b8','진행예정':'#0369a1','진행중':'#1d4ed8','진행완료':'#15803d','해당없음':'#94a3b8'};
+const PI_COLORS={'-':'#9AA09D','진행예정':'#1D5C82','진행중':'#2C4A76','진행완료':'#1F6B44','해당없음':'#9AA09D'};
 const PR_STATUSES=['검토파일미반영','반영완료'];
-const PR_COLORS={'검토파일미반영':'#dc2626','반영완료':'#15803d'};
+const PR_COLORS={'검토파일미반영':'#B8402C','반영완료':'#1F6B44'};
 // 3단계 라벨 (요청/작성중/작성완료만) — 발송 단계는 아래 세부단계에서 관리
 const LABEL_STATUSES=['-','라벨요청','라벨작성중','라벨작성완료'];
-const LABEL_COLORS={'-':'#94a3b8','라벨요청':'#0369a1','라벨작성중':'#7c3aed','라벨작성완료':'#15803d'};
+const LABEL_COLORS={'-':'#9AA09D','라벨요청':'#1D5C82','라벨작성중':'#6B3F82','라벨작성완료':'#1F6B44'};
 // 3단계 라벨 검토단계 (사전검사 반영여부처럼 세부)
 const LABEL_REVIEW_STATUSES=['-','라벨검토중','라벨보완중','라벨발송'];
-const LABEL_REVIEW_COLORS={'-':'#94a3b8','라벨검토중':'#7c3aed','라벨보완중':'#d97706','라벨발송':'#065f46'};
+const LABEL_REVIEW_COLORS={'-':'#9AA09D','라벨검토중':'#6B3F82','라벨보완중':'#9C4F22','라벨발송':'#1F6B44'};
 // 4단계 수입신고
 const ID_STATUSES=['-','수입신고준비중','신고완료'];
-const ID_COLORS={'-':'#94a3b8','수입신고준비중':'#0369a1','신고완료':'#065f46'};
+const ID_COLORS={'-':'#9AA09D','수입신고준비중':'#1D5C82','신고완료':'#1F6B44'};
+
+function statCard(label,count,color,onclick,labelHtml){
+  const solid=label==='검토완료';
+  const bg=solid?color:color+'1A';
+  const fg=solid?'#fff':color;
+  return`<div class="stat-card" style="background:${bg};text-align:center" onclick="${onclick}">
+    <div class="val" style="color:${fg}">${count}</div>
+    <div class="lbl" style="margin-top:8px;color:${fg}">${labelHtml||label}</div>
+  </div>`;
+}
 
 const FILE_CATS=['성분표','공정도','포장재질 자료','제조사 회신자료','시험성적서','표시시안','검토보고서'];
 const FOOD_TYPES=['과자류','캔디류','빵류','초콜릿류','잼류','음료류','주류','통조림류','냉동식품','육가공품','수산가공품','유가공품','건강기능식품','조미식품','기타'];
@@ -342,10 +360,10 @@ function setSyncStatus(s){
   const dot=document.getElementById('syncDot');
   const txt=document.getElementById('syncStatus');
   if(!dot||!txt)return;
-  if(s==='ok'){dot.className='sync-dot ok';txt.textContent='클라우드 연결됨';txt.style.color='#4ade80';}
-  else if(s==='syncing'){dot.className='sync-dot syncing';txt.textContent='동기화 중...';txt.style.color='#fbbf24';}
-  else if(s==='err'){dot.className='sync-dot err';txt.textContent='연결 오류';txt.style.color='#f87171';}
-  else{dot.className='sync-dot';txt.textContent='클라우드 미연결';txt.style.color='#64748b';}
+  if(s==='ok'){dot.className='sync-dot ok';txt.textContent='클라우드 연결됨';txt.style.color='#1F6B44';}
+  else if(s==='syncing'){dot.className='sync-dot syncing';txt.textContent='동기화 중...';txt.style.color='#C99A1F';}
+  else if(s==='err'){dot.className='sync-dot err';txt.textContent='연결 오류';txt.style.color='#B8402C';}
+  else{dot.className='sync-dot';txt.textContent='클라우드 미연결';txt.style.color='#9AA09D';}
 }
 let isSaving=false;
 async function cloudSave(data){
@@ -439,7 +457,7 @@ function showBackupModal(){
   <hr>
   <div class="fg">
     <label>백업 파일로 복원</label>
-    <input type="file" id="restoreFileInput" accept="application/json,.json" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:7px;font-size:12px">
+    <input type="file" id="restoreFileInput" accept="application/json,.json" style="width:100%;padding:8px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px">
   </div>
   <div class="alert-warn">⚠️ 복원하면 <strong>현재 데이터가 파일 내용으로 완전히 대체</strong>됩니다. 되돌릴 수 없으니 신중하게 선택하세요.</div>
   <div class="modal-footer">
@@ -515,10 +533,10 @@ function updateNotifBadge(){
 }
 
 function sBadge(v){return`<span class="badge s-${v}">${v}</span>`;}
-function piBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return`<span class="badge pi-${v}">${v}</span>`;}
+function piBadge(v){if(!v||v==='-')return`<span style="color:#9AA09D;font-size:12px">—</span>`;return`<span class="badge pi-${v}">${v}</span>`;}
 function prBadge(v){return`<span class="badge pr-${v.replace(/\s/g,'')}">${v}</span>`;}
-function labelBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return`<span class="badge lb-${v.replace(/\s/g,'')}">${v}</span>`;}
-function idBadge(v){if(!v||v==='-')return`<span style="color:#94a3b8;font-size:12px">—</span>`;return`<span class="badge id-${v.replace(/\s/g,'')}">${v}</span>`;}
+function labelBadge(v){if(!v||v==='-')return`<span style="color:#9AA09D;font-size:12px">—</span>`;return`<span class="badge lb-${v.replace(/\s/g,'')}">${v}</span>`;}
+function idBadge(v){if(!v||v==='-')return`<span style="color:#9AA09D;font-size:12px">—</span>`;return`<span class="badge id-${v.replace(/\s/g,'')}">${v}</span>`;}
 
 // ============================================================
 // ROUTER
@@ -594,14 +612,14 @@ function renderDashboard(){
   const recentH=[...DB.history].sort((a,b)=>b.at.localeCompare(a.at)).slice(0,5);
   const pendingFinal=pendingFinalProducts();
   const finalBanner=pendingFinal.length?`
-  <div class="card" style="border:2px solid #f59e0b;background:#fffbeb;margin-bottom:14px">
-    <h3 style="color:#b45309">🔔 최종 확인 대기 <span class="notif-count" style="font-size:13px">${pendingFinal.length}</span> <span style="font-weight:400;color:#92400e;font-size:11px">— 검토자가 검토를 마쳤습니다. 최종 검토자가 확인해 주세요.</span></h3>
+  <div class="card" style="border:2px solid #C99A1F;background:#FFFCF3;margin-bottom:14px">
+    <h3 style="color:#6B540F">🔔 최종 확인 대기 <span class="notif-count" style="font-size:13px">${pendingFinal.length}</span> <span style="font-weight:400;color:#6B540F;font-size:11px">— 검토자가 검토를 마쳤습니다. 최종 검토자가 확인해 주세요.</span></h3>
     <table><tr><th>No.</th><th>제품명</th><th>검토자</th><th>검토 종료 시각</th><th style="width:180px">최종 확인</th></tr>
-    ${pendingFinal.map(p=>`<tr style="background:#fffdf5">
-      <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
-      <td><strong style="cursor:pointer;color:#b45309" onclick="go('product','${p.id}')">${p.name}</strong></td>
+    ${pendingFinal.map(p=>`<tr style="background:#FFFCF3">
+      <td style="font-size:11px;color:#9AA09D">${p.itemNo||'—'}</td>
+      <td><strong style="cursor:pointer;color:#6B540F" onclick="go('product','${p.id}')">${p.name}</strong></td>
       <td style="font-size:12px">${p.reviewSubmittedBy?username(p.reviewSubmittedBy):'—'}</td>
-      <td style="font-size:11px;color:#64748b">${p.reviewSubmittedAt||'—'}</td>
+      <td style="font-size:11px;color:#9AA09D">${p.reviewSubmittedAt||'—'}</td>
       <td><button class="btn btn-success btn-sm" onclick="confirmFinalReview('${p.id}')">✅ 최종 확인</button>
           <button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td>
     </tr>`).join('')}
@@ -615,39 +633,35 @@ function renderDashboard(){
 
   ${finalBanner}
   <div class="card" style="margin-bottom:14px">
-    <h3>📋 검토 상태 현황 <span style="font-weight:400;color:#64748b;font-size:11px">— 카드를 클릭하면 해당 상태 목록으로 이동합니다</span></h3>
-    <div class="stat-grid" style="margin-bottom:0;grid-template-columns:repeat(5,1fr)">
-      ${STATUSES.map(s=>`
-      <div class="stat-card" style="border-color:${STATUS_COLORS[s]};text-align:center" onclick="goProductsFilter('${s}')">
-        <div class="val" style="color:${STATUS_COLORS[s]}">${statusCounts[s]||0}</div>
-        <div class="lbl" style="margin-top:6px"><span class="badge s-${s}">${s}</span></div>
-      </div>`).join('')}
+    <h3>📋 검토 상태 현황 <span style="font-weight:400;color:#9AA09D;font-size:11px">— 카드를 클릭하면 해당 상태 목록으로 이동합니다</span></h3>
+    <div class="stat-grid" style="margin-bottom:0;grid-template-columns:repeat(7,1fr);gap:10px">
+      ${STATUSES.map(s=>statCard(s,statusCounts[s]||0,STATUS_COLORS[s],`goProductsFilter('${s}')`)).join('')}
+      ${statCard('수입신고준비중',idInProg,ID_COLORS['수입신고준비중'],`goDashPreset('id-prep')`,'수입신고<br>준비중')}
+      ${statCard('신고완료',idDone,ID_COLORS['신고완료'],`goDashPreset('id-done')`)}
     </div>
   </div>
 
   <div class="stat-grid">
-    <div class="stat-card" style="border-color:#3b82f6" onclick="goDashPreset('pi-inprog')"><div class="val" style="color:#1d4ed8">${piInProg}</div><div class="lbl">🧪 사전검사 진행중</div></div>
-    <div class="stat-card" style="border-color:#ef4444" onclick="goDashPreset('pi-notrefl')"><div class="val" style="color:#dc2626">${piNotRefl}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
-    <div class="stat-card" style="border-color:#7c3aed" onclick="goDashPreset('label-inprog')"><div class="val" style="color:#6d28d9">${labelInProg}</div><div class="lbl">🏷️ 라벨 진행중</div></div>
-    <div class="stat-card" style="border-color:#f59e0b" onclick="goDashPreset('id-prep')"><div class="val" style="color:#d97706">${idInProg}</div><div class="lbl">🚢 수입신고 준비중</div></div>
-    <div class="stat-card" style="border-color:#10b981" onclick="goDashPreset('id-done')"><div class="val" style="color:#059669">${idDone}</div><div class="lbl">✅ 신고 완료</div></div>
+    <div class="stat-card" style="background:${'#1F4B43'}1A" onclick="goDashPreset('pi-inprog')"><div class="val" style="color:#2C4A76">${piInProg}</div><div class="lbl">🧪 사전검사 진행중</div></div>
+    <div class="stat-card" style="background:${'#B8402C'}1A" onclick="goDashPreset('pi-notrefl')"><div class="val" style="color:#B8402C">${piNotRefl}</div><div class="lbl">⚠️ 사전검사 완료<br>검토파일 미반영</div></div>
+    <div class="stat-card" style="background:${'#6B3F82'}1A" onclick="goDashPreset('label-inprog')"><div class="val" style="color:#6B3F82">${labelInProg}</div><div class="lbl">🏷️ 라벨 진행중</div></div>
   </div>
 
   <div class="card">
-    <h3>📊 1단계 검토 진행 현황 <span style="font-weight:400;color:#64748b;font-size:11px">(전체 ${total}건)</span></h3>
+    <h3>📊 1단계 검토 진행 현황 <span style="font-weight:400;color:#9AA09D;font-size:11px">(전체 ${total}건)</span></h3>
     ${STATUSES.map(s=>`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
       <span class="badge s-${s}" style="width:110px;text-align:center">${s}</span>
-      <div style="flex:1;background:#f1f5f9;border-radius:5px;height:12px;overflow:hidden"><div style="width:${total?Math.round((statusCounts[s]/total)*100):0}%;background:${STATUS_COLORS[s]};height:100%;border-radius:5px;transition:width .3s"></div></div>
+      <div style="flex:1;background:#ECEDEB;border-radius:5px;height:12px;overflow:hidden"><div style="width:${total?Math.round((statusCounts[s]/total)*100):0}%;background:${STATUS_COLORS[s]};height:100%;border-radius:5px;transition:width .3s"></div></div>
       <span style="font-size:13px;font-weight:700;width:64px;text-align:right;color:${STATUS_COLORS[s]}">${statusCounts[s]||0}건</span>
     </div>`).join('')}
   </div>
-  ${piNotRefl>0?`<div class="card" style="border:1px solid #fca5a5">
-    <h3 style="color:#dc2626">⚠️ 사전검사 완료 후 검토파일 미반영 (${piNotRefl}건)</h3>
+  ${piNotRefl>0?`<div class="card" style="border:1px solid #F0C9BE">
+    <h3 style="color:#B8402C">⚠️ 사전검사 완료 후 검토파일 미반영 (${piNotRefl}건)</h3>
     <table><tr><th>No.</th><th>제품명</th><th>수입사</th><th>검토상태</th><th>라벨</th><th>수입신고</th><th></th></tr>
     ${prods.filter(p=>p.preInspect==='진행완료'&&p.preInspectReflect==='검토파일미반영').map(p=>`
-    <tr><td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
-    <td><strong style="cursor:pointer;color:#dc2626" onclick="go('product','${p.id}')">${p.name}</strong></td>
+    <tr><td style="font-size:11px;color:#9AA09D">${p.itemNo||'—'}</td>
+    <td><strong style="cursor:pointer;color:#B8402C" onclick="go('product','${p.id}')">${p.name}</strong></td>
     <td>${p.importer}</td><td>${sBadge(p.status)}</td>
     <td>${labelBadge(p.labelStatus)}</td><td>${idBadge(p.importDecl)}</td>
     <td><button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button></td></tr>`).join('')}
@@ -664,7 +678,7 @@ function renderDashboard(){
 function renderProductList(){
   const base=activeProducts();
   return`<div class="card">
-    <div class="flex-between"><h3>진행중인 제품 (${base.length}건) <span style="font-weight:400;color:#94a3b8;font-size:11px">완료 제품은 [🏁 완료 제품] 메뉴에서 확인</span></h3>
+    <div class="flex-between"><h3>진행중인 제품 (${base.length}건) <span style="font-weight:400;color:#9AA09D;font-size:11px">완료 제품은 [🏁 완료 제품] 메뉴에서 확인</span></h3>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary btn-sm" onclick="go('register')">➕ 제품 등록</button>
         <button class="btn btn-purple btn-sm" onclick="showImportModal()">📥 구글시트 이관</button>
@@ -672,15 +686,15 @@ function renderProductList(){
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <input id="fl-name" placeholder="🔍 아이템번호/제품명/수입사" oninput="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;min-width:200px">
-      <select id="fl-status" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 검토상태</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <select id="fl-lock" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">검토자 전체</option>${Object.values(USERS).map(u=>`<option value="${u.id}">🔒${u.name}</option>`).join('')}<option value="none">🔓 미검토</option></select>
-      <select id="fl-pi" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">사전검사 전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <select id="fl-lb" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">라벨 전체</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <select id="fl-id" onchange="filterList()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">수입신고 전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
-      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:6px 10px;cursor:pointer"><input type="checkbox" id="fl-flag" onchange="filterList()"> 🚩 검토필요만</label>
+      <input id="fl-name" placeholder="🔍 아이템번호/제품명/수입사" oninput="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px;min-width:200px">
+      <select id="fl-status" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">전체 검토상태</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="fl-lock" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">검토자 전체</option>${Object.values(USERS).map(u=>`<option value="${u.id}">🔒${u.name}</option>`).join('')}<option value="none">🔓 미검토</option></select>
+      <select id="fl-pi" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">사전검사 전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="fl-lb" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">라벨 전체</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="fl-id" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">수입신고 전체</option>${ID_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#6B540F;background:#FFFCF3;border:1px solid #F0D999;border-radius:7px;padding:6px 10px;cursor:pointer"><input type="checkbox" id="fl-flag" onchange="filterList()"> 🚩 검토필요만</label>
     </div>
-    ${dashPreset&&DASH_PRESETS[dashPreset]?`<div style="margin-bottom:10px"><span class="chip" style="background:#e0e7ff;color:#3730a3">필터: ${DASH_PRESETS[dashPreset].label} <span style="cursor:pointer;font-weight:700;margin-left:4px" onclick="clearDashPreset()">✕</span></span></div>`:''}
+    ${dashPreset&&DASH_PRESETS[dashPreset]?`<div style="margin-bottom:10px"><span class="chip" style="background:#E6EBF3;color:#2C4A76">필터: ${DASH_PRESETS[dashPreset].label} <span style="cursor:pointer;font-weight:700;margin-left:4px" onclick="clearDashPreset()">✕</span></span></div>`:''}
     <table>
       <tr><th><input type="checkbox" id="chk-all" onchange="toggleAllCheck(this.checked)" title="전체선택"></th><th>No.</th><th>제품명</th><th>1단계 검토상태</th><th>진행 파이프라인 (2~4단계)</th><th title="검토 필요 표시">🚩</th><th>잠금</th><th>작업</th></tr>
       <tbody id="product-tbody">${renderProductRows(dashPreset&&DASH_PRESETS[dashPreset]?base.filter(DASH_PRESETS[dashPreset].test):base)}</tbody>
@@ -706,9 +720,9 @@ function pipelineBar(p){
       title:`수입신고: ${p.importDecl||'-'}`+(p.importDeclDate?`\n📅 신고일: ${p.importDeclDate}`:'')},
   ];
   return`<div class="pipeline">${steps.map((s,i)=>{
-    const color=s.colors[s.val]||'#94a3b8';
-    const bg=s.done?color:s.val&&s.val!=='-'?color+'33':'#f1f5f9';
-    const fc=s.done?'#fff':s.val&&s.val!=='-'?color:'#94a3b8';
+    const color=s.colors[s.val]||'#9AA09D';
+    const bg=s.done?color:s.val&&s.val!=='-'?color+'33':'#ECEDEB';
+    const fc=s.done?'#fff':s.val&&s.val!=='-'?color:'#9AA09D';
     return(i>0?`<span class="pipe-arrow">›</span>`:'')+
       `<select class="pipe-step" style="background:${bg};color:${fc};border:none;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;cursor:pointer" title="${escAttr(s.title)}" onclick="event.stopPropagation()" onchange="${s.onchange}">
         ${s.options.map(o=>`<option value="${o}" ${o===s.val?'selected':''}>${o==='-'?'—':o}</option>`).join('')}
@@ -719,7 +733,7 @@ function pipelineBar(p){
 function inlineStatusSelect(p){
   const locked=p.lockedBy&&p.lockedBy!==currentUser.id;
   if(locked)return sBadge(p.status);
-  const bg=STATUS_COLORS[p.status]||'#94a3b8';
+  const bg=STATUS_COLORS[p.status]||'#9AA09D';
   return`<select class="inline-select" style="background:${bg}22;color:${bg};border:1px solid ${bg}66"
     onchange="inlineChangeStatus('${p.id}',this.value)" onclick="event.stopPropagation()">
     ${STATUSES.map(s=>`<option value="${s}" ${s===p.status?'selected':''}>${s}</option>`).join('')}
@@ -742,8 +756,8 @@ function renderProductRows(prods){
   if(!prods.length)return`<tr><td colspan="10" class="empty">검색 결과가 없습니다.</td></tr>`;
   return prods.map(p=>`<tr>
     <td><input type="checkbox" class="row-chk" value="${p.id}" ${selectedProductIds.has(p.id)?'checked':''} onchange="toggleRowCheck('${p.id}',this.checked)"></td>
-    <td style="font-size:11px;color:#64748b;white-space:nowrap">${p.itemNo||'—'}</td>
-    <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#94a3b8">${p.importer||''}</div></td>
+    <td style="font-size:11px;color:#9AA09D;white-space:nowrap">${p.itemNo||'—'}</td>
+    <td><strong style="cursor:pointer;color:#1F4B43" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#9AA09D">${p.importer||''}</div></td>
     <td>${inlineStatusSelect(p)}</td>
     <td>${pipelineBar(p)}</td>
     <td style="text-align:center"><span onclick="toggleFlag('${p.id}')" style="cursor:pointer;font-size:16px;user-select:none" title="${p.flagged?'검토 필요 해제':'검토 필요 표시'}">${p.flagged?'🚩':'<span style=\"opacity:.2\">🚩</span>'}</span></td>
@@ -879,11 +893,11 @@ function renderFloatingChat(p){
   if(floatingChatOpen)markChatRead(p.id); // 위젯이 열려있으면 보고 있는 것이므로 읽음 처리
   const unread=DB.chats.filter(c=>c.productId===p.id&&c.userId!==currentUser.id&&(!c.readBy||!c.readBy.includes(currentUser.id))).length;
   return`
-  <div onclick="toggleFloatingChat('${p.id}')" style="position:fixed;right:24px;bottom:24px;width:54px;height:54px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;z-index:900">
+  <div onclick="toggleFloatingChat('${p.id}')" style="position:fixed;right:24px;bottom:24px;width:54px;height:54px;border-radius:50%;background:#1F4B43;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;z-index:900">
     💬${unread>0?`<span class="notif-count" style="position:absolute;top:-2px;right:-2px">${unread}</span>`:''}
   </div>
   ${floatingChatOpen?`<div style="position:fixed;right:24px;bottom:88px;width:340px;max-width:88vw;height:440px;max-height:70vh;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;z-index:900">
-    <div style="background:#3b82f6;color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;flex-shrink:0">
+    <div style="background:#1F4B43;color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;flex-shrink:0">
       <span>💬 ${p.name}</span>
       <span style="cursor:pointer;font-size:16px" onclick="toggleFloatingChat('${p.id}')">✕</span>
     </div>
@@ -906,41 +920,41 @@ function renderBasicInfo(p){
 
   // 퀵 파이프라인 패널
   const quickPanel=`
-  <div style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:10px;letter-spacing:.3px">⚡ 빠른 상태 변경</div>
+  <div style="background:#EEF3F8;border:1px solid #C7D9E8;border-radius:10px;padding:14px 16px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:#2C4A76;margin-bottom:10px;letter-spacing:.3px">⚡ 빠른 상태 변경</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
       <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">1</span>검토</div>
-        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${STATUS_COLORS[p.status]||'#94a3b8'}22;color:${STATUS_COLORS[p.status]||'#94a3b8'}"
+        <div style="font-size:10px;font-weight:700;color:#565D5A;margin-bottom:4px"><span class="stage-label">1</span>검토</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #D8DAD5;font-size:12px;font-weight:600;background:${STATUS_COLORS[p.status]||'#9AA09D'}22;color:${STATUS_COLORS[p.status]||'#9AA09D'}"
           onchange="changeStatus('${p.id}',this.value)">
           ${STATUSES.map(s=>`<option value="${s}" ${s===p.status?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
       <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">2</span>사전검사</div>
-        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${PI_COLORS[p.preInspect]||'#94a3b8'}22;color:${PI_COLORS[p.preInspect]||'#94a3b8'}"
+        <div style="font-size:10px;font-weight:700;color:#565D5A;margin-bottom:4px"><span class="stage-label">2</span>사전검사</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #D8DAD5;font-size:12px;font-weight:600;background:${PI_COLORS[p.preInspect]||'#9AA09D'}22;color:${PI_COLORS[p.preInspect]||'#9AA09D'}"
           onchange="changePI('${p.id}',this.value)">
           ${PI_STATUSES.map(s=>`<option value="${s}" ${s===p.preInspect?'selected':''}>${s==='-'?'—':s}</option>`).join('')}
         </select>
-        ${showReflect?`<select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:11px;margin-top:3px;background:${PR_COLORS[p.preInspectReflect]||'#94a3b8'}22;color:${PR_COLORS[p.preInspectReflect]||'#94a3b8'}"
+        ${showReflect?`<select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #D8DAD5;font-size:11px;margin-top:3px;background:${PR_COLORS[p.preInspectReflect]||'#9AA09D'}22;color:${PR_COLORS[p.preInspectReflect]||'#9AA09D'}"
           onchange="changePR('${p.id}',this.value)">
           ${PR_STATUSES.map(s=>`<option value="${s}" ${s===p.preInspectReflect?'selected':''}>${s}</option>`).join('')}
         </select>`:''}
       </div>
       <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">3</span>라벨</div>
-        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${LABEL_COLORS[p.labelStatus]||'#94a3b8'}22;color:${LABEL_COLORS[p.labelStatus]||'#94a3b8'}"
+        <div style="font-size:10px;font-weight:700;color:#565D5A;margin-bottom:4px"><span class="stage-label">3</span>라벨</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #D8DAD5;font-size:12px;font-weight:600;background:${LABEL_COLORS[p.labelStatus]||'#9AA09D'}22;color:${LABEL_COLORS[p.labelStatus]||'#9AA09D'}"
           onchange="changeLabel('${p.id}',this.value)">
           ${LABEL_STATUSES.map(s=>`<option value="${s}" ${s===p.labelStatus?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
         </select>
-        ${p.labelStatus&&p.labelStatus!=='-'?`<select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:11px;margin-top:3px;background:${LABEL_REVIEW_COLORS[p.labelReview]||'#94a3b8'}22;color:${LABEL_REVIEW_COLORS[p.labelReview]||'#94a3b8'}"
+        ${p.labelStatus&&p.labelStatus!=='-'?`<select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #D8DAD5;font-size:11px;margin-top:3px;background:${LABEL_REVIEW_COLORS[p.labelReview]||'#9AA09D'}22;color:${LABEL_REVIEW_COLORS[p.labelReview]||'#9AA09D'}"
           onchange="changeLabelReview('${p.id}',this.value)">
           ${LABEL_REVIEW_STATUSES.map(s=>`<option value="${s}" ${s===p.labelReview?'selected':''}>${s==='-'?'—(세부단계)':s}</option>`).join('')}
         </select>`:''}
       </div>
       <div>
-        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:4px"><span class="stage-label">4</span>수입신고</div>
-        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#94a3b8'}22;color:${ID_COLORS[p.importDecl]||'#94a3b8'}"
+        <div style="font-size:10px;font-weight:700;color:#565D5A;margin-bottom:4px"><span class="stage-label">4</span>수입신고</div>
+        <select style="width:100%;padding:5px 7px;border-radius:7px;border:1px solid #D8DAD5;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#9AA09D'}22;color:${ID_COLORS[p.importDecl]||'#9AA09D'}"
           onchange="changeID('${p.id}',this.value)">
           ${ID_STATUSES.map(s=>`<option value="${s}" ${s===p.importDecl?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
         </select>
@@ -959,69 +973,69 @@ function renderBasicInfo(p){
       <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">식품유형</div><span class="tag">${p.foodType}</span></div>
     </div>
     <div>
-      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">검토자</div><div style="font-weight:600">${p.reviewedBy?username(p.reviewedBy):'<span style="color:#94a3b8;font-size:12px">미지정 (검토 시작 시 자동)</span>'}</div></div>
+      <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">검토자</div><div style="font-weight:600">${p.reviewedBy?username(p.reviewedBy):'<span style="color:#9AA09D;font-size:12px">미지정 (검토 시작 시 자동)</span>'}</div></div>
       <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">우선순위</div><span class="badge ${p.priority==='높음'?'ph':p.priority==='보통'?'pm':'pl'}">${p.priority}</span></div>
       <div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">등록일</div><div>${p.registeredAt}</div></div>
-      ${p.note?`<div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">메모</div><div style="font-size:12px;color:#64748b">${p.note}</div></div>`:''}
+      ${p.note?`<div style="margin-bottom:8px"><div class="text-sm" style="margin-bottom:2px">메모</div><div style="font-size:12px;color:#9AA09D">${p.note}</div></div>`:''}
     </div>
   </div><hr>
 
   <div class="status-section">
     <h4><span class="stage-label">1단계</span>검토 진행상태</h4>
     <div class="status-btns">
-      ${STATUSES.map(s=>`<button style="background:${s===p.status?STATUS_COLORS[s]:'#f1f5f9'};color:${s===p.status?'#fff':'#374151'};border-color:${s===p.status?STATUS_COLORS[s]:'transparent'}" onclick="changeStatus('${p.id}','${s}')">${s}</button>`).join('')}
+      ${STATUSES.map(s=>`<button style="background:${s===p.status?STATUS_COLORS[s]:'#ECEDEB'};color:${s===p.status?'#fff':'#3A3F3D'};border-color:${s===p.status?STATUS_COLORS[s]:'transparent'}" onclick="changeStatus('${p.id}','${s}')">${s}</button>`).join('')}
     </div>
     ${p.status==='보완요청'||p.reviseRequestDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
-      <div style="font-size:11px;color:#c2410c;font-weight:600;white-space:nowrap">📌 보완요청일</div>
-      <input type="date" id="reviseDateInput" value="${p.reviseRequestDate||''}" onchange="saveReviseDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
-      <input type="text" id="reviseNoteInput" value="${escAttr(p.reviseNote)}" onchange="saveReviseNote('${p.id}',this.value)" placeholder="보완 내용 메모 (예: 트랜스지방 표시 누락)" style="flex:1;min-width:220px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">
+      <div style="font-size:11px;color:#9C4F22;font-weight:600;white-space:nowrap">📌 보완요청일</div>
+      <input type="date" id="reviseDateInput" value="${p.reviseRequestDate||''}" onchange="saveReviseDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #D8DAD5;border-radius:6px;font-size:12px;width:150px">
+      <input type="text" id="reviseNoteInput" value="${escAttr(p.reviseNote)}" onchange="saveReviseNote('${p.id}',this.value)" placeholder="보완 내용 메모 (예: 트랜스지방 표시 누락)" style="flex:1;min-width:220px;padding:4px 8px;border:1px solid #D8DAD5;border-radius:6px;font-size:12px">
     </div>`:''}
   </div>
 
   <div class="status-section">
     <h4><span class="stage-label">2단계</span>사전검사</h4>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <div style="font-size:11px;color:#475569;font-weight:600">의뢰일</div>
-      <input type="date" id="piDateInput" value="${p.preInspectDate||''}" onchange="savePreInspectDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
+      <div style="font-size:11px;color:#565D5A;font-weight:600">의뢰일</div>
+      <input type="date" id="piDateInput" value="${p.preInspectDate||''}" onchange="savePreInspectDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #D8DAD5;border-radius:6px;font-size:12px;width:150px">
     </div>
-    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">진행여부</div>
+    <div style="margin-bottom:6px;font-size:11px;color:#565D5A;font-weight:600">진행여부</div>
     <div class="status-btns" style="margin-bottom:8px">
-      ${PI_STATUSES.map(s=>`<button style="background:${s===p.preInspect?PI_COLORS[s]:'#f1f5f9'};color:${s===p.preInspect?'#fff':'#374151'};border-color:${s===p.preInspect?PI_COLORS[s]:'transparent'}" onclick="changePI('${p.id}','${s}')">${s==='- '?'—':s}</button>`).join('')}
+      ${PI_STATUSES.map(s=>`<button style="background:${s===p.preInspect?PI_COLORS[s]:'#ECEDEB'};color:${s===p.preInspect?'#fff':'#3A3F3D'};border-color:${s===p.preInspect?PI_COLORS[s]:'transparent'}" onclick="changePI('${p.id}','${s}')">${s==='- '?'—':s}</button>`).join('')}
     </div>
     ${showReflect?`
-    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">검토파일 반영여부</div>
+    <div style="margin-bottom:6px;font-size:11px;color:#565D5A;font-weight:600">검토파일 반영여부</div>
     <div class="status-btns">
-      ${PR_STATUSES.map(s=>`<button style="background:${s===p.preInspectReflect?PR_COLORS[s]:'#f1f5f9'};color:${s===p.preInspectReflect?'#fff':'#374151'};border-color:${s===p.preInspectReflect?PR_COLORS[s]:'transparent'}" onclick="changePR('${p.id}','${s}')">${s}</button>`).join('')}
+      ${PR_STATUSES.map(s=>`<button style="background:${s===p.preInspectReflect?PR_COLORS[s]:'#ECEDEB'};color:${s===p.preInspectReflect?'#fff':'#3A3F3D'};border-color:${s===p.preInspectReflect?PR_COLORS[s]:'transparent'}" onclick="changePR('${p.id}','${s}')">${s}</button>`).join('')}
     </div>
     ${p.preInspectReflect==='검토파일미반영'?`<div class="alert-red" style="margin-top:8px">⚠️ 사전검사 완료 후 검토파일 미반영 상태입니다.</div>`:''}`:''}
   </div>
 
   <div class="status-section">
     <h4><span class="stage-label">3단계</span>라벨</h4>
-    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">진행여부</div>
+    <div style="margin-bottom:6px;font-size:11px;color:#565D5A;font-weight:600">진행여부</div>
     <div class="status-btns" style="margin-bottom:8px">
-      ${LABEL_STATUSES.map(s=>`<button style="background:${s===p.labelStatus?LABEL_COLORS[s]:'#f1f5f9'};color:${s===p.labelStatus?'#fff':'#374151'};border-color:${s===p.labelStatus?LABEL_COLORS[s]:'transparent'}" onclick="changeLabel('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
+      ${LABEL_STATUSES.map(s=>`<button style="background:${s===p.labelStatus?LABEL_COLORS[s]:'#ECEDEB'};color:${s===p.labelStatus?'#fff':'#3A3F3D'};border-color:${s===p.labelStatus?LABEL_COLORS[s]:'transparent'}" onclick="changeLabel('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
     </div>
     ${p.labelStatus&&p.labelStatus!=='-'?`
-    <div style="margin-bottom:6px;font-size:11px;color:#475569;font-weight:600">라벨 검토단계</div>
+    <div style="margin-bottom:6px;font-size:11px;color:#565D5A;font-weight:600">라벨 검토단계</div>
     <div class="status-btns">
-      ${LABEL_REVIEW_STATUSES.map(s=>`<button style="background:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'#f1f5f9'};color:${s===p.labelReview?'#fff':'#374151'};border-color:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'transparent'}" onclick="changeLabelReview('${p.id}','${s}')">${s==='-'?'—':s}</button>`).join('')}
+      ${LABEL_REVIEW_STATUSES.map(s=>`<button style="background:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'#ECEDEB'};color:${s===p.labelReview?'#fff':'#3A3F3D'};border-color:${s===p.labelReview?LABEL_REVIEW_COLORS[s]:'transparent'}" onclick="changeLabelReview('${p.id}','${s}')">${s==='-'?'—':s}</button>`).join('')}
     </div>
     ${p.labelReview==='라벨보완중'||p.labelReviseDate?`<div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
-      <div style="font-size:11px;color:#c2410c;font-weight:600;white-space:nowrap">📌 라벨보완요청일</div>
-      <input type="date" id="labelReviseDateInput" value="${p.labelReviseDate||''}" onchange="saveLabelReviseDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
-      <input type="text" id="labelReviseNoteInput" value="${escAttr(p.labelReviseNote)}" onchange="saveLabelReviseNote('${p.id}',this.value)" placeholder="보완 내용 메모 (예: 폰트 크기 오류)" style="flex:1;min-width:220px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px">
+      <div style="font-size:11px;color:#9C4F22;font-weight:600;white-space:nowrap">📌 라벨보완요청일</div>
+      <input type="date" id="labelReviseDateInput" value="${p.labelReviseDate||''}" onchange="saveLabelReviseDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #D8DAD5;border-radius:6px;font-size:12px;width:150px">
+      <input type="text" id="labelReviseNoteInput" value="${escAttr(p.labelReviseNote)}" onchange="saveLabelReviseNote('${p.id}',this.value)" placeholder="보완 내용 메모 (예: 폰트 크기 오류)" style="flex:1;min-width:220px;padding:4px 8px;border:1px solid #D8DAD5;border-radius:6px;font-size:12px">
     </div>`:''}`:''}
   </div>
 
   <div class="status-section">
     <h4><span class="stage-label">4단계</span>수입신고</h4>
     <div class="status-btns">
-      ${ID_STATUSES.map(s=>`<button style="background:${s===p.importDecl?ID_COLORS[s]:'#f1f5f9'};color:${s===p.importDecl?'#fff':'#374151'};border-color:${s===p.importDecl?ID_COLORS[s]:'transparent'}" onclick="changeID('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
+      ${ID_STATUSES.map(s=>`<button style="background:${s===p.importDecl?ID_COLORS[s]:'#ECEDEB'};color:${s===p.importDecl?'#fff':'#3A3F3D'};border-color:${s===p.importDecl?ID_COLORS[s]:'transparent'}" onclick="changeID('${p.id}','${s}')">${s==='-'?'—(공란)':s}</button>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-      <div style="font-size:11px;color:#475569;font-weight:600;white-space:nowrap">📅 수입신고일</div>
-      <input type="date" id="importDeclDateInput" value="${p.importDeclDate||''}" onchange="saveImportDeclDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;width:150px">
+      <div style="font-size:11px;color:#565D5A;font-weight:600;white-space:nowrap">📅 수입신고일</div>
+      <input type="date" id="importDeclDateInput" value="${p.importDeclDate||''}" onchange="saveImportDeclDate('${p.id}',this.value)" style="padding:4px 8px;border:1px solid #D8DAD5;border-radius:6px;font-size:12px;width:150px">
     </div>
   </div>
 
@@ -1165,7 +1179,7 @@ function toggleLockFromList(id){
 // CHAT
 function renderChatTab(productId,compact){
   const msgs=DB.chats.filter(c=>c.productId===productId).sort((a,b)=>a.at.localeCompare(b.at));
-  const colors=['#3b82f6','#10b981'];
+  const colors=['#1F4B43','#1F6B44'];
   return`<div class="chat-box" id="chatBox" style="${compact?'flex:1;min-height:0;height:auto':''}">
     ${msgs.length===0?'<div class="empty">아직 메시지가 없습니다.</div>':msgs.map(m=>{
       const mine=m.userId===currentUser.id;
@@ -1330,8 +1344,8 @@ function renderSearch(){
 function renderSearchRows(prods){
   if(!prods.length)return`<tr><td colspan="8" class="empty">결과 없음</td></tr>`;
   return prods.map(p=>`<tr>
-    <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
-    <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
+    <td style="font-size:11px;color:#9AA09D">${p.itemNo||'—'}</td>
+    <td><strong style="cursor:pointer;color:#1F4B43" onclick="go('product','${p.id}')">${p.name}</strong></td>
     <td style="font-size:11px">${p.importer}</td>
     <td>${sBadge(p.status)}</td>
     <td>${piBadge(p.preInspect)}</td>
@@ -1367,13 +1381,13 @@ function renderFinalReview(){
     ${list.length===0?'<div class="empty">최종 확인 대기 중인 제품이 없습니다.</div>':`
     <table>
       <tr><th>No.</th><th>제품명</th><th>1단계</th><th>라벨</th><th>검토자</th><th>검토 종료 시각</th><th style="width:200px">작업</th></tr>
-      ${list.map(p=>`<tr style="background:#fffdf5">
-        <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
-        <td><strong style="cursor:pointer;color:#b45309" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#94a3b8">${p.importer||''}</div></td>
+      ${list.map(p=>`<tr style="background:#FFFCF3">
+        <td style="font-size:11px;color:#9AA09D">${p.itemNo||'—'}</td>
+        <td><strong style="cursor:pointer;color:#6B540F" onclick="go('product','${p.id}')">${p.name}</strong><div style="font-size:10px;color:#9AA09D">${p.importer||''}</div></td>
         <td>${sBadge(p.status)}</td>
-        <td>${labelBadge(p.labelStatus)}${p.labelReview&&p.labelReview!=='-'?` <span style="font-size:10px;color:#64748b">/ ${p.labelReview}</span>`:''}</td>
+        <td>${labelBadge(p.labelStatus)}${p.labelReview&&p.labelReview!=='-'?` <span style="font-size:10px;color:#9AA09D">/ ${p.labelReview}</span>`:''}</td>
         <td style="font-size:12px">${p.reviewSubmittedBy?username(p.reviewSubmittedBy):'—'}</td>
-        <td style="font-size:11px;color:#64748b">${p.reviewSubmittedAt||'—'}</td>
+        <td style="font-size:11px;color:#9AA09D">${p.reviewSubmittedAt||'—'}</td>
         <td style="display:flex;gap:4px">
           <button class="btn btn-success btn-sm" onclick="confirmFinalReview('${p.id}')">✅ 최종 확인</button>
           <button class="btn btn-outline btn-sm" onclick="go('product','${p.id}')">상세</button>
@@ -1394,7 +1408,7 @@ function renderCompleted(){
       <span class="text-sm">📦 수입신고준비중 ${idPrep}건 · ✅ 신고완료 ${idDone}건${idNone?` · — 미지정 ${idNone}건`:''}</span>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <select id="cpl-id" onchange="filterCompleted()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px">
+      <select id="cpl-id" onchange="filterCompleted()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px">
         <option value="">수입신고 전체</option>
         ${ID_STATUSES.map(s=>`<option value="${s}">${s==='-'?'—(미지정)':s}</option>`).join('')}
       </select>
@@ -1407,15 +1421,15 @@ function renderCompleted(){
   </div>`;
 }
 function renderCompletedRows(list){
-  return list.map(p=>`<tr${p.importDecl!=='신고완료'?' style="background:#fffbeb"':''}>
-        <td style="font-size:11px;color:#64748b">${p.itemNo||'—'}</td>
-        <td><strong style="cursor:pointer;color:#2563eb" onclick="go('product','${p.id}')">${p.name}</strong></td>
+  return list.map(p=>`<tr${p.importDecl!=='신고완료'?' style="background:#FFFCF3"':''}>
+        <td style="font-size:11px;color:#9AA09D">${p.itemNo||'—'}</td>
+        <td><strong style="cursor:pointer;color:#1F4B43" onclick="go('product','${p.id}')">${p.name}</strong></td>
         <td style="font-size:11px">${p.importer||''}</td>
         <td>${sBadge(p.status)}</td>
         <td>${labelBadge(p.labelStatus)}</td>
-        <td><span class="badge" style="background:#065f4622;color:#065f46">${p.labelReview}</span></td>
+        <td><span class="badge" style="background:#1F6B4422;color:#1F6B44">${p.labelReview}</span></td>
         <td>
-          <select title="${escAttr(p.importDeclDate?`📅 신고일: ${p.importDeclDate}`:'')}" style="padding:4px 8px;border-radius:6px;border:1px solid #d1d5db;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#94a3b8'}22;color:${ID_COLORS[p.importDecl]||'#94a3b8'}" onchange="changeID('${p.id}',this.value)">
+          <select title="${escAttr(p.importDeclDate?`📅 신고일: ${p.importDeclDate}`:'')}" style="padding:4px 8px;border-radius:6px;border:1px solid #D8DAD5;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#9AA09D'}22;color:${ID_COLORS[p.importDecl]||'#9AA09D'}" onchange="changeID('${p.id}',this.value)">
             ${ID_STATUSES.map(s=>`<option value="${s}" ${s===p.importDecl?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
           </select>
         </td>
@@ -1445,7 +1459,7 @@ function renderNotifications(){
     <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}','${n.productId||''}')">
       <div style="font-size:20px">${n.type==='chat'?'💬':n.type==='status'?'🔄':n.type==='assign'?'👤':'📎'}</div>
       <div style="flex:1"><div style="font-size:13px;font-weight:${n.read?400:600}">${n.msg}</div><div class="text-sm">${n.at}</div></div>
-      ${!n.read?'<div style="width:8px;height:8px;background:#3b82f6;border-radius:50%;margin-top:4px;flex-shrink:0"></div>':''}
+      ${!n.read?'<div style="width:8px;height:8px;background:#1F4B43;border-radius:50%;margin-top:4px;flex-shrink:0"></div>':''}
     </div>`).join('')}
   </div>`;
 }
@@ -1462,7 +1476,7 @@ let parsedCSVData=null;
 function showImportModal(){
   showModal(`<h2>📥 구글 시트 데이터 가져오기</h2>
   <div class="alert-info">기존 구글 시트의 제품 목록을 불러옵니다. 중복 제품명은 자동으로 건너뜁니다.</div>
-  <div style="display:flex;border-bottom:1px solid #e2e8f0;margin-bottom:14px">
+  <div style="display:flex;border-bottom:1px solid #E3E5E3;margin-bottom:14px">
     <div class="import-tab active" id="it-auto" onclick="switchImportTab('auto')">🔗 자동 불러오기</div>
     <div class="import-tab" id="it-manual" onclick="switchImportTab('manual')">📋 수동 붙여넣기</div>
   </div>
@@ -1491,7 +1505,7 @@ function switchImportTab(tab){
 }
 async function fetchGoogleSheet(){
   const statusEl=document.getElementById('fetch-status');
-  statusEl.innerHTML='<span style="color:#3b82f6">⏳ 불러오는 중...</span>';
+  statusEl.innerHTML='<span style="color:#1F4B43">⏳ 불러오는 중...</span>';
   const urlInput=(document.getElementById('sheet-url').value||'').trim();
   const idMatch=urlInput.match(/\/d\/([a-zA-Z0-9_-]+)/);
   const gidMatch=urlInput.match(/gid=(\d+)/);
@@ -1503,7 +1517,7 @@ async function fetchGoogleSheet(){
     const text=await resp.text();
     const parsed=parseCSV(text);
     parsedCSVData=parsed;
-    statusEl.innerHTML=`<span style="color:#22c55e">✅ ${parsed.rows.length}개 행 성공!</span>`;
+    statusEl.innerHTML=`<span style="color:#1F6B44">✅ ${parsed.rows.length}개 행 성공!</span>`;
     showCSVPreview(parsed);
     document.getElementById('import-btn').style.display='inline-flex';
   }catch(err){
@@ -1559,7 +1573,7 @@ function showCSVPreview(parsed){
   ${rows.slice(0,3).map(r=>`<tr>${r.map(c=>`<td>${c||''}</td>`).join('')}</tr>`).join('')}</table></div>
   <div style="font-size:13px;font-weight:600;margin:10px 0 8px">컬럼 매핑</div>
   <div class="col-map">${headers.map((h,i)=>`<div class="fg"><label>${h}</label><select id="col-map-${i}">${fieldOpts}</select></div>`).join('')}</div>
-  <div class="text-sm" style="${rows.length===0?'color:#dc2626;font-weight:600':''}">전체 ${rows.length}행</div>`;
+  <div class="text-sm" style="${rows.length===0?'color:#B8402C;font-weight:600':''}">전체 ${rows.length}행</div>`;
   headers.forEach((h,i)=>{const sel=document.getElementById(`col-map-${i}`);if(sel&&autoMap[i])sel.value=autoMap[i];});
 }
 function doImport(){
@@ -1605,10 +1619,10 @@ function daysBetween(dateStr){
 // 만료 상태: 오류(만료) / 확인필요(임박) / 완료(유효) / 미확인
 function manufExpiryInfo(m){
   const dd=daysBetween(m.expiry);
-  if(dd===null)return{label:'만료일 미입력',color:'#94a3b8',dday:''};
-  if(dd<0)return{label:'만료',color:'#dc2626',dday:`D+${-dd}`};
-  if(dd<=60)return{label:'만료임박',color:'#d97706',dday:`D-${dd}`};
-  return{label:'유효',color:'#16a34a',dday:`D-${dd}`};
+  if(dd===null)return{label:'만료일 미입력',color:'#9AA09D',dday:''};
+  if(dd<0)return{label:'만료',color:'#B8402C',dday:`D+${-dd}`};
+  if(dd<=60)return{label:'만료임박',color:'#9C4F22',dday:`D-${dd}`};
+  return{label:'유효',color:'#1F6B44',dday:`D-${dd}`};
 }
 function manufBadge(m){const i=manufExpiryInfo(m);return`<span class="badge" style="background:${i.color}22;color:${i.color}">${i.label}</span>`;}
 
@@ -1628,9 +1642,9 @@ function renderManufManage(){
   const rows=list.length?list.map(m=>{
     const i=manufExpiryInfo(m);
     return`<tr>
-      <td><strong>${m.name||'—'}</strong>${m.role?`<div style="font-size:10px;color:#94a3b8">${m.role}</div>`:''}</td>
+      <td><strong>${m.name||'—'}</strong>${m.role?`<div style="font-size:10px;color:#9AA09D">${m.role}</div>`:''}</td>
       <td style="font-size:12px">${m.country||'—'}</td>
-      <td style="font-size:11px;color:#64748b">${m.regNo||'—'}</td>
+      <td style="font-size:11px;color:#9AA09D">${m.regNo||'—'}</td>
       <td style="font-size:11px">${m.regDate||'—'}</td>
       <td style="font-size:11px">${m.expiry||'—'}</td>
       <td style="white-space:nowrap">${manufBadge(m)} ${i.dday?`<span style="font-size:10px;color:${i.color};font-weight:600">${i.dday}</span>`:''}</td>
@@ -1649,14 +1663,14 @@ function renderManufManage(){
     ② 제조사명·주소 <strong>일치</strong> 확인 &nbsp;·&nbsp;
     ③ <strong>등록 만료일</strong> 유효성 확인 &nbsp;·&nbsp;
     ④ 공급사(Supplier)와 제조사(Manufacturer) <strong>구분</strong><br>
-    <span style="color:#b45309">⚠️ 등록번호 형식만 보고 통과 금지 — 만료일·유효성을 반드시 별도 확인하세요.</span>
-    &nbsp;<a href="https://impfood.mfds.go.kr" target="_blank" rel="noopener" style="color:#1d4ed8;font-weight:600">↗ 정보마루 바로가기</a>
+    <span style="color:#6B540F">⚠️ 등록번호 형식만 보고 통과 금지 — 만료일·유효성을 반드시 별도 확인하세요.</span>
+    &nbsp;<a href="https://impfood.mfds.go.kr" target="_blank" rel="noopener" style="color:#2C4A76;font-weight:600">↗ 정보마루 바로가기</a>
   </div>
   <div class="stat-grid">
-    <div class="stat-card" style="border-color:#16a34a"><div class="val" style="color:#16a34a">${valid}</div><div class="lbl">✅ 유효</div></div>
-    <div class="stat-card" style="border-color:#d97706"><div class="val" style="color:#d97706">${soon}</div><div class="lbl">⚠️ 만료임박 (60일 이내)</div></div>
-    <div class="stat-card" style="border-color:#dc2626"><div class="val" style="color:#dc2626">${expired}</div><div class="lbl">❌ 만료</div></div>
-    <div class="stat-card" style="border-color:#3b82f6"><div class="val" style="color:#3b82f6">${DB.manufacturers.length}</div><div class="lbl">🏭 전체 등록</div></div>
+    <div class="stat-card" style="background:#1F6B441A"><div class="val" style="color:#1F6B44">${valid}</div><div class="lbl">✅ 유효</div></div>
+    <div class="stat-card" style="background:#9C4F221A"><div class="val" style="color:#9C4F22">${soon}</div><div class="lbl">⚠️ 만료임박 (60일 이내)</div></div>
+    <div class="stat-card" style="background:#B8402C1A"><div class="val" style="color:#B8402C">${expired}</div><div class="lbl">❌ 만료</div></div>
+    <div class="stat-card" style="background:#1F4B431A"><div class="val" style="color:#1F4B43">${DB.manufacturers.length}</div><div class="lbl">🏭 전체 등록</div></div>
   </div>
   <div class="card">
     <div class="flex-between">
@@ -1667,7 +1681,7 @@ function renderManufManage(){
       </div>
     </div>
     <div style="margin-bottom:10px">
-      <input id="mf-search" placeholder="🔍 업소명 / 국가 / 등록번호 / 연결제품" oninput="filterManuf()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;min-width:280px">
+      <input id="mf-search" placeholder="🔍 업소명 / 국가 / 등록번호 / 연결제품" oninput="filterManuf()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px;min-width:280px">
     </div>
     <table>
       <tr><th>업소명</th><th>제조국</th><th>등록번호</th><th>등록일</th><th>만료일</th><th>유효상태</th><th>연결제품</th><th>작업</th></tr>
@@ -1686,9 +1700,9 @@ function filterManuf(){
   tbody.innerHTML=list.map(m=>{
     const i=manufExpiryInfo(m);
     return`<tr>
-      <td><strong>${m.name||'—'}</strong>${m.role?`<div style="font-size:10px;color:#94a3b8">${m.role}</div>`:''}</td>
+      <td><strong>${m.name||'—'}</strong>${m.role?`<div style="font-size:10px;color:#9AA09D">${m.role}</div>`:''}</td>
       <td style="font-size:12px">${m.country||'—'}</td>
-      <td style="font-size:11px;color:#64748b">${m.regNo||'—'}</td>
+      <td style="font-size:11px;color:#9AA09D">${m.regNo||'—'}</td>
       <td style="font-size:11px">${m.regDate||'—'}</td>
       <td style="font-size:11px">${m.expiry||'—'}</td>
       <td style="white-space:nowrap">${manufBadge(m)} ${i.dday?`<span style="font-size:10px;color:${i.color};font-weight:600">${i.dday}</span>`:''}</td>
@@ -1797,13 +1811,13 @@ function renderIngredients(){
   <div class="card">
     <div class="flex-between"><h3>🧪 성분코드조회</h3><span id="ing-count" class="text-sm"></span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <input id="ing-q" placeholder="🔍 성분명(영문/국문) 또는 코드 입력" oninput="filterIngredients()" onkeydown="if(event.key==='Enter')runMaruIngredient()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:200px;flex:1">
-      <select id="ing-cat" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 분류</option></select>
-      <select id="ing-avail" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:12px"><option value="">전체 사용여부</option></select>
+      <input id="ing-q" placeholder="🔍 성분명(영문/국문) 또는 코드 입력" oninput="filterIngredients()" onkeydown="if(event.key==='Enter')runMaruIngredient()" style="padding:7px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:13px;min-width:200px;flex:1">
+      <select id="ing-cat" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">전체 분류</option></select>
+      <select id="ing-avail" onchange="filterIngredients()" style="padding:7px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">전체 사용여부</option></select>
       <button class="btn btn-success btn-sm" onclick="filterIngredients()">🔎 chunil DB 검색</button>
       <button class="btn btn-primary btn-sm" onclick="runMaruIngredient()">🌐 정보마루 조회</button>
     </div>
-    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>: 사내 성분DB (오프라인·빠름, 사용가능 여부까지 표시) &nbsp;·&nbsp; <strong>🌐 정보마루 조회</strong>: 수입식품정보마루 실시간 성분코드 조회 &nbsp;·&nbsp; <strong style="color:#0f766e">[고시]</strong>: 식약처 고시 INS No./CAS No./사용기준/주용도 자동 매칭 표시</div>
+    <div class="text-sm" style="margin-bottom:10px">💡 <strong>chunil DB</strong>: 사내 성분DB (오프라인·빠름, 사용가능 여부까지 표시) &nbsp;·&nbsp; <strong>🌐 정보마루 조회</strong>: 수입식품정보마루 실시간 성분코드 조회 &nbsp;·&nbsp; <strong style="color:#1F4B43">[고시]</strong>: 식약처 고시 INS No./CAS No./사용기준/주용도 자동 매칭 표시</div>
     <div id="ing-status"></div>
     <div id="ing-results"></div>
   </div>`;
@@ -1811,12 +1825,12 @@ function renderIngredients(){
 
 function availColor(v){
   v=(v||'').trim();
-  if(v==='사용가능')return'#16a34a';
-  if(v==='사용불가')return'#dc2626';
-  if(!v||v==='미확정')return'#64748b';
-  return'#d97706'; // 별도 확인 필요 등
+  if(v==='사용가능')return'#1F6B44';
+  if(v==='사용불가')return'#B8402C';
+  if(!v||v==='미확정')return'#9AA09D';
+  return'#9C4F22'; // 별도 확인 필요 등
 }
-function availBadge(v){v=(v||'').trim();if(!v)return`<span style="color:#94a3b8">—</span>`;const c=availColor(v);return`<span class="badge" style="background:${c}22;color:${c};white-space:normal;line-height:1.4">${v}</span>`;}
+function availBadge(v){v=(v||'').trim();if(!v)return`<span style="color:#9AA09D">—</span>`;const c=availColor(v);return`<span class="badge" style="background:${c}22;color:${c};white-space:normal;line-height:1.4">${v}</span>`;}
 
 // RFC4180 준수 파서 (따옴표 안 콤마/개행 처리)
 function parseCSVRecords(text){
@@ -1925,25 +1939,25 @@ function filterIngredients(){
       const off=findOfficialStandard(x);
       const stdMain=x.std&&!isUnknownStd(x.std)?dmfEsc(x.std):'';
       const stdSame=off&&off.usageStandard&&x.std&&off.usageStandard.replace(/\s+/g,'')===x.std.replace(/\s+/g,'');
-      const stdOff=off&&off.usageStandard&&!stdSame?`<div style="${stdMain?'margin-top:4px;padding-top:4px;border-top:1px dashed #e2e8f0;':''}color:#0f766e"><strong>[고시]</strong> ${dmfEsc(off.usageStandard)}</div>`:'';
+      const stdOff=off&&off.usageStandard&&!stdSame?`<div style="${stdMain?'margin-top:4px;padding-top:4px;border-top:1px dashed #E3E5E3;':''}color:#1F4B43"><strong>[고시]</strong> ${dmfEsc(off.usageStandard)}</div>`:'';
       const stdCell=stdMain||stdOff?stdMain+stdOff:'—';
       const purMain=x.purpose?dmfEsc(x.purpose):'';
       const purSame=off&&off.purpose&&x.purpose&&off.purpose.replace(/\s+/g,'')===x.purpose.replace(/\s+/g,'');
-      const purOff=off&&off.purpose&&!purSame?`<div style="${purMain?'margin-top:3px;':''}color:#0f766e">${dmfEsc(off.purpose)}</div>`:'';
+      const purOff=off&&off.purpose&&!purSame?`<div style="${purMain?'margin-top:3px;':''}color:#1F4B43">${dmfEsc(off.purpose)}</div>`:'';
       const purCell=purMain||purOff?purMain+purOff:'—';
       const insCas=off&&(off.ins||off.cas)?`${off.ins?`INS ${dmfEsc(off.ins)}`:''}${off.ins&&off.cas?'<br>':''}${off.cas?`CAS ${dmfEsc(off.cas)}`:''}`:'—';
       return`<tr>
-      <td style="font-size:11px;color:#64748b;white-space:nowrap;font-family:monospace">${x.code||'—'}</td>
-      <td><strong style="font-size:12px">${x.ko||x.en||'—'}</strong>${x.en&&x.ko?`<div style="font-size:10px;color:#94a3b8">${x.en}</div>`:''}${x.ch?`<div style="font-size:10px;color:#7c3aed">천일:${x.ch}</div>`:''}</td>
+      <td style="font-size:11px;color:#9AA09D;white-space:nowrap;font-family:monospace">${x.code||'—'}</td>
+      <td><strong style="font-size:12px">${x.ko||x.en||'—'}</strong>${x.en&&x.ko?`<div style="font-size:10px;color:#9AA09D">${x.en}</div>`:''}${x.ch?`<div style="font-size:10px;color:#6B3F82">천일:${x.ch}</div>`:''}</td>
       <td style="font-size:11px;white-space:nowrap">${x.cat||'—'}</td>
       <td>${availBadge(x.avail)}</td>
-      <td style="font-size:10px;color:#7c3aed;white-space:nowrap;font-family:monospace">${insCas}</td>
-      <td style="font-size:11px;color:#475569;max-width:280px">${stdCell}</td>
-      <td style="font-size:11px;color:#64748b;max-width:160px">${purCell}</td>
+      <td style="font-size:10px;color:#6B3F82;white-space:nowrap;font-family:monospace">${insCas}</td>
+      <td style="font-size:11px;color:#565D5A;max-width:280px">${stdCell}</td>
+      <td style="font-size:11px;color:#9AA09D;max-width:160px">${purCell}</td>
     </tr>`;}).join('')}
   </table></div>
   ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}
-  ${OFFICIAL_STANDARD_DB?`<div class="text-sm" style="padding-top:8px;color:#94a3b8">[고시] 표시는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준 데이터입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`:''}`;
+  ${OFFICIAL_STANDARD_DB?`<div class="text-sm" style="padding-top:8px;color:#9AA09D">[고시] 표시는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준 데이터입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`:''}`;
 }
 
 // ============================================================
@@ -1958,7 +1972,7 @@ function renderUsageStd(){
   <div class="card">
     <div class="flex-between"><h3>📜 사용기준조회</h3><span id="us-count" class="text-sm"></span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <input id="us-q" placeholder="🔍 품목명(한글/영문) · 이명 · INS No. · CAS No. 입력" oninput="filterUsageStd()" style="padding:7px 10px;border:1px solid #d1d5db;border-radius:7px;font-size:13px;min-width:240px;flex:1">
+      <input id="us-q" placeholder="🔍 품목명(한글/영문) · 이명 · INS No. · CAS No. 입력" oninput="filterUsageStd()" style="padding:7px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:13px;min-width:240px;flex:1">
       <button class="btn btn-success btn-sm" onclick="filterUsageStd()">🔎 조회</button>
     </div>
     <div id="us-status"></div>
@@ -2004,25 +2018,25 @@ function filterUsageStd(){
   if(!list.length){res.innerHTML=`<div class="empty">검색 결과가 없습니다.</div>`;return;}
   res.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">
     ${shown.map(r=>`
-    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px">
+    <div style="border:1px solid #E3E5E3;border-radius:8px;padding:12px 14px">
       <div class="flex-between" style="align-items:flex-start">
         <div>
-          <strong style="font-size:14px">${dmfEsc(r.korean)}${r.koreanFlag?`<span style="color:#94a3b8;font-size:11px"> ${dmfEsc(r.koreanFlag)}</span>`:''}</strong>
-          ${r.english?`<span style="font-size:12px;color:#64748b;margin-left:6px">${dmfEsc(r.english)}</span>`:''}
-          ${(r.extraKorean&&r.extraKorean.length)?`<div style="font-size:11px;color:#94a3b8">${r.extraKorean.map(dmfEsc).join(', ')}</div>`:''}
-          ${(r.synonyms&&r.synonyms.length)?`<div style="font-size:11px;color:#94a3b8">이명: ${r.synonyms.map(dmfEsc).join(', ')}</div>`:''}
+          <strong style="font-size:14px">${dmfEsc(r.korean)}${r.koreanFlag?`<span style="color:#9AA09D;font-size:11px"> ${dmfEsc(r.koreanFlag)}</span>`:''}</strong>
+          ${r.english?`<span style="font-size:12px;color:#9AA09D;margin-left:6px">${dmfEsc(r.english)}</span>`:''}
+          ${(r.extraKorean&&r.extraKorean.length)?`<div style="font-size:11px;color:#9AA09D">${r.extraKorean.map(dmfEsc).join(', ')}</div>`:''}
+          ${(r.synonyms&&r.synonyms.length)?`<div style="font-size:11px;color:#9AA09D">이명: ${r.synonyms.map(dmfEsc).join(', ')}</div>`:''}
         </div>
-        <div style="text-align:right;white-space:nowrap;font-family:monospace;font-size:11px;color:#7c3aed">
+        <div style="text-align:right;white-space:nowrap;font-family:monospace;font-size:11px;color:#6B3F82">
           ${r.ins?`INS ${dmfEsc(r.ins)}`:''}${r.ins&&r.cas?'<br>':''}${r.cas?`CAS ${dmfEsc(r.cas)}`:''}
         </div>
       </div>
-      ${r.definition?`<div class="text-sm" style="margin-top:8px;color:#64748b">${dmfEsc(r.definition)}</div>`:''}
-      <div style="margin-top:8px;font-size:12px;color:#334155"><strong>사용기준:</strong> ${dmfEsc(r.usageStandard)||'—'}</div>
-      ${r.purpose?`<div style="margin-top:4px"><span class="badge" style="background:#0f766e22;color:#0f766e">${dmfEsc(r.purpose)}</span></div>`:''}
+      ${r.definition?`<div class="text-sm" style="margin-top:8px;color:#9AA09D">${dmfEsc(r.definition)}</div>`:''}
+      <div style="margin-top:8px;font-size:12px;color:#3A3F3D"><strong>사용기준:</strong> ${dmfEsc(r.usageStandard)||'—'}</div>
+      ${r.purpose?`<div style="margin-top:4px"><span class="badge" style="background:#1F4B4322;color:#1F4B43">${dmfEsc(r.purpose)}</span></div>`:''}
     </div>`).join('')}
   </div>
   ${list.length>CAP?`<div class="text-sm" style="padding:10px 0;text-align:center">⚠️ 검색 결과 ${list.length.toLocaleString()}건 중 상위 ${CAP}건만 표시됩니다. 검색어를 더 구체적으로 입력하세요.</div>`:''}
-  <div class="text-sm" style="padding-top:8px;color:#94a3b8">본 데이터는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준을 기반으로 자동 정리한 참고용 자료입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`;
+  <div class="text-sm" style="padding-top:8px;color:#9AA09D">본 데이터는 식약처 고시 「식품의 기준 및 규격」III. 품목별 사용기준을 기반으로 자동 정리한 참고용 자료입니다. 법적 확인은 원문 고시를 기준으로 하세요.</div>`;
 }
 
 // ============================================================
@@ -2086,7 +2100,7 @@ function dmfListRowsHTML(){
   if(!DMF_RESULTS.length)return `<tr><td colspan="5" style="text-align:center;color:#9aa3b5;padding:20px">검색 결과가 없습니다.</td></tr>`;
   return DMF_RESULTS.map((m,i)=>{
     const exp=daysBetween(m.expiry);
-    const ec=exp===null?'#64748b':exp<0?'#dc2626':exp<=60?'#d97706':'#15803d';
+    const ec=exp===null?'#9AA09D':exp<0?'#B8402C':exp<=60?'#9C4F22':'#1F6B44';
     return `<tr class="${i===DMF_SEL?'sel':''}" onclick="dmfSelect(${i})">
       <td title="${dmfAttr(m.name)}">${m.name||'—'}</td>
       <td>${m.code||'—'}</td>
@@ -2160,15 +2174,15 @@ async function dmfSearch(){
   const code=(document.getElementById('dmf-code').value||'').trim();
   DMF_NAME=name;DMF_CODE=code;
   if(!name&&!code){alert('제조업소명 또는 코드를 입력하세요.');return;}
-  const cnt=document.getElementById('dmf-cnt');cnt.textContent='조회 중...';cnt.style.color='#d97706';
+  const cnt=document.getElementById('dmf-cnt');cnt.textContent='조회 중...';cnt.style.color='#9C4F22';
   try{
     const j=await maruFetch('proxy=manufacturer&q='+encodeURIComponent(name)+'&code='+encodeURIComponent(code));
     if(!j){cnt.textContent='제조업소명 또는 코드를 입력하세요.';cnt.style.color='#5a6b82';return;}
     DMF_RESULTS=j.rows||[];DMF_SEL=DMF_RESULTS.length?0:-1;
-    cnt.textContent='검색 결과: '+j.count+'건';cnt.style.color='#15803d';
+    cnt.textContent='검색 결과: '+j.count+'건';cnt.style.color='#1F6B44';
     document.getElementById('dmf-list-body').innerHTML=dmfListRowsHTML();
     document.getElementById('dmf-detail').innerHTML=dmfDetailHTML();
-  }catch(e){cnt.textContent='연결 실패: '+e.message;cnt.style.color='#dc2626';}
+  }catch(e){cnt.textContent='연결 실패: '+e.message;cnt.style.color='#B8402C';}
 }
 function dmfSelect(i){
   DMF_SEL=i;
@@ -2245,7 +2259,7 @@ async function runMaruIngredient(){
   if(!q){alert('검색어를 입력하세요.');return;}
   const st=document.getElementById('ing-status');
   const res=document.getElementById('ing-results');
-  st.innerHTML='<div class="text-sm" style="padding:10px 0;color:#3b82f6">⏳ 정보마루 실시간 조회 중...</div>';
+  st.innerHTML='<div class="text-sm" style="padding:10px 0;color:#1F4B43">⏳ 정보마루 실시간 조회 중...</div>';
   res.innerHTML='';
   try{
     const j=await maruFetch('proxy=ingredient&q='+encodeURIComponent(q));
@@ -2256,9 +2270,9 @@ async function runMaruIngredient(){
     res.innerHTML=`<div style="overflow-x:auto"><table>
       <tr><th>성분코드</th><th>성분명(한글)</th><th>성분명(영문)</th></tr>
       ${rows.map(r=>`<tr>
-        <td style="font-family:monospace;font-size:11px;color:#64748b;white-space:nowrap">${r.code||'—'}</td>
+        <td style="font-family:monospace;font-size:11px;color:#9AA09D;white-space:nowrap">${r.code||'—'}</td>
         <td style="font-size:12px"><strong>${r.korean||'—'}</strong></td>
-        <td style="font-size:11px;color:#475569">${r.english||'—'}</td>
+        <td style="font-size:11px;color:#565D5A">${r.english||'—'}</td>
       </tr>`).join('')}
     </table></div>`;
   }catch(e){st.innerHTML=`<div class="alert-warn">❌ 조회 실패: ${e.message}</div>`;}
