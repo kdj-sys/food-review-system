@@ -523,7 +523,10 @@ function ensureFields(p){
 }
 
 function addNotif(userId,type,msg,productId){
-  DB.notifications.unshift({id:uid(),userId,type,msg,productId,read:false,at:nowStr()});
+  // push로 뒤에 추가 (history/chats와 동일하게 오래된 순). 용량 초과 시 앞쪽(오래된 것)부터
+  // 정리하는 enforceDbSizeBudget()의 trimTo()가 unshift(최신이 앞)와 만나면 최신 알림부터
+  // 지워버리는 버그가 있었음 — push로 통일해 항상 오래된 알림부터 정리되도록 수정.
+  DB.notifications.push({id:uid(),userId,type,msg,productId,read:false,at:nowStr()});
   saveData(DB);updateNotifBadge();
 }
 function updateNotifBadge(){
