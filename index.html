@@ -46,6 +46,7 @@ body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#F6F7F5;co
 .s-보완요청{background:#F5E6DA;color:#9C4F22;}
 .s-보완회신대기{background:#F3EBD3;color:#8A6E14;}
 .s-검토완료{background:#DCEAE6;color:#1F4B43;}
+.s-중단{background:#E3E5E3;color:#3A3F3D;}
 /* 2단계 사전검사 */
 .pi-진행예정{background:#DCEAF3;color:#1D5C82;}
 .pi-진행중{background:#E6EBF3;color:#2C4A76;}
@@ -247,8 +248,8 @@ let API_URL=localStorage.getItem(API_KEY_STORE)||DEFAULT_API_URL;
 // CONSTANTS
 // ============================================================
 // 1단계
-const STATUSES=['검토예정','검토중','보완요청','보완회신대기','검토완료'];
-const STATUS_COLORS={'검토예정':'#6B726F','검토중':'#2C4A76','보완요청':'#9C4F22','보완회신대기':'#8A6E14','검토완료':'#1F4B43'};
+const STATUSES=['검토예정','검토중','보완요청','보완회신대기','검토완료','중단'];
+const STATUS_COLORS={'검토예정':'#6B726F','검토중':'#2C4A76','보완요청':'#9C4F22','보완회신대기':'#8A6E14','검토완료':'#1F4B43','중단':'#3A3F3D'};
 // 2단계 사전검사
 const PI_STATUSES=['-','진행예정','진행중','진행완료','해당없음'];
 const PI_COLORS={'-':'#9AA09D','진행예정':'#1D5C82','진행중':'#2C4A76','진행완료':'#1F6B44','해당없음':'#9AA09D'};
@@ -569,7 +570,15 @@ function renderPage(){
   updateFinalBadge();
 }
 function switchUser(id){currentUser=USERS[id];renderPage();}
-function goProductsFilter(status){dashPreset=null;go('products');setTimeout(()=>{const el=document.getElementById('fl-status');if(el){el.value=status;filterList();}},30);}
+function goProductsFilter(status){
+  // 중단 처리된 제품은 완료 제품으로 분류되어 진행중 목록에는 없으므로 완료 제품 화면으로 이동
+  if(status==='중단'){
+    go('completed');
+    setTimeout(()=>{const el=document.getElementById('cpl-status');if(el){el.value=status;filterCompleted();}},30);
+    return;
+  }
+  dashPreset=null;go('products');setTimeout(()=>{const el=document.getElementById('fl-status');if(el){el.value=status;filterList();}},30);
+}
 
 // 대시보드 아랫줄(단계) 카드 → 제품목록 프리셋 필터
 const DASH_PRESETS={
@@ -593,7 +602,7 @@ function goDashPreset(key){
 function clearDashPreset(){dashPreset=null;renderPage();}
 
 // 최종검토 대기 / 완료 제품 판정
-function isCompleted(p){return p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송';}
+function isCompleted(p){return p.status==='중단'||(p.labelStatus==='라벨작성완료'&&p.labelReview==='라벨발송');}
 function activeProducts(){return DB.products.map(ensureFields).filter(p=>!isCompleted(p));}
 function pendingFinalProducts(){return DB.products.map(ensureFields).filter(p=>p.finalReviewPending);}
 function completedProducts(){return DB.products.map(ensureFields).filter(isCompleted);}
@@ -643,7 +652,7 @@ function renderDashboard(){
   ${finalBanner}
   <div class="card" style="margin-bottom:14px">
     <h3>📋 검토 상태 현황 <span style="font-weight:400;color:#9AA09D;font-size:11px">— 카드를 클릭하면 해당 상태 목록으로 이동합니다</span></h3>
-    <div class="stat-grid" style="margin-bottom:0;grid-template-columns:repeat(7,1fr);gap:10px">
+    <div class="stat-grid" style="margin-bottom:0;grid-template-columns:repeat(${STATUSES.length+2},1fr);gap:10px">
       ${STATUSES.map(s=>statCard(s,statusCounts[s]||0,STATUS_COLORS[s],`goProductsFilter('${s}')`)).join('')}
       ${statCard('수입신고준비중',idInProg,ID_COLORS['수입신고준비중'],`goDashPreset('id-prep')`,'수입신고<br>준비중')}
       ${statCard('신고완료',idDone,ID_COLORS['신고완료'],`goDashPreset('id-done')`)}
@@ -696,7 +705,7 @@ function renderProductList(){
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <input id="fl-name" placeholder="🔍 아이템번호/제품명/수입사" oninput="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px;min-width:200px">
-      <select id="fl-status" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">전체 검토상태</option>${STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
+      <select id="fl-status" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">전체 검토상태</option>${STATUSES.filter(s=>s!=='중단').map(s=>`<option>${s}</option>`).join('')}</select>
       <select id="fl-lock" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">검토자 전체</option>${Object.values(USERS).map(u=>`<option value="${u.id}">🔒${u.name}</option>`).join('')}<option value="none">🔓 미검토</option></select>
       <select id="fl-pi" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">사전검사 전체</option>${PI_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
       <select id="fl-lb" onchange="filterList()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px"><option value="">라벨 전체</option>${LABEL_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select>
@@ -716,7 +725,7 @@ function pipelineBar(p){
   // 보완요청일·메모가 있으면 커서를 올렸을 때만 보이도록 title에 덧붙임
   const reviseSuffix=(date,note)=>(date||note)?`\n📌 보완요청일: ${date||'-'}${note?`\n메모: ${note}`:''}`:'';
   const steps=[
-    {val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료',options:STATUSES,onchange:`changeStatus('${p.id}',this.value)`,
+    {val:p.status,colors:STATUS_COLORS,done:p.status==='검토완료'||p.status==='중단',options:STATUSES,onchange:`changeStatus('${p.id}',this.value)`,
       title:`검토: ${p.status}`+(p.status==='보완요청'?reviseSuffix(p.reviseRequestDate,p.reviseNote):'')},
     {val:p.preInspect,colors:PI_COLORS,done:p.preInspect==='진행완료'||p.preInspect==='해당없음',options:PI_STATUSES,onchange:`changePI('${p.id}',this.value)`,
       title:`사전검사: ${p.preInspect||'-'}`},
@@ -756,7 +765,7 @@ function inlineChangeStatus(id,s){
   p.status=s;
   if(s==='보완요청'){p.reviseRequestDate=todayStr();p.reviseNote='';}
   DB.history.push({id:uid(),productId:id,from:old,to:s,by:currentUser.id,at:nowStr(),note:'목록 인라인 변경'});
-  if(s==='검토완료'){p.lockedBy=null;p.lockTime=null;}
+  if(s==='검토완료'||s==='중단'){p.lockedBy=null;p.lockTime=null;}
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→${s}`,id);});
   saveData(DB);filterList();
 }
@@ -1063,7 +1072,7 @@ function changeStatus(id,s){
   p.status=s;
   if(s==='보완요청'){p.reviseRequestDate=todayStr();p.reviseNote='';}
   DB.history.push({id:uid(),productId:id,from:old,to:s,by:currentUser.id,at:nowStr(),note:''});
-  if(s==='검토완료'){p.lockedBy=null;p.lockTime=null;}
+  if(s==='검토완료'||s==='중단'){p.lockedBy=null;p.lockTime=null;}
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
@@ -1411,12 +1420,16 @@ function renderCompleted(){
   const idDone=list.filter(p=>p.importDecl==='신고완료').length;
   const idNone=list.length-idPrep-idDone;
   return`
-  <div class="alert-success">🏁 <strong>라벨작성완료</strong>이고 세부단계가 <strong>라벨발송</strong>까지 끝난 제품입니다. (완전 완료)</div>
+  <div class="alert-success">🏁 <strong>라벨작성완료</strong>이고 세부단계가 <strong>라벨발송</strong>까지 끝난 제품, 또는 1단계 검토가 <strong>중단</strong> 처리된 제품입니다.</div>
   <div class="card">
     <div class="flex-between"><h3>🏁 완료 제품 (<span id="cpl-count">${list.length}</span>건)</h3>
       <span class="text-sm">📦 수입신고준비중 ${idPrep}건 · ✅ 신고완료 ${idDone}건${idNone?` · — 미지정 ${idNone}건`:''}</span>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <select id="cpl-status" onchange="filterCompleted()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px">
+        <option value="">1단계 검토 전체</option>
+        ${STATUSES.map(s=>`<option value="${s}">${s}</option>`).join('')}
+      </select>
       <select id="cpl-id" onchange="filterCompleted()" style="padding:6px 10px;border:1px solid #D8DAD5;border-radius:7px;font-size:12px">
         <option value="">수입신고 전체</option>
         ${ID_STATUSES.map(s=>`<option value="${s}">${s==='-'?'—(미지정)':s}</option>`).join('')}
@@ -1436,7 +1449,7 @@ function renderCompletedRows(list){
         <td style="font-size:11px">${p.importer||''}</td>
         <td>${sBadge(p.status)}</td>
         <td>${labelBadge(p.labelStatus)}</td>
-        <td><span class="badge" style="background:#1F6B4422;color:#1F6B44">${p.labelReview}</span></td>
+        <td>${p.labelReview&&p.labelReview!=='-'?`<span class="badge" style="background:#1F6B4422;color:#1F6B44">${p.labelReview}</span>`:'<span style="color:#9AA09D;font-size:12px">—</span>'}</td>
         <td>
           <select title="${escAttr(p.importDeclDate?`📅 신고일: ${p.importDeclDate}`:'')}" style="padding:4px 8px;border-radius:6px;border:1px solid #D8DAD5;font-size:12px;font-weight:600;background:${ID_COLORS[p.importDecl]||'#9AA09D'}22;color:${ID_COLORS[p.importDecl]||'#9AA09D'}" onchange="changeID('${p.id}',this.value)">
             ${ID_STATUSES.map(s=>`<option value="${s}" ${s===p.importDecl?'selected':''}>${s==='-'?'—(공란)':s}</option>`).join('')}
@@ -1447,8 +1460,10 @@ function renderCompletedRows(list){
 }
 function filterCompleted(){
   const idv=(document.getElementById('cpl-id')||{}).value||'';
+  const sv=(document.getElementById('cpl-status')||{}).value||'';
   let list=completedProducts().sort((a,b)=>(b.registeredAt||'').localeCompare(a.registeredAt||''));
   if(idv)list=list.filter(p=>p.importDecl===idv);
+  if(sv)list=list.filter(p=>p.status===sv);
   const tbody=document.getElementById('cpl-tbody');
   if(tbody)tbody.innerHTML=renderCompletedRows(list);
   const cnt=document.getElementById('cpl-count');
