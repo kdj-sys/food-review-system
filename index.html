@@ -1084,18 +1084,21 @@ function changePI(id,s){
   const old=p.preInspect;p.preInspect=s;
   if(s==='해당없음'||s==='-')p.preInspectReflect='검토파일미반영';
   DB.history.push({id:uid(),productId:id,from:`사전검사:${old}`,to:`사전검사:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  if(old!==s)Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 사전검사 ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
 function changePR(id,s){
   const p=getProduct(id);if(!p)return;
   const old=p.preInspectReflect;p.preInspectReflect=s;
   DB.history.push({id:uid(),productId:id,from:`반영:${old}`,to:`반영:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  if(old!==s)Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 검토파일 반영 ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
 function changeLabel(id,s){
   const p=getProduct(id);if(!p)return;
   const old=p.labelStatus;p.labelStatus=s;
   DB.history.push({id:uid(),productId:id,from:`라벨:${old}`,to:`라벨:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  if(old!==s)Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 라벨 ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
 function changeID(id,s){
@@ -1103,6 +1106,7 @@ function changeID(id,s){
   const old=p.importDecl;p.importDecl=s;
   if(s==='신고완료'&&old!==s)p.importDeclDate=todayStr();
   DB.history.push({id:uid(),productId:id,from:`수입신고:${old}`,to:`수입신고:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  if(old!==s)Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 수입신고 ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
 function saveImportDeclDate(id,val){
@@ -1138,6 +1142,7 @@ function changeLabelReview(id,s){
   const old=p.labelReview;p.labelReview=s;
   if(s==='라벨보완중'&&old!==s){p.labelReviseDate=todayStr();p.labelReviseNote='';}
   DB.history.push({id:uid(),productId:id,from:`라벨검토:${old}`,to:`라벨검토:${s}`,by:currentUser.id,at:nowStr(),note:''});
+  if(old!==s)Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'status',`${p.name}: 라벨검토 ${old}→${s}`,id);});
   saveData(DB);renderPage();
 }
 function saveLabelReviseDate(id,val){
