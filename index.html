@@ -1212,7 +1212,7 @@ function renderChatTab(productId,compact){
       const ci=Object.keys(USERS).indexOf(m.userId);
       return`<div class="chat-msg ${mine?'mine':''}">
         <div class="avatar" style="background:${colors[ci%2]}">${m.userName.charAt(0)}</div>
-        <div><div class="name">${m.userName}</div><div class="bubble"><div class="text">${m.msg}</div></div><div class="time">${m.at}</div></div>
+        <div><div class="name">${m.userName}</div><div class="bubble"><div class="text">${m.msg}</div></div><div class="time">${m.at}${mine?` · <span style="cursor:pointer;color:#B8402C" onclick="deleteChat('${m.id}','${productId}')">삭제</span>`:''}</div></div>
       </div>`;}).join('')}
   </div>
   <div class="chat-input-row">
@@ -1226,6 +1226,14 @@ function sendChat(productId){
   DB.chats.push({id:uid(),productId,userId:currentUser.id,userName:currentUser.name,msg,at:nowStr()});
   Object.values(USERS).forEach(u=>{if(u.id!==currentUser.id)addNotif(u.id,'chat',`${currentUser.name}: ${msg.substring(0,25)}`,productId);});
   saveData(DB);inp.value='';
+  refreshChatViews(productId);
+}
+function deleteChat(chatId,productId){
+  const m=DB.chats.find(c=>c.id===chatId);
+  if(!m||m.userId!==currentUser.id)return; // 본인이 보낸 메시지만 삭제 가능
+  if(!confirm('이 메시지를 삭제할까요?'))return;
+  DB.chats=DB.chats.filter(c=>c.id!==chatId);
+  saveData(DB);
   refreshChatViews(productId);
 }
 function refreshChatViews(productId){
